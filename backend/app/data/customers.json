@@ -1,0 +1,13 @@
+[
+ {"name":"Sahyadri Institute of Technology","country":"IN","region":"Maharashtra","segment":"education","tax_id":"27AABTS1234K1Z2","deals_won":3},
+ {"name":"Kaveri Health Systems","country":"IN","region":"Karnataka","segment":"healthcare","tax_id":"29AAECK5678L1Z9","deals_won":1},
+ {"name":"Northgate Logistics","country":"IN","region":"Delhi","segment":"enterprise","tax_id":"07AAGCN9012M1Z4","deals_won":0},
+ {"name":"Harbourline Freight LLC","country":"AE","region":"Dubai","segment":"enterprise","tax_id":"100384729100003","deals_won":2},
+ {"name":"Lionsgate Analytics Pte. Ltd.","country":"SG","region":null,"segment":"smb","tax_id":"201912345K","deals_won":1},
+ {"name":"Brightwater Medical Group","country":"GB","region":"England","segment":"healthcare","tax_id":"GB284716391","deals_won":0},
+ {"name":"Rheinland Präzisionstechnik GmbH","country":"DE","region":"Nordrhein-Westfalen","segment":"enterprise","tax_id":"DE298174563","deals_won":1},
+ {"name":"Cedar Valley Unified School District","country":"US","region":"California","segment":"education","tax_id":null,"deals_won":0},
+ {"name":"Lone Star Engineering Partners","country":"US","region":"Texas","segment":"smb","tax_id":null,"deals_won":2},
+ {"name":"Southern Cross Advisory","country":"AU","region":"New South Wales","segment":"smb","tax_id":"ABN 51 824 753 556","deals_won":0},
+ {"name":"Maple Ridge Municipal Services","country":"CA","region":"Ontario","segment":"public","tax_id":null,"deals_won":0}
+]

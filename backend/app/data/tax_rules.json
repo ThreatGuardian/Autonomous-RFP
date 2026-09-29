@@ -1,0 +1,764 @@
+[
+ {
+  "country": "IN",
+  "region": null,
+  "tax_category": "goods_standard",
+  "name": "GST",
+  "rate_pct": 18.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 18.0
+   }
+  ]
+ },
+ {
+  "country": "IN",
+  "region": null,
+  "tax_category": "software",
+  "name": "GST",
+  "rate_pct": 18.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 18.0
+   }
+  ]
+ },
+ {
+  "country": "IN",
+  "region": null,
+  "tax_category": "services",
+  "name": "GST",
+  "rate_pct": 18.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 18.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "California",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 7.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 7.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "California",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "California",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Texas",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Texas",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Texas",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 5.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 5.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "New York",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 4.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 4.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "New York",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 4.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 4.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "New York",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Washington",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 6.5,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.5
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Washington",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 6.5,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.5
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Washington",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 6.5,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.5
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Florida",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 6.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Florida",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Florida",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Illinois",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Illinois",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Illinois",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Massachusetts",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Massachusetts",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 6.25,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 6.25
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Massachusetts",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Oregon",
+  "tax_category": "goods_standard",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Oregon",
+  "tax_category": "software",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "US",
+  "region": "Oregon",
+  "tax_category": "services",
+  "name": "State sales tax",
+  "rate_pct": 0.0,
+  "components": [
+   {
+    "name": "State sales tax",
+    "rate_pct": 0.0
+   }
+  ]
+ },
+ {
+  "country": "CA",
+  "region": "Ontario",
+  "tax_category": "*",
+  "name": "HST",
+  "rate_pct": 13.0,
+  "components": [
+   {
+    "name": "HST",
+    "rate_pct": 13.0
+   }
+  ]
+ },
+ {
+  "country": "CA",
+  "region": "British Columbia",
+  "tax_category": "*",
+  "name": "GST/PST",
+  "rate_pct": 12.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 5.0
+   },
+   {
+    "name": "PST",
+    "rate_pct": 7.0
+   }
+  ]
+ },
+ {
+  "country": "CA",
+  "region": "Quebec",
+  "tax_category": "*",
+  "name": "GST/QST",
+  "rate_pct": 14.975,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 5.0
+   },
+   {
+    "name": "QST",
+    "rate_pct": 9.975
+   }
+  ]
+ },
+ {
+  "country": "CA",
+  "region": "Alberta",
+  "tax_category": "*",
+  "name": "GST",
+  "rate_pct": 5.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 5.0
+   }
+  ]
+ },
+ {
+  "country": "CA",
+  "region": null,
+  "tax_category": "*",
+  "name": "GST",
+  "rate_pct": 5.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 5.0
+   }
+  ]
+ },
+ {
+  "country": "GB",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 20.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 20.0
+   }
+  ]
+ },
+ {
+  "country": "DE",
+  "region": null,
+  "tax_category": "*",
+  "name": "MwSt",
+  "rate_pct": 19.0,
+  "components": [
+   {
+    "name": "MwSt",
+    "rate_pct": 19.0
+   }
+  ]
+ },
+ {
+  "country": "FR",
+  "region": null,
+  "tax_category": "*",
+  "name": "TVA",
+  "rate_pct": 20.0,
+  "components": [
+   {
+    "name": "TVA",
+    "rate_pct": 20.0
+   }
+  ]
+ },
+ {
+  "country": "NL",
+  "region": null,
+  "tax_category": "*",
+  "name": "BTW",
+  "rate_pct": 21.0,
+  "components": [
+   {
+    "name": "BTW",
+    "rate_pct": 21.0
+   }
+  ]
+ },
+ {
+  "country": "IE",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 23.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 23.0
+   }
+  ]
+ },
+ {
+  "country": "ES",
+  "region": null,
+  "tax_category": "*",
+  "name": "IVA",
+  "rate_pct": 21.0,
+  "components": [
+   {
+    "name": "IVA",
+    "rate_pct": 21.0
+   }
+  ]
+ },
+ {
+  "country": "IT",
+  "region": null,
+  "tax_category": "*",
+  "name": "IVA",
+  "rate_pct": 22.0,
+  "components": [
+   {
+    "name": "IVA",
+    "rate_pct": 22.0
+   }
+  ]
+ },
+ {
+  "country": "BE",
+  "region": null,
+  "tax_category": "*",
+  "name": "BTW",
+  "rate_pct": 21.0,
+  "components": [
+   {
+    "name": "BTW",
+    "rate_pct": 21.0
+   }
+  ]
+ },
+ {
+  "country": "SE",
+  "region": null,
+  "tax_category": "*",
+  "name": "Moms",
+  "rate_pct": 25.0,
+  "components": [
+   {
+    "name": "Moms",
+    "rate_pct": 25.0
+   }
+  ]
+ },
+ {
+  "country": "DK",
+  "region": null,
+  "tax_category": "*",
+  "name": "Moms",
+  "rate_pct": 25.0,
+  "components": [
+   {
+    "name": "Moms",
+    "rate_pct": 25.0
+   }
+  ]
+ },
+ {
+  "country": "AT",
+  "region": null,
+  "tax_category": "*",
+  "name": "USt",
+  "rate_pct": 20.0,
+  "components": [
+   {
+    "name": "USt",
+    "rate_pct": 20.0
+   }
+  ]
+ },
+ {
+  "country": "PL",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 23.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 23.0
+   }
+  ]
+ },
+ {
+  "country": "CH",
+  "region": null,
+  "tax_category": "*",
+  "name": "MWST",
+  "rate_pct": 8.1,
+  "components": [
+   {
+    "name": "MWST",
+    "rate_pct": 8.1
+   }
+  ]
+ },
+ {
+  "country": "NO",
+  "region": null,
+  "tax_category": "*",
+  "name": "MVA",
+  "rate_pct": 25.0,
+  "components": [
+   {
+    "name": "MVA",
+    "rate_pct": 25.0
+   }
+  ]
+ },
+ {
+  "country": "AE",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 5.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 5.0
+   }
+  ]
+ },
+ {
+  "country": "SA",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 15.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 15.0
+   }
+  ]
+ },
+ {
+  "country": "BH",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 10.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 10.0
+   }
+  ]
+ },
+ {
+  "country": "OM",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 5.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 5.0
+   }
+  ]
+ },
+ {
+  "country": "SG",
+  "region": null,
+  "tax_category": "*",
+  "name": "GST",
+  "rate_pct": 9.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 9.0
+   }
+  ]
+ },
+ {
+  "country": "AU",
+  "region": null,
+  "tax_category": "*",
+  "name": "GST",
+  "rate_pct": 10.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 10.0
+   }
+  ]
+ },
+ {
+  "country": "NZ",
+  "region": null,
+  "tax_category": "*",
+  "name": "GST",
+  "rate_pct": 15.0,
+  "components": [
+   {
+    "name": "GST",
+    "rate_pct": 15.0
+   }
+  ]
+ },
+ {
+  "country": "JP",
+  "region": null,
+  "tax_category": "*",
+  "name": "Consumption tax",
+  "rate_pct": 10.0,
+  "components": [
+   {
+    "name": "Consumption tax",
+    "rate_pct": 10.0
+   }
+  ]
+ },
+ {
+  "country": "MY",
+  "region": null,
+  "tax_category": "*",
+  "name": "SST",
+  "rate_pct": 8.0,
+  "components": [
+   {
+    "name": "SST",
+    "rate_pct": 8.0
+   }
+  ]
+ },
+ {
+  "country": "ZA",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 15.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 15.0
+   }
+  ]
+ },
+ {
+  "country": "KE",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 16.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 16.0
+   }
+  ]
+ },
+ {
+  "country": "LK",
+  "region": null,
+  "tax_category": "*",
+  "name": "VAT",
+  "rate_pct": 18.0,
+  "components": [
+   {
+    "name": "VAT",
+    "rate_pct": 18.0
+   }
+  ]
+ }
+]

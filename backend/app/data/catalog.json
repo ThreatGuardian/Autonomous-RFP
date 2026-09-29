@@ -1,0 +1,1486 @@
+[
+ {
+  "sku": "MSS-LT-101",
+  "mpn": "DL-5450-I5-16-512",
+  "name": "Dell Latitude 5450 Business Laptop",
+  "brand": "Dell",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1345U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "notebook",
+   "business laptop",
+   "14 inch",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 68500,
+  "list_price": 82900,
+  "min_margin_pct": 8,
+  "stock_qty": 140,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "14-inch business notebook with Intel Core i5, 16 GB RAM and 512 GB NVMe SSD, Windows 11 Pro, 3-year ProSupport."
+ },
+ {
+  "sku": "MSS-LT-102",
+  "mpn": "DL-7450-I7-32-1T",
+  "name": "Dell Latitude 7450 Premium Laptop",
+  "brand": "Dell",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core Ultra 7 165U",
+   "ram_gb": 32,
+   "storage_gb": 1024,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "notebook",
+   "executive laptop",
+   "ultrabook",
+   "core i7",
+   "core ultra 7"
+  ],
+  "unit": "unit",
+  "unit_cost": 112000,
+  "list_price": 134500,
+  "min_margin_pct": 8,
+  "stock_qty": 45,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Premium 14-inch executive notebook, Core Ultra 7, 32 GB RAM, 1 TB SSD, aluminium chassis."
+ },
+ {
+  "sku": "MSS-LT-103",
+  "mpn": "LN-21JR-E14G6",
+  "name": "Lenovo ThinkPad E14 Gen 6",
+  "brand": "Lenovo",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1335U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "thinkpad",
+   "notebook",
+   "14 inch",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 61200,
+  "list_price": 74900,
+  "min_margin_pct": 8,
+  "stock_qty": 210,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Value business notebook, Core i5, 16 GB RAM, 512 GB SSD, spill-resistant keyboard."
+ },
+ {
+  "sku": "MSS-LT-104",
+  "mpn": "LN-21ML-T14G5",
+  "name": "Lenovo ThinkPad T14 Gen 5",
+  "brand": "Lenovo",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core Ultra 7 155U",
+   "ram_gb": 32,
+   "storage_gb": 1024,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "thinkpad",
+   "notebook",
+   "core i7",
+   "core ultra 7"
+  ],
+  "unit": "unit",
+  "unit_cost": 104000,
+  "list_price": 126000,
+  "min_margin_pct": 8,
+  "stock_qty": 60,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Enterprise ThinkPad with Core Ultra 7, 32 GB RAM, 1 TB SSD, MIL-STD-810H tested."
+ },
+ {
+  "sku": "MSS-LT-105",
+  "mpn": "HP-9C0B5PA-440G11",
+  "name": "HP ProBook 440 G11",
+  "brand": "HP",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1334U",
+   "ram_gb": 8,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "probook",
+   "notebook",
+   "entry laptop",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 52800,
+  "list_price": 63900,
+  "min_margin_pct": 7,
+  "stock_qty": 320,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Entry business notebook, Core i5, 8 GB RAM, 512 GB SSD \u2014 suited to student and front-office fleets."
+ },
+ {
+  "sku": "MSS-LT-106",
+  "mpn": "HP-A26N5PA-840G11",
+  "name": "HP EliteBook 840 G11",
+  "brand": "HP",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core Ultra 7 155U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "elitebook",
+   "notebook",
+   "core i7",
+   "core ultra 7"
+  ],
+  "unit": "unit",
+  "unit_cost": 96500,
+  "list_price": 116000,
+  "min_margin_pct": 8,
+  "stock_qty": 75,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Premium business notebook with Wolf Security, Core Ultra 7, 16 GB RAM, 512 GB SSD."
+ },
+ {
+  "sku": "MSS-LT-107",
+  "mpn": "AP-MXCT3HN-A",
+  "name": "Apple MacBook Air 13-inch M3",
+  "brand": "Apple",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Apple M3",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 13.6,
+   "os": "macOS"
+  },
+  "keywords": [
+   "macbook",
+   "mac",
+   "apple laptop"
+  ],
+  "unit": "unit",
+  "unit_cost": 118000,
+  "list_price": 134900,
+  "min_margin_pct": 6,
+  "stock_qty": 30,
+  "lead_time_days": 10,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "MacBook Air 13-inch with Apple M3, 16 GB unified memory and 512 GB SSD."
+ },
+ {
+  "sku": "MSS-DT-201",
+  "mpn": "DL-OP7020T-I5",
+  "name": "Dell OptiPlex 7020 Tower",
+  "brand": "Dell",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-14500",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "desktop",
+   "pc",
+   "tower",
+   "workstation pc",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 54000,
+  "list_price": 65500,
+  "min_margin_pct": 8,
+  "stock_qty": 95,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Business tower desktop, Core i5 14th gen, 16 GB RAM, 512 GB SSD."
+ },
+ {
+  "sku": "MSS-DT-202",
+  "mpn": "HP-8T1Q0PA-MINI400",
+  "name": "HP Pro Mini 400 G9",
+  "brand": "HP",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-13500T",
+   "ram_gb": 8,
+   "storage_gb": 256,
+   "storage_type": "SSD",
+   "form_factor": "mini",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "mini pc",
+   "desktop",
+   "small form factor",
+   "thin client"
+  ],
+  "unit": "unit",
+  "unit_cost": 43500,
+  "list_price": 52900,
+  "min_margin_pct": 7,
+  "stock_qty": 150,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Ultra-compact desktop for reception, kiosks and shared desks."
+ },
+ {
+  "sku": "MSS-DT-203",
+  "mpn": "LN-12E4-M70QG5",
+  "name": "Lenovo ThinkCentre M70q Gen 5",
+  "brand": "Lenovo",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i7-14700T",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "mini",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "tiny",
+   "desktop",
+   "mini pc",
+   "core i7"
+  ],
+  "unit": "unit",
+  "unit_cost": 63000,
+  "list_price": 76500,
+  "min_margin_pct": 8,
+  "stock_qty": 70,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Tiny form-factor desktop with Core i7, 16 GB RAM, 512 GB SSD."
+ },
+ {
+  "sku": "MSS-WS-301",
+  "mpn": "DL-P3680-I9-A2000",
+  "name": "Dell Precision 3680 Tower Workstation",
+  "brand": "Dell",
+  "category": "workstation",
+  "specs": {
+   "cpu": "Intel Core i9-14900K",
+   "ram_gb": 64,
+   "storage_gb": 2048,
+   "storage_type": "SSD",
+   "gpu": "NVIDIA RTX A2000 12GB",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "workstation",
+   "cad",
+   "engineering",
+   "gpu",
+   "rendering"
+  ],
+  "unit": "unit",
+  "unit_cost": 235000,
+  "list_price": 279000,
+  "min_margin_pct": 9,
+  "stock_qty": 18,
+  "lead_time_days": 12,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "CAD/engineering workstation, Core i9, 64 GB RAM, 2 TB SSD, NVIDIA RTX A2000."
+ },
+ {
+  "sku": "MSS-MN-401",
+  "mpn": "DL-P2425H",
+  "name": "Dell Pro 24 Monitor P2425H",
+  "brand": "Dell",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 24,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DP, VGA, USB"
+  },
+  "keywords": [
+   "display",
+   "24 inch",
+   "full hd",
+   "fhd",
+   "screen"
+  ],
+  "unit": "unit",
+  "unit_cost": 12400,
+  "list_price": 15200,
+  "min_margin_pct": 7,
+  "stock_qty": 400,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "24-inch Full HD IPS monitor with height-adjustable stand and ComfortView Plus."
+ },
+ {
+  "sku": "MSS-MN-402",
+  "mpn": "DL-P2725H",
+  "name": "Dell Pro 27 Monitor P2725H",
+  "brand": "Dell",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 27,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DP, VGA, USB"
+  },
+  "keywords": [
+   "display",
+   "27 inch",
+   "full hd",
+   "fhd",
+   "screen"
+  ],
+  "unit": "unit",
+  "unit_cost": 16900,
+  "list_price": 20500,
+  "min_margin_pct": 7,
+  "stock_qty": 260,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "27-inch Full HD IPS monitor with height-adjustable stand."
+ },
+ {
+  "sku": "MSS-MN-403",
+  "mpn": "LG-27UP850N-W",
+  "name": "LG 27UP850N 27-inch 4K USB-C Monitor",
+  "brand": "LG",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 27,
+   "resolution": "3840x2160",
+   "panel": "IPS",
+   "ports": "USB-C 96W, HDMI, DP"
+  },
+  "keywords": [
+   "display",
+   "27 inch",
+   "4k",
+   "uhd",
+   "usb-c",
+   "screen"
+  ],
+  "unit": "unit",
+  "unit_cost": 29800,
+  "list_price": 36500,
+  "min_margin_pct": 7,
+  "stock_qty": 85,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "27-inch 4K UHD IPS monitor with USB-C 96 W power delivery."
+ },
+ {
+  "sku": "MSS-MN-404",
+  "mpn": "SS-LS32D804UA",
+  "name": "Samsung ViewFinity S80D 32-inch 4K",
+  "brand": "Samsung",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 32,
+   "resolution": "3840x2160",
+   "panel": "VA",
+   "ports": "USB-C, HDMI, DP"
+  },
+  "keywords": [
+   "display",
+   "32 inch",
+   "4k",
+   "uhd",
+   "screen"
+  ],
+  "unit": "unit",
+  "unit_cost": 31500,
+  "list_price": 38900,
+  "min_margin_pct": 7,
+  "stock_qty": 40,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "32-inch 4K UHD monitor with USB-C and HDR10."
+ },
+ {
+  "sku": "MSS-MN-405",
+  "mpn": "HP-6N4E8AA-E24G5",
+  "name": "HP E24 G5 FHD Monitor",
+  "brand": "HP",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 23.8,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DP, USB"
+  },
+  "keywords": [
+   "display",
+   "24 inch",
+   "full hd",
+   "fhd",
+   "screen"
+  ],
+  "unit": "unit",
+  "unit_cost": 11600,
+  "list_price": 14300,
+  "min_margin_pct": 7,
+  "stock_qty": 180,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "23.8-inch Full HD IPS monitor, eye-ease low blue light."
+ },
+ {
+  "sku": "MSS-NW-501",
+  "mpn": "CS-C9200L-24P-4G-E",
+  "name": "Cisco Catalyst 9200L 24-port PoE+ Switch",
+  "brand": "Cisco",
+  "category": "network_switch",
+  "specs": {
+   "ports": 24,
+   "poe": true,
+   "poe_budget_w": 370,
+   "uplinks": "4x1G",
+   "layer": 3,
+   "managed": true
+  },
+  "keywords": [
+   "switch",
+   "poe",
+   "access switch",
+   "24 port",
+   "catalyst",
+   "layer 3"
+  ],
+  "unit": "unit",
+  "unit_cost": 245000,
+  "list_price": 289000,
+  "min_margin_pct": 10,
+  "stock_qty": 22,
+  "lead_time_days": 14,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "24-port Gigabit PoE+ access switch, 370 W budget, 4x1G uplinks, Network Essentials."
+ },
+ {
+  "sku": "MSS-NW-502",
+  "mpn": "CS-C9200L-48P-4G-E",
+  "name": "Cisco Catalyst 9200L 48-port PoE+ Switch",
+  "brand": "Cisco",
+  "category": "network_switch",
+  "specs": {
+   "ports": 48,
+   "poe": true,
+   "poe_budget_w": 740,
+   "uplinks": "4x1G",
+   "layer": 3,
+   "managed": true
+  },
+  "keywords": [
+   "switch",
+   "poe",
+   "access switch",
+   "48 port",
+   "catalyst",
+   "layer 3"
+  ],
+  "unit": "unit",
+  "unit_cost": 398000,
+  "list_price": 468000,
+  "min_margin_pct": 10,
+  "stock_qty": 12,
+  "lead_time_days": 14,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "48-port Gigabit PoE+ access switch, 740 W budget, 4x1G uplinks, Network Essentials."
+ },
+ {
+  "sku": "MSS-NW-503",
+  "mpn": "AR-JL684A-1930",
+  "name": "Aruba Instant On 1930 24G PoE Switch",
+  "brand": "Aruba",
+  "category": "network_switch",
+  "specs": {
+   "ports": 24,
+   "poe": true,
+   "poe_budget_w": 195,
+   "uplinks": "4x1G SFP",
+   "layer": 2,
+   "managed": true
+  },
+  "keywords": [
+   "switch",
+   "poe",
+   "smart managed",
+   "24 port",
+   "small office"
+  ],
+  "unit": "unit",
+  "unit_cost": 38500,
+  "list_price": 46900,
+  "min_margin_pct": 9,
+  "stock_qty": 65,
+  "lead_time_days": 5,
+  "warranty_months": 120,
+  "tax_category": "goods_standard",
+  "description": "24-port smart-managed Gigabit PoE switch with cloud management; lifetime warranty."
+ },
+ {
+  "sku": "MSS-NW-504",
+  "mpn": "UB-U6-PRO",
+  "name": "Ubiquiti UniFi U6 Pro Access Point",
+  "brand": "Ubiquiti",
+  "category": "wireless",
+  "specs": {
+   "wifi": "Wi-Fi 6",
+   "streams": "4x4",
+   "poe": true,
+   "mount": "ceiling"
+  },
+  "keywords": [
+   "access point",
+   "wifi",
+   "wi-fi 6",
+   "wireless",
+   "ap"
+  ],
+  "unit": "unit",
+  "unit_cost": 14200,
+  "list_price": 17500,
+  "min_margin_pct": 9,
+  "stock_qty": 160,
+  "lead_time_days": 5,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Wi-Fi 6 ceiling access point, 5.3 Gbps aggregate, PoE powered."
+ },
+ {
+  "sku": "MSS-NW-505",
+  "mpn": "CS-MR36-HW",
+  "name": "Cisco Meraki MR36 Access Point",
+  "brand": "Cisco Meraki",
+  "category": "wireless",
+  "specs": {
+   "wifi": "Wi-Fi 6",
+   "streams": "2x2",
+   "poe": true,
+   "mount": "ceiling",
+   "license": "separate"
+  },
+  "keywords": [
+   "access point",
+   "wifi",
+   "wi-fi 6",
+   "wireless",
+   "meraki",
+   "cloud managed",
+   "ap"
+  ],
+  "unit": "unit",
+  "unit_cost": 58000,
+  "list_price": 69500,
+  "min_margin_pct": 10,
+  "stock_qty": 48,
+  "lead_time_days": 10,
+  "warranty_months": 120,
+  "tax_category": "goods_standard",
+  "description": "Cloud-managed Wi-Fi 6 access point (licence sold separately)."
+ },
+ {
+  "sku": "MSS-NW-506",
+  "mpn": "FT-FG-60F",
+  "name": "Fortinet FortiGate 60F Firewall",
+  "brand": "Fortinet",
+  "category": "firewall",
+  "specs": {
+   "throughput_gbps": 10,
+   "ngfw_gbps": 1,
+   "ports": 10,
+   "form_factor": "desktop"
+  },
+  "keywords": [
+   "firewall",
+   "utm",
+   "ngfw",
+   "security appliance",
+   "fortigate"
+  ],
+  "unit": "unit",
+  "unit_cost": 62000,
+  "list_price": 75500,
+  "min_margin_pct": 10,
+  "stock_qty": 35,
+  "lead_time_days": 7,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Next-generation firewall for branch offices, 10 Gbps firewall throughput."
+ },
+ {
+  "sku": "MSS-NW-507",
+  "mpn": "FT-FG-100F",
+  "name": "Fortinet FortiGate 100F Firewall",
+  "brand": "Fortinet",
+  "category": "firewall",
+  "specs": {
+   "throughput_gbps": 20,
+   "ngfw_gbps": 1.6,
+   "ports": 22,
+   "form_factor": "1U"
+  },
+  "keywords": [
+   "firewall",
+   "utm",
+   "ngfw",
+   "security appliance",
+   "fortigate",
+   "rack"
+  ],
+  "unit": "unit",
+  "unit_cost": 248000,
+  "list_price": 296000,
+  "min_margin_pct": 10,
+  "stock_qty": 9,
+  "lead_time_days": 14,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Mid-range NGFW, 20 Gbps firewall throughput, dual power supply, 1U rack."
+ },
+ {
+  "sku": "MSS-NW-508",
+  "mpn": "TP-ER7206",
+  "name": "TP-Link Omada ER7206 VPN Router",
+  "brand": "TP-Link",
+  "category": "router",
+  "specs": {
+   "ports": 6,
+   "wan": "multi-WAN",
+   "vpn": true
+  },
+  "keywords": [
+   "router",
+   "vpn router",
+   "gateway",
+   "multi wan"
+  ],
+  "unit": "unit",
+  "unit_cost": 11800,
+  "list_price": 14500,
+  "min_margin_pct": 8,
+  "stock_qty": 90,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Multi-WAN Gigabit VPN router with Omada SDN management."
+ },
+ {
+  "sku": "MSS-SV-601",
+  "mpn": "DL-R660XS-2S4410Y",
+  "name": "Dell PowerEdge R660xs Rack Server",
+  "brand": "Dell",
+  "category": "server",
+  "specs": {
+   "cpu": "2x Intel Xeon Silver 4410Y",
+   "ram_gb": 64,
+   "storage_gb": 1920,
+   "storage_type": "SSD",
+   "form_factor": "1U",
+   "psu": "dual"
+  },
+  "keywords": [
+   "server",
+   "rack server",
+   "1u",
+   "xeon",
+   "virtualization"
+  ],
+  "unit": "unit",
+  "unit_cost": 520000,
+  "list_price": 612000,
+  "min_margin_pct": 9,
+  "stock_qty": 6,
+  "lead_time_days": 21,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "1U dual-socket rack server, 2x Xeon Silver 4410Y, 64 GB RDIMM, 2x 960 GB SSD, dual PSU, iDRAC9."
+ },
+ {
+  "sku": "MSS-SV-602",
+  "mpn": "DL-T360-E2434",
+  "name": "Dell PowerEdge T360 Tower Server",
+  "brand": "Dell",
+  "category": "server",
+  "specs": {
+   "cpu": "Intel Xeon E-2434",
+   "ram_gb": 32,
+   "storage_gb": 4000,
+   "storage_type": "HDD",
+   "form_factor": "tower"
+  },
+  "keywords": [
+   "server",
+   "tower server",
+   "file server",
+   "small office server",
+   "xeon"
+  ],
+  "unit": "unit",
+  "unit_cost": 245000,
+  "list_price": 289000,
+  "min_margin_pct": 9,
+  "stock_qty": 11,
+  "lead_time_days": 14,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Tower server for small offices, Xeon E-2434, 32 GB ECC, 2x 2 TB HDD in RAID 1."
+ },
+ {
+  "sku": "MSS-SV-603",
+  "mpn": "HPE-DL380G11-4416",
+  "name": "HPE ProLiant DL380 Gen11",
+  "brand": "HPE",
+  "category": "server",
+  "specs": {
+   "cpu": "2x Intel Xeon Silver 4416+",
+   "ram_gb": 128,
+   "storage_gb": 3840,
+   "storage_type": "SSD",
+   "form_factor": "2U",
+   "psu": "dual"
+  },
+  "keywords": [
+   "server",
+   "rack server",
+   "2u",
+   "xeon",
+   "virtualization",
+   "database server"
+  ],
+  "unit": "unit",
+  "unit_cost": 745000,
+  "list_price": 872000,
+  "min_margin_pct": 9,
+  "stock_qty": 4,
+  "lead_time_days": 28,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "2U dual-socket rack server, 2x Xeon Silver 4416+, 128 GB, 4x 960 GB SSD, dual PSU."
+ },
+ {
+  "sku": "MSS-ST-701",
+  "mpn": "SY-RS1221PLUS",
+  "name": "Synology RackStation RS1221+ 8-bay NAS",
+  "brand": "Synology",
+  "category": "storage",
+  "specs": {
+   "bays": 8,
+   "form_factor": "2U",
+   "ram_gb": 4,
+   "network": "4x1GbE"
+  },
+  "keywords": [
+   "nas",
+   "storage",
+   "network storage",
+   "rack nas",
+   "backup storage"
+  ],
+  "unit": "unit",
+  "unit_cost": 118000,
+  "list_price": 139500,
+  "min_margin_pct": 9,
+  "stock_qty": 14,
+  "lead_time_days": 10,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "8-bay 2U rackmount NAS for file services, backup and virtualisation datastores."
+ },
+ {
+  "sku": "MSS-ST-702",
+  "mpn": "SY-DS923PLUS",
+  "name": "Synology DiskStation DS923+ 4-bay NAS",
+  "brand": "Synology",
+  "category": "storage",
+  "specs": {
+   "bays": 4,
+   "form_factor": "desktop",
+   "ram_gb": 4,
+   "network": "2x1GbE"
+  },
+  "keywords": [
+   "nas",
+   "storage",
+   "network storage",
+   "desktop nas",
+   "backup"
+  ],
+  "unit": "unit",
+  "unit_cost": 52500,
+  "list_price": 62900,
+  "min_margin_pct": 9,
+  "stock_qty": 28,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "4-bay desktop NAS for small offices, expandable to 9 drives."
+ },
+ {
+  "sku": "MSS-ST-703",
+  "mpn": "SG-ST8000NT001",
+  "name": "Seagate IronWolf Pro 8TB NAS HDD",
+  "brand": "Seagate",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 8000,
+   "type": "HDD",
+   "rpm": 7200
+  },
+  "keywords": [
+   "hard drive",
+   "hdd",
+   "disk",
+   "8tb",
+   "nas drive"
+  ],
+  "unit": "unit",
+  "unit_cost": 18900,
+  "list_price": 22900,
+  "min_margin_pct": 7,
+  "stock_qty": 120,
+  "lead_time_days": 5,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "8 TB 7200 rpm NAS-grade hard drive, 5-year warranty with data recovery."
+ },
+ {
+  "sku": "MSS-ST-704",
+  "mpn": "SS-MZ-77E1T0BW",
+  "name": "Samsung 870 EVO 1TB SATA SSD",
+  "brand": "Samsung",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 1000,
+   "type": "SSD",
+   "interface": "SATA"
+  },
+  "keywords": [
+   "ssd",
+   "solid state drive",
+   "1tb",
+   "disk upgrade"
+  ],
+  "unit": "unit",
+  "unit_cost": 7200,
+  "list_price": 8900,
+  "min_margin_pct": 6,
+  "stock_qty": 300,
+  "lead_time_days": 3,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "1 TB 2.5-inch SATA solid-state drive."
+ },
+ {
+  "sku": "MSS-PW-801",
+  "mpn": "APC-SMT1500IC",
+  "name": "APC Smart-UPS 1500VA LCD",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "capacity_va": 1500,
+   "topology": "line-interactive",
+   "form_factor": "tower"
+  },
+  "keywords": [
+   "ups",
+   "power backup",
+   "battery backup",
+   "1500va",
+   "1.5kva"
+  ],
+  "unit": "unit",
+  "unit_cost": 48500,
+  "list_price": 57900,
+  "min_margin_pct": 9,
+  "stock_qty": 40,
+  "lead_time_days": 5,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "1500 VA line-interactive UPS with LCD and SmartConnect."
+ },
+ {
+  "sku": "MSS-PW-802",
+  "mpn": "APC-SRT3KXLI",
+  "name": "APC Smart-UPS SRT 3000VA Online",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "capacity_va": 3000,
+   "topology": "online double-conversion",
+   "form_factor": "rack/tower"
+  },
+  "keywords": [
+   "ups",
+   "online ups",
+   "3kva",
+   "3000va",
+   "rack ups",
+   "power backup"
+  ],
+  "unit": "unit",
+  "unit_cost": 142000,
+  "list_price": 168000,
+  "min_margin_pct": 9,
+  "stock_qty": 10,
+  "lead_time_days": 10,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "3000 VA online double-conversion UPS, rack/tower convertible."
+ },
+ {
+  "sku": "MSS-PW-803",
+  "mpn": "APC-AP7920B",
+  "name": "APC Switched Rack PDU 1U",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "outlets": 8,
+   "form_factor": "1U",
+   "switched": true
+  },
+  "keywords": [
+   "pdu",
+   "power distribution",
+   "rack pdu"
+  ],
+  "unit": "unit",
+  "unit_cost": 32000,
+  "list_price": 38500,
+  "min_margin_pct": 9,
+  "stock_qty": 25,
+  "lead_time_days": 7,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "1U switched rack PDU with 8 outlets and remote management."
+ },
+ {
+  "sku": "MSS-RK-901",
+  "mpn": "NT-42U-8010",
+  "name": "Netrack 42U Server Rack 800x1000",
+  "brand": "Netrack",
+  "category": "rack",
+  "specs": {
+   "units": 42,
+   "width_mm": 800,
+   "depth_mm": 1000
+  },
+  "keywords": [
+   "rack",
+   "cabinet",
+   "42u",
+   "server cabinet",
+   "enclosure"
+  ],
+  "unit": "unit",
+  "unit_cost": 68000,
+  "list_price": 81500,
+  "min_margin_pct": 10,
+  "stock_qty": 12,
+  "lead_time_days": 10,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "42U floor-standing server cabinet, perforated doors, 4 fans, 800x1000 mm."
+ },
+ {
+  "sku": "MSS-CB-902",
+  "mpn": "CM-CAT6-305M",
+  "name": "CommScope Cat6 UTP Cable 305 m",
+  "brand": "CommScope",
+  "category": "cabling",
+  "specs": {
+   "category": "Cat6",
+   "length_m": 305,
+   "type": "UTP"
+  },
+  "keywords": [
+   "cat6",
+   "cable",
+   "network cable",
+   "lan cable",
+   "structured cabling",
+   "ethernet cable"
+  ],
+  "unit": "box",
+  "unit_cost": 9800,
+  "list_price": 12400,
+  "min_margin_pct": 10,
+  "stock_qty": 220,
+  "lead_time_days": 3,
+  "warranty_months": 300,
+  "tax_category": "goods_standard",
+  "description": "Cat6 U/UTP 23 AWG solid copper cable, 305 m box, LSZH jacket."
+ },
+ {
+  "sku": "MSS-CB-903",
+  "mpn": "CM-PP-CAT6-24",
+  "name": "CommScope Cat6 24-port Patch Panel",
+  "brand": "CommScope",
+  "category": "cabling",
+  "specs": {
+   "category": "Cat6",
+   "ports": 24,
+   "form_factor": "1U"
+  },
+  "keywords": [
+   "patch panel",
+   "cat6",
+   "structured cabling",
+   "24 port"
+  ],
+  "unit": "unit",
+  "unit_cost": 3400,
+  "list_price": 4600,
+  "min_margin_pct": 12,
+  "stock_qty": 150,
+  "lead_time_days": 3,
+  "warranty_months": 300,
+  "tax_category": "goods_standard",
+  "description": "1U 24-port Cat6 unloaded patch panel."
+ },
+ {
+  "sku": "MSS-CB-904",
+  "mpn": "CM-PC-CAT6-1M",
+  "name": "CommScope Cat6 Patch Cord 1 m",
+  "brand": "CommScope",
+  "category": "cabling",
+  "specs": {
+   "category": "Cat6",
+   "length_m": 1
+  },
+  "keywords": [
+   "patch cord",
+   "patch cable",
+   "cat6",
+   "ethernet cable"
+  ],
+  "unit": "piece",
+  "unit_cost": 145,
+  "list_price": 220,
+  "min_margin_pct": 15,
+  "stock_qty": 4000,
+  "lead_time_days": 2,
+  "warranty_months": 300,
+  "tax_category": "goods_standard",
+  "description": "Cat6 moulded patch cord, 1 m."
+ },
+ {
+  "sku": "MSS-PR-111",
+  "mpn": "LG-920-002602",
+  "name": "Logitech MK540 Keyboard and Mouse Combo",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "wireless",
+   "layout": "full size"
+  },
+  "keywords": [
+   "keyboard",
+   "mouse",
+   "combo",
+   "wireless keyboard"
+  ],
+  "unit": "unit",
+  "unit_cost": 2650,
+  "list_price": 3400,
+  "min_margin_pct": 8,
+  "stock_qty": 600,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Full-size wireless keyboard and mouse combo."
+ },
+ {
+  "sku": "MSS-PR-112",
+  "mpn": "LG-960-001372",
+  "name": "Logitech C920 HD Pro Webcam",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "resolution": "1080p"
+  },
+  "keywords": [
+   "webcam",
+   "camera",
+   "video conferencing"
+  ],
+  "unit": "unit",
+  "unit_cost": 5900,
+  "list_price": 7400,
+  "min_margin_pct": 8,
+  "stock_qty": 240,
+  "lead_time_days": 3,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "1080p HD webcam with stereo microphones."
+ },
+ {
+  "sku": "MSS-PR-113",
+  "mpn": "JB-25089-999",
+  "name": "Jabra Evolve2 40 SE USB Headset",
+  "brand": "Jabra",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB-A",
+   "type": "stereo"
+  },
+  "keywords": [
+   "headset",
+   "headphones",
+   "call center headset",
+   "audio"
+  ],
+  "unit": "unit",
+  "unit_cost": 7900,
+  "list_price": 9800,
+  "min_margin_pct": 8,
+  "stock_qty": 180,
+  "lead_time_days": 4,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "Wired stereo headset certified for Microsoft Teams."
+ },
+ {
+  "sku": "MSS-PR-114",
+  "mpn": "DL-WD19S-130W",
+  "name": "Dell Dock WD19S 130W",
+  "brand": "Dell",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB-C",
+   "power_w": 130
+  },
+  "keywords": [
+   "docking station",
+   "dock",
+   "usb-c dock"
+  ],
+  "unit": "unit",
+  "unit_cost": 14800,
+  "list_price": 17900,
+  "min_margin_pct": 8,
+  "stock_qty": 110,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "USB-C docking station with 130 W power delivery."
+ },
+ {
+  "sku": "MSS-PR-115",
+  "mpn": "HP-W1A56A-M404DN",
+  "name": "HP LaserJet Pro M404dn Printer",
+  "brand": "HP",
+  "category": "printer",
+  "specs": {
+   "type": "mono laser",
+   "duplex": true,
+   "network": true,
+   "ppm": 38
+  },
+  "keywords": [
+   "printer",
+   "laser printer",
+   "mono printer",
+   "network printer"
+  ],
+  "unit": "unit",
+  "unit_cost": 24500,
+  "list_price": 29900,
+  "min_margin_pct": 8,
+  "stock_qty": 36,
+  "lead_time_days": 5,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Monochrome network laser printer, 38 ppm, automatic duplex."
+ },
+ {
+  "sku": "MSS-PR-116",
+  "mpn": "PL-2200-86260",
+  "name": "Poly Studio X30 Video Bar",
+  "brand": "Poly",
+  "category": "av",
+  "specs": {
+   "room_size": "small",
+   "camera": "4K"
+  },
+  "keywords": [
+   "video conferencing",
+   "video bar",
+   "meeting room",
+   "conference room",
+   "vc"
+  ],
+  "unit": "unit",
+  "unit_cost": 185000,
+  "list_price": 219000,
+  "min_margin_pct": 9,
+  "stock_qty": 8,
+  "lead_time_days": 14,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "All-in-one video bar for small meeting rooms, 4K camera, native Teams/Zoom."
+ },
+ {
+  "sku": "MSS-SW-121",
+  "mpn": "MS-CFQ7TTC0LDPB",
+  "name": "Microsoft 365 Business Standard (annual)",
+  "brand": "Microsoft",
+  "category": "software",
+  "specs": {
+   "term_months": 12,
+   "licence": "per user"
+  },
+  "keywords": [
+   "office 365",
+   "m365",
+   "microsoft 365",
+   "office licence",
+   "email",
+   "productivity suite"
+  ],
+  "unit": "user",
+  "unit_cost": 9900,
+  "list_price": 11700,
+  "min_margin_pct": 5,
+  "stock_qty": 99999,
+  "lead_time_days": 1,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Annual subscription per user: Office apps, Exchange, Teams, 1 TB OneDrive."
+ },
+ {
+  "sku": "MSS-SW-122",
+  "mpn": "MS-P73-08328",
+  "name": "Windows Server 2022 Standard 16-core",
+  "brand": "Microsoft",
+  "category": "software",
+  "specs": {
+   "cores": 16,
+   "licence": "perpetual"
+  },
+  "keywords": [
+   "windows server",
+   "server licence",
+   "os licence"
+  ],
+  "unit": "unit",
+  "unit_cost": 72000,
+  "list_price": 84500,
+  "min_margin_pct": 6,
+  "stock_qty": 99999,
+  "lead_time_days": 2,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Windows Server 2022 Standard, 16-core perpetual licence."
+ },
+ {
+  "sku": "MSS-SW-123",
+  "mpn": "VM-V-VDPESS-5",
+  "name": "Veeam Data Platform Essentials (5 instances)",
+  "brand": "Veeam",
+  "category": "software",
+  "specs": {
+   "instances": 5,
+   "term_months": 12
+  },
+  "keywords": [
+   "backup software",
+   "backup",
+   "disaster recovery",
+   "veeam"
+  ],
+  "unit": "pack",
+  "unit_cost": 58000,
+  "list_price": 69000,
+  "min_margin_pct": 6,
+  "stock_qty": 99999,
+  "lead_time_days": 2,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Annual subscription covering 5 protected workloads, backup and replication."
+ },
+ {
+  "sku": "MSS-SW-124",
+  "mpn": "SP-CIXA1CSAA",
+  "name": "Sophos Intercept X Advanced (annual)",
+  "brand": "Sophos",
+  "category": "software",
+  "specs": {
+   "term_months": 12,
+   "licence": "per user"
+  },
+  "keywords": [
+   "antivirus",
+   "endpoint protection",
+   "edr",
+   "endpoint security",
+   "anti-malware"
+  ],
+  "unit": "user",
+  "unit_cost": 2300,
+  "list_price": 2950,
+  "min_margin_pct": 6,
+  "stock_qty": 99999,
+  "lead_time_days": 1,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Endpoint protection with anti-ransomware and deep learning malware detection, per user."
+ },
+ {
+  "sku": "MSS-SW-125",
+  "mpn": "FT-FC-10-0060F-950",
+  "name": "FortiGate 60F UTP Subscription (1 year)",
+  "brand": "Fortinet",
+  "category": "software",
+  "specs": {
+   "term_months": 12
+  },
+  "keywords": [
+   "firewall licence",
+   "utp",
+   "security subscription",
+   "fortiguard"
+  ],
+  "unit": "unit",
+  "unit_cost": 38000,
+  "list_price": 45500,
+  "min_margin_pct": 6,
+  "stock_qty": 99999,
+  "lead_time_days": 2,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Unified threat protection bundle and FortiCare support for FortiGate 60F, 12 months."
+ },
+ {
+  "sku": "MSS-SV-131",
+  "mpn": "MSS-SVC-INSTALL",
+  "name": "On-site Installation and Configuration",
+  "brand": "Meridian Services",
+  "category": "service",
+  "specs": {
+   "scope": "per device"
+  },
+  "keywords": [
+   "installation",
+   "setup",
+   "deployment",
+   "configuration",
+   "imaging",
+   "commissioning"
+  ],
+  "unit": "device",
+  "unit_cost": 1200,
+  "list_price": 2500,
+  "min_margin_pct": 25,
+  "stock_qty": 99999,
+  "lead_time_days": 3,
+  "warranty_months": 0,
+  "tax_category": "services",
+  "description": "Unboxing, imaging, domain join and hand-over, per device."
+ },
+ {
+  "sku": "MSS-SV-132",
+  "mpn": "MSS-SVC-NETDEPLOY",
+  "name": "Network Design and Deployment",
+  "brand": "Meridian Services",
+  "category": "service",
+  "specs": {
+   "scope": "per engineer day"
+  },
+  "keywords": [
+   "network design",
+   "network deployment",
+   "professional services",
+   "engineer day",
+   "implementation"
+  ],
+  "unit": "day",
+  "unit_cost": 18000,
+  "list_price": 32000,
+  "min_margin_pct": 25,
+  "stock_qty": 99999,
+  "lead_time_days": 5,
+  "warranty_months": 0,
+  "tax_category": "services",
+  "description": "Certified network engineer for design, staging and cut-over, per day."
+ },
+ {
+  "sku": "MSS-SV-133",
+  "mpn": "MSS-SVC-MIGRATE",
+  "name": "Data Migration Service",
+  "brand": "Meridian Services",
+  "category": "service",
+  "specs": {
+   "scope": "per TB"
+  },
+  "keywords": [
+   "data migration",
+   "migration",
+   "file migration",
+   "mailbox migration"
+  ],
+  "unit": "TB",
+  "unit_cost": 6500,
+  "list_price": 11000,
+  "min_margin_pct": 25,
+  "stock_qty": 99999,
+  "lead_time_days": 5,
+  "warranty_months": 0,
+  "tax_category": "services",
+  "description": "Planned data and mailbox migration, validated and signed off, per TB."
+ }
+]
