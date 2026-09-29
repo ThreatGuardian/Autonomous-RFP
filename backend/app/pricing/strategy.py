@@ -288,7 +288,8 @@ class StrategyEngine:
             + ("; repeat customer." if buyer.repeat_customer else ".")
         )
         headline = {
-            VALUE_DIFFERENTIATION: f"Competitor below cost — holding price and bundling {c.bundle.name if c.bundle else 'value'}",
+            VALUE_DIFFERENTIATION: (f"Competitor {'below our cost' if below_cost else 'below our margin floor'} — "
+                                    f"holding price and bundling {c.bundle.name.lower() if c.bundle else 'value'}"),
             FLOOR_DEFENCE: "Competitor below floor — holding at policy minimum",
             UNDERCUT: f"Priced {abs(pct_vs_best):.1f}% under the lowest competitor",
             MATCH: "Priced level with the market",
@@ -308,7 +309,7 @@ class StrategyEngine:
             b = c.bundle
             bundle = BundleDecision(code=b.code, name=b.name, kind=b.kind, unit_cost=b.unit_cost, unit_value=b.unit_value,
                                     total_cost=round(b.unit_cost * q, 2), total_value=round(b.unit_value * q, 2),
-                                    warranty_extension_months=b.warranty_extension_months)
+                                    warranty_extension_months=b.warranty_extension_months, description=b.description)
         revenue = round(c.price * q, 2)
         cost = round(line.unit_cost * q, 2)
         bcost = bundle.total_cost if bundle else 0.0

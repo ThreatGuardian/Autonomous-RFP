@@ -239,7 +239,7 @@ class RfpParserAgent(Agent):
         segment, seg_source = ex.infer_segment(text, name)
         client = ClientInfo(
             name=name, contact_name=contact["name"], email=contact["email"], phone=contact["phone"],
-            country=loc.country, region=loc.region, segment=segment, segment_source=seg_source,
+            country=loc.country, region=loc.region, city=loc.city, segment=segment, segment_source=seg_source,
             tax_id=ex.extract_tax_id(text),
         )
         log.info("Client identified", name=name, method=how, contact=contact["name"])

@@ -101,6 +101,22 @@ class LocationResult:
     region: str | None
     evidence: str
     delivery_location: str | None
+    city: str | None = None
+
+
+def _city(places, country: str | None, region: str | None) -> str | None:
+    """First mention that names a place below the region/country level (a city)."""
+    for p in places:
+        if p.country != country or (region and p.region not in (None, region)):
+            continue
+        alias = p.alias
+        if (p.region and fold(p.region) == alias) or alias in {fold(countries()[p.country].name)}:
+            continue
+        if p.region is None and alias in countries()[p.country].aliases[:1]:
+            continue
+        if len(alias) > 3 and not alias.isupper():
+            return " ".join(w.capitalize() for w in alias.split())
+    return None
 
 
 def extract_location(text: str) -> LocationResult:
@@ -116,7 +132,8 @@ def extract_location(text: str) -> LocationResult:
         if places:
             best = next((p for p in places if p.region), places[0])
             region = best.region or next((p.region for p in places if p.country == best.country and p.region), None)
-            return LocationResult(best.country, region, f"delivery address mentions '{best.alias}'", address)
+            return LocationResult(best.country, region, f"delivery address mentions '{best.alias}'", address,
+                                  _city(places, best.country, region))
     places = find_places(text)
     if not places:
         return LocationResult(None, None, "no place names found", address)
@@ -127,7 +144,8 @@ def extract_location(text: str) -> LocationResult:
     country = max(votes, key=lambda c: (votes[c], -first_seen[c]))
     regions = Counter(p.region for p in places if p.country == country and p.region)
     region = regions.most_common(1)[0][0] if regions else None
-    return LocationResult(country, region, f"{votes[country]} mention(s) of {countries()[country].name}", address)
+    return LocationResult(country, region, f"{votes[country]} mention(s) of {countries()[country].name}", address,
+                          _city(places, country, region))
 
 
 # --------------------------------------------------------------------------- currency

@@ -110,7 +110,7 @@ def _international(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
     ddp = incoterm not in NON_DDP_EXPORT_TERMS
     out = TaxAssessment(
         jurisdiction=where,
-        summary=f"Destination tax charged ({incoterm})" if ddp else f"Zero-rated export under LUT ({incoterm})",
+        summary=f"Destination taxes charged under {incoterm}" if ddp else f"Zero-rated export under LUT, {incoterm} terms",
     )
     if ctx.client_country == "US" and not ctx.client_region:
         out.notes.append("US state not identified; sales tax cannot be determined and is excluded.")

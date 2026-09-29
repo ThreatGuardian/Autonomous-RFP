@@ -18,6 +18,7 @@ class ClientInfo(BaseModel):
     country: str | None = None
     country_name: str | None = None
     region: str | None = None
+    city: str | None = None
     is_eu: bool = False
     segment: str = "smb"
     segment_source: str = "default"
@@ -199,6 +200,7 @@ class BundleDecision(BaseModel):
     total_cost: float
     total_value: float
     warranty_extension_months: int
+    description: str = ""
 
 
 class PricedLine(BaseModel):
@@ -301,3 +303,48 @@ class Localisation(BaseModel):
     grand_total: float
     grand_total_base: float
     bundled_value: float
+
+
+# --------------------------------------------------------------------------- proposal
+
+
+class Evidence(BaseModel):
+    source: str
+    section: str
+    text: str
+    score: float
+
+
+class ComplianceRow(BaseModel):
+    ref: str
+    requirement: str
+    type: str
+    status: Literal["Complies", "Complies with note", "Clarification required", "Noted"]
+    response: str
+    evidence: list[Evidence] = Field(default_factory=list)
+
+
+class Milestone(BaseModel):
+    label: str
+    day: int
+    detail: str
+
+
+class Proposal(BaseModel):
+    quote_number: str
+    version: int
+    issue_date: str
+    valid_until: str
+    salutation: str
+    cover_letter: list[str]
+    executive_summary: list[str]
+    highlights: list[str]
+    compliance: list[ComplianceRow]
+    compliance_counts: dict[str, int]
+    delivery_plan: list[str]
+    milestones: list[Milestone]
+    inclusions: list[dict[str, Any]]
+    terms: list[str]
+    signatory: dict[str, str]
+    retrieval_log: list[dict[str, Any]]
+    documents: dict[str, str] = Field(default_factory=dict)
