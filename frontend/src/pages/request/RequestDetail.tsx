@@ -1,0 +1,169 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Download, FileText, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { CountryTag, StageTracker, StatusBadge } from "../../components/domain";
+import { Page, PageHeader } from "../../components/layout/Shell";
+import { Button, Card, Dialog, Empty, Field, Skeleton, Spinner, Tabs } from "../../components/ui";
+import { api } from "../../lib/api";
+import type { RfpDetail } from "../../lib/types";
+import { date, daysUntil, money } from "../../lib/format";
+import { ActivityTab } from "./ActivityTab";
+import { PricingTab } from "./PricingTab";
+import { QuotationTab } from "./QuotationTab";
+import { RequirementsTab } from "./RequirementsTab";
+
+type Tab = "pricing" | "requirements" | "quotation" | "activity" | "source";
+
+export default function RequestDetail() {
+  const id = Number(useParams().id);
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>("pricing");
+  const [stageFocus, setStageFocus] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<null | "approve" | "reject" | "reopen" | "delete">(null);
+  const [actor, setActor] = useState("Priya Shah");
+  const [note, setNote] = useState("");
+
+  const { data: rfp, isLoading, error } = useQuery({
+    queryKey: ["rfp", id],
+    queryFn: () => api.rfp(id),
+    refetchInterval: (q) => {
+      const d = q.state.data as RfpDetail | undefined;
+      return !d || d.running || d.status === "queued" || d.status === "processing" ? 900 : false;
+    },
+  });
+
+  const act = useMutation({
+    mutationFn: async (kind: "approve" | "reject" | "reopen" | "delete" | "retry") => {
+      if (kind === "approve") return api.approve(id, actor, note || undefined);
+      if (kind === "reject") return api.reject(id, actor, note || undefined);
+      if (kind === "reopen") return api.reopen(id, actor, note || undefined);
+      if (kind === "retry") return api.retry(id);
+      return api.remove(id);
+    },
+    onSuccess: (_d, kind) => {
+      setDialog(null);
+      setNote("");
+      qc.invalidateQueries({ queryKey: ["rfps"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      if (kind === "delete") navigate("/requests");
+      else qc.invalidateQueries({ queryKey: ["rfp", id] });
+    },
+  });
+
+  if (isLoading) return <Page><Skeleton className="mb-4 h-16" /><Skeleton className="h-72" /></Page>;
+  if (error || !rfp) return <Page><Empty title="Request not found" description="It may have been deleted." action={<Link to="/requests"><Button>Back to requests</Button></Link>} /></Page>;
+
+  const busy = rfp.running || rfp.status === "queued" || rfp.status === "processing";
+  const ready = !!rfp.pricing?.strategy && !!rfp.proposal && !busy;
+  const editable = rfp.status === "review" && !busy;
+  const days = daysUntil(rfp.due_date);
+  const loc = rfp.pricing?.localisation;
+  const docs = rfp.proposal?.documents ?? {};
+
+  return (
+    <>
+      <PageHeader
+        breadcrumb={<><Link to="/requests" className="hover:text-ink">Requests</Link> / <span className="font-mono">{rfp.reference}</span></>}
+        title={rfp.parsed?.title ?? rfp.title}
+        description={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <StatusBadge status={rfp.status} />
+            <span className="text-ink-soft">{rfp.client_name ?? "Client not yet identified"}</span>
+            {rfp.client_country && <CountryTag code={rfp.client_country} />}
+            {rfp.due_date && <span>Due {date(rfp.due_date)}{days !== null && days >= 0 && ` · ${days} days left`}</span>}
+            {loc && <span className="font-medium text-ink tnum">{money(loc.grand_total, loc.currency, { decimals: loc.decimals })}</span>}
+          </span>
+        }
+        actions={
+          <>
+            {docs.quotation && <a href={api.documentUrl(id, "quotation")} target="_blank" rel="noreferrer"><Button icon={<Download className="size-4" />}>Quotation</Button></a>}
+            {docs.memo && <a href={api.documentUrl(id, "memo")} target="_blank" rel="noreferrer"><Button icon={<FileText className="size-4" />}>Pricing memo</Button></a>}
+            {rfp.status === "review" && !busy && <>
+              <Button variant="danger" icon={<XCircle className="size-4" />} onClick={() => setDialog("reject")}>Decline</Button>
+              <Button variant="success" icon={<CheckCircle2 className="size-4" />} onClick={() => setDialog("approve")}>Approve quotation</Button>
+            </>}
+            {(rfp.status === "approved" || rfp.status === "rejected") && <Button icon={<RotateCcw className="size-4" />} onClick={() => setDialog("reopen")}>Reopen</Button>}
+            {rfp.status === "failed" && <Button variant="primary" icon={<RotateCcw className="size-4" />} loading={act.isPending} onClick={() => act.mutate("retry")}>Retry</Button>}
+            {!busy && <Button variant="ghost" aria-label="Delete" onClick={() => setDialog("delete")}><Trash2 className="size-4" /></Button>}
+          </>
+        }
+      />
+      <Page className="space-y-5">
+        <StageTracker order={rfp.stage_order} stages={rfp.stages} active={stageFocus}
+          onSelect={(s) => { setStageFocus(s); setTab("activity"); }} />
+
+        {rfp.status === "failed" && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-[13px] text-rose-900">
+            <div className="font-semibold">Processing stopped</div><div className="mt-1">{rfp.error}</div>
+          </div>
+        )}
+        {rfp.status === "approved" && (
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-[13px] text-emerald-900">
+            <CheckCircle2 className="size-4" /> Approved — the final quotation has been issued without the draft watermark and is ready to send.
+          </div>
+        )}
+
+        {!ready && busy ? (
+          <Card>
+            <div className="flex flex-col items-center py-12 text-center">
+              <Spinner className="size-6 text-ink" />
+              <div className="mt-4 text-[14px] font-semibold">Preparing the quotation</div>
+              <div className="mt-1 max-w-md text-[12.5px] text-muted">Reading the request, checking cost and stock, gathering competitor prices and drafting documents. This usually takes a few seconds.</div>
+            </div>
+          </Card>
+        ) : !ready ? (
+          <Card><Empty title="No pricing available" description="Processing did not complete for this request." /></Card>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <Tabs value={tab} onChange={setTab} items={[
+                { value: "pricing", label: "Pricing" },
+                { value: "requirements", label: "Requirements", count: rfp.parsed?.requirements.filter((r) => r.type !== "scope").length },
+                { value: "quotation", label: "Quotation" },
+                { value: "activity", label: "Activity" },
+                { value: "source", label: "Source document" },
+              ]} />
+              {busy && <span className="flex items-center gap-2 text-[12.5px] text-muted"><Spinner className="size-3.5" /> Re-pricing…</span>}
+            </div>
+            {tab === "pricing" && <PricingTab rfp={rfp} editable={editable} />}
+            {tab === "requirements" && <RequirementsTab rfp={rfp} />}
+            {tab === "quotation" && <QuotationTab rfp={rfp} editable={editable} />}
+            {tab === "activity" && <ActivityTab rfp={rfp} focus={stageFocus} />}
+            {tab === "source" && (
+              <Card title={rfp.source_filename ?? "Pasted text"} subtitle={`${rfp.raw_text.length.toLocaleString()} characters`}>
+                <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-[1.65] text-ink-soft">{rfp.raw_text}</pre>
+              </Card>
+            )}
+          </>
+        )}
+      </Page>
+
+      <Dialog open={dialog === "approve" || dialog === "reject" || dialog === "reopen"} onClose={() => setDialog(null)}
+        title={dialog === "approve" ? "Approve quotation" : dialog === "reject" ? "Decline to bid" : "Reopen for review"}
+        footer={<>
+          <Button onClick={() => setDialog(null)}>Cancel</Button>
+          <Button variant={dialog === "approve" ? "success" : dialog === "reject" ? "danger" : "primary"} loading={act.isPending}
+            onClick={() => act.mutate(dialog as "approve" | "reject" | "reopen")}>
+            {dialog === "approve" ? "Approve and issue" : dialog === "reject" ? "Decline" : "Reopen"}
+          </Button>
+        </>}>
+        <div className="space-y-4">
+          {dialog === "approve" && loc && (
+            <p className="text-[12.5px] text-muted">The final quotation for <span className="font-medium text-ink">{money(loc.grand_total, loc.currency, { decimals: loc.decimals })}</span> will be issued without the draft watermark, and the approval will be recorded in the pricing memo.</p>
+          )}
+          <Field label="Your name"><input className="input" value={actor} onChange={(e) => setActor(e.target.value)} /></Field>
+          <Field label={dialog === "reject" ? "Reason" : "Note (optional)"}>
+            <textarea className="input h-20 resize-none py-2" value={note} onChange={(e) => setNote(e.target.value)} />
+          </Field>
+          {act.isError && <div className="text-[12.5px] text-rose-700">{(act.error as Error).message}</div>}
+        </div>
+      </Dialog>
+      <Dialog open={dialog === "delete"} onClose={() => setDialog(null)} title="Delete request"
+        footer={<><Button onClick={() => setDialog(null)}>Cancel</Button><Button variant="danger" loading={act.isPending} onClick={() => act.mutate("delete")}>Delete</Button></>}>
+        <p className="text-[13px] text-ink-soft">This permanently removes {rfp.reference}, its pricing history and review record.</p>
+      </Dialog>
+    </>
+  );
+}

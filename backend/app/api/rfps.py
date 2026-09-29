@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -136,6 +137,7 @@ def samples() -> list[dict[str, str]]:
     for p in sorted(SAMPLES_DIR.glob("*.txt")):
         text = p.read_text(encoding="utf-8")
         first = next((l.strip() for l in text.splitlines() if l.strip()), p.stem)
+        first = re.sub(r"^(from|to|issued by)\s*:\s*", "", first, flags=re.I)
         out.append({"filename": p.name, "title": first, "text": text})
     return out
 

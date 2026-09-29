@@ -6,6 +6,7 @@ from app.agents.base import Agent, PipelineContext, StageLog
 from app.agents.messages import CompetitiveAnalysis, InternalPricing, Localisation, LocalisedLine, ParsedRfp, TaxLine
 from app.db.seed import load_json
 from app.finance.currency import fx
+from app.finance.money import fmt
 from app.finance.tax import TaxContext, assess
 
 
@@ -79,5 +80,6 @@ class LocalisationAgent(Agent):
         )
 
     def summarize(self, output: Localisation) -> str:  # type: ignore[override]
-        return (f"{output.currency} {output.grand_total:,.{output.decimals}f} incl. {output.tax_summary.lower()}; "
-                f"FX {output.base_currency}/{output.currency} {output.fx_effective_rate:.6f} ({output.fx_source}).")
+        fx_note = "" if output.currency == output.base_currency else (
+            f"; 1 {output.currency} = {1 / output.fx_effective_rate:,.4f} {output.base_currency} ({output.fx_source})")
+        return f"Total {fmt(output.grand_total, output.currency, output.decimals)} — {output.tax_summary}{fx_note}."
