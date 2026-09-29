@@ -1,0 +1,37 @@
+Sahyadri Institute of Technology
+Survey No. 44, Narhe, Pune 411041, Maharashtra
+GSTIN: 27AABTS1234K1Z2
+
+REQUEST FOR QUOTATION
+RFQ No.: SIT/IT/2026-27/014
+Date of issue: 22 September 2026
+Subject: Supply of computing and networking equipment for the new Computer Science block
+
+1. Background
+Sahyadri Institute of Technology is commissioning a new Computer Science block with four teaching laboratories and a faculty wing. The Institute invites sealed quotations from authorised partners for the equipment listed below.
+
+2. Schedule of requirements
+- 60 x Business laptops for faculty, Intel Core i5 or better, 16GB RAM, 512GB SSD, 14 inch display
+- 120 desktop computers (tower), Core i5, 16GB RAM, 512GB SSD, Windows 11 Pro
+- 120 nos. 24-inch Full HD monitors with height adjustable stand
+- 48-port PoE+ managed switches with Layer 3 support: Qty 4
+- Wi-Fi 6 ceiling access points (24 units)
+- Online UPS 3kVA - 4
+- 30 boxes of Cat6 cable, 305 m
+- 120 wireless keyboard and mouse combos
+
+3. Delivery and installation
+All items must be delivered to the Narhe campus, Pune within 30 days of the purchase order. Installation and configuration of all devices is to be included.
+
+4. Warranty
+All end-user devices must carry a minimum 3 years comprehensive onsite warranty.
+
+5. Commercial terms
+Prices must be quoted in INR, inclusive of GST shown separately. Payment will be made within 45 days of receipt of a valid invoice. No advance payment will be released.
+
+6. Evaluation
+The contract will be awarded to the lowest compliant bidder (L1) among technically qualified vendors.
+
+7. Submission
+Quotations must be submitted by 10 October 2026 to purchase@sahyadri.edu.in.
+Contact: Prof. Anjali Deshpande, Head – IT Services

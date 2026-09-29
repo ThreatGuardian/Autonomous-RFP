@@ -120,10 +120,13 @@ class HybridIndex:
         bm, sem, lex = self._signals(query)
         w = self.WEIGHTS
         fused = w["bm25"] * bm + w["semantic"] * sem + w["lexical"] * lex
+        # Boosts (e.g. a category prior) change the ranking only; reported
+        # scores stay unboosted so they remain comparable across queries.
+        ranking = fused.copy()
         if boost:
             for idx, factor in boost.items():
-                fused[idx] = min(1.0, fused[idx] * factor)
-        order = np.argsort(-fused)
+                ranking[idx] *= factor
+        order = np.argsort(-ranking)
         hits: list[Hit] = []
         for i in order:
             doc = self.documents[i]

@@ -1,0 +1,28 @@
+Kaveri Health Systems Pvt. Ltd.
+No. 18, Hosur Road, Bengaluru 560029, Karnataka
+
+Request for Proposal: Hospital network and data centre modernisation
+RFP Reference: KHS-NET-2026-07
+Issued on: 15 September 2026
+
+Kaveri Health Systems operates a 300-bed multi-speciality hospital and two clinics. We are modernising the hospital network and replacing ageing servers in our on-premise data centre.
+
+Scope of supply
+| Item | Description | Qty | Unit |
+|---|---|---|---|
+| 1 | Cisco Catalyst 24-port PoE+ access switch | 10 | nos |
+| 2 | Next generation firewall, 10 Gbps throughput | 2 | nos |
+| 3 | Rack server, 2x Xeon Silver, 64GB RAM, dual power supply | 3 | nos |
+| 4 | 8-bay rackmount NAS for backup | 1 | nos |
+| 5 | 42U server rack | 2 | nos |
+| 6 | Backup software subscription, 5 instances | 2 | packs |
+| 7 | Network design and deployment engineer days | 8 | days |
+
+Requirements
+The bidder must hold a valid ISO/IEC 27001 certificate and comply with the DPDP Act 2023.
+All equipment should carry at least 36 months warranty with next business day onsite support.
+Delivery to our Bengaluru hospital within 21 days of the purchase order.
+Bids will be evaluated on price (60%) and technical merit (40%).
+Payment terms: net 30 from invoice date. Please quote in Indian Rupees.
+Proposals must be submitted by 12 October 2026.
+Point of contact: Dr. Ravi Menon, Chief Information Officer, ravi.menon@kaverihealth.in

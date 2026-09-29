@@ -1,0 +1,23 @@
+Cedar Valley Unified School District
+Technology Services Department
+2100 Valley Road, Fresno, California 93721, United States
+
+REQUEST FOR PROPOSAL
+RFP #: CVUSD-TECH-27-003
+Title: Classroom technology and wireless refresh
+Release date: 09/15/2026
+
+The District invites proposals for classroom technology serving 14 schools. Pricing should be quoted in US dollars.
+
+Items requested
+- 150 student laptops, Core i5, 8GB RAM, 512GB SSD
+- 40 x 27 inch 4K monitors, USB-C
+- Wi-Fi 6 access points: Qty 60
+- 24-port PoE switches, smart managed - 12
+- 20 network laser printers
+- 12 interactive whiteboards, 75 inch
+
+Delivery shall be made to the District warehouse in Fresno within 45 days. Freight must be included.
+The District requires a minimum 3 year warranty on all hardware.
+Proposals will be scored: price 50%, support 30%, experience 20%.
+Proposals are due by 10/20/2026 at 3:00 PM PT to purchasing@cedarvalley.k12.ca.us.

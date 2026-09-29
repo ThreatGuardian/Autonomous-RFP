@@ -1,0 +1,22 @@
+Rheinland Präzisionstechnik GmbH
+Industriestraße 12, 40210 Düsseldorf, Germany
+VAT ID: DE298174563
+
+Request for Quotation: Engineering workstation and storage upgrade
+Reference: RPT-EK-2026-118
+Dated 20 September 2026
+
+Our engineering department requires CAD workstations and supporting infrastructure for our Düsseldorf plant.
+
+Item                                   Qty    Unit
+CAD workstation, Core i9, 64GB RAM, RTX GPU, 2TB SSD    8    units
+32 inch 4K monitors                    16     units
+Online UPS 1500VA                      8      units
+4-bay NAS for project files            2      units
+8TB NAS hard drives                    8      units
+
+Delivery: DAP Düsseldorf within six weeks of order.
+All workstations require 36 months on-site warranty.
+Suppliers must comply with GDPR and hold ISO 9001 certification.
+Quotations in EUR are to be sent to einkauf@rheinland-praezision.de by 16 October 2026.
+Contact person: Katrin Vogel, Einkauf
