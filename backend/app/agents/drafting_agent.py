@@ -122,7 +122,7 @@ class ProposalDraftingAgent(Agent):
             Milestone(label="Purchase order", day=0, detail="Order acknowledgement and confirmed schedule within one business day."),
             Milestone(label="Staging complete", day=max_lead, detail="Goods received, configured and quality-checked at our integration centre."),
             Milestone(label="Delivered to site", day=max_lead + transit,
-                      detail=f"{'Air freight, customs clearance and ' if international else ''}delivery to {location}."),
+                      detail=f"{'Air freight, customs clearance and delivery' if international else 'Delivery'} to {location}."),
         ]
         if has_services:
             milestones.append(Milestone(label="Installation and hand-over", day=max_lead + transit + 5,

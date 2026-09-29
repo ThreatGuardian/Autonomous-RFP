@@ -15,6 +15,23 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+# --------------------------------------------------------------------------- users
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    email: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    title: Mapped[str] = mapped_column(String(80), default="Bid manager")
+    provider: Mapped[str] = mapped_column(String(16), default="password")  # password | google | sso
+    password_hash: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 # --------------------------------------------------------------------------- catalogue
 
 

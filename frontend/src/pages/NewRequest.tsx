@@ -27,7 +27,7 @@ export default function NewRequest() {
     },
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: ["rfps"] });
-      navigate(created.length === 1 ? `/requests/${created[0].id}` : "/requests?status=active");
+      navigate(created.length === 1 ? `/app/requests/${created[0].id}` : "/app/requests?status=active");
     },
     onError: (e: Error) => setError(e.message),
   });

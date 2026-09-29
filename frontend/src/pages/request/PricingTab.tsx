@@ -1,14 +1,16 @@
 import clsx from "clsx";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { StrategyBadge, WarningList } from "../../components/domain";
-import { Badge, Card, Meter, Stat, StatGrid } from "../../components/ui";
+import { Badge, Button, Card, Meter, Stat, StatGrid } from "../../components/ui";
 import type { RfpDetail } from "../../lib/types";
 import { money, pct, prob } from "../../lib/format";
 import { LineSheet } from "./LineSheet";
+import { Workbench } from "./Workbench";
 
 export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
+  const [bench, setBench] = useState(false);
   const strat = rfp.pricing?.strategy;
   const costing = rfp.pricing?.costing;
   if (!strat) return null;
@@ -33,7 +35,8 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
       </div>
       <WarningList items={warnings} />
 
-      <Card title="Line pricing" subtitle={`Amounts in ${base} (base currency). Select a line for the full rationale and to adjust it.`} bodyClassName="p-0">
+      <Card title="Line pricing" subtitle={`Amounts in ${base} (base currency). Select a line for the full rationale and to adjust it.`} bodyClassName="p-0"
+        actions={editable && <Button variant="primary" icon={<SlidersHorizontal className="size-4" />} onClick={() => setBench(true)}>Adjust quotation</Button>}>
         <div className="overflow-x-auto">
           <table className="table-base">
             <thead>
@@ -96,6 +99,8 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
           </div>
         )}
       </Card>
+
+      {bench && <Workbench key={`${rfp.proposal?.version}-${rfp.updated_at}`} rfp={rfp} open onClose={() => setBench(false)} />}
 
       <LineSheet rfpId={rfp.id} line={selected} currency={base} editable={editable}
         costed={costing?.lines.find((c) => c.line_no === open)}

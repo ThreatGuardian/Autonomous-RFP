@@ -3,8 +3,12 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Shell } from "./components/layout/Shell";
+import { AuthProvider, RequireAuth } from "./lib/auth";
+import Landing from "./pages/public/Landing";
+import Login from "./pages/public/Login";
+import ProviderSignIn from "./pages/public/ProviderSignIn";
 import Catalogue from "./pages/Catalogue";
 import Finance from "./pages/Finance";
 import Market from "./pages/Market";
@@ -20,18 +24,25 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route element={<Shell />}>
-            <Route index element={<Overview />} />
-            <Route path="requests" element={<Requests />} />
-            <Route path="requests/new" element={<NewRequest />} />
-            <Route path="requests/:id" element={<RequestDetail />} />
-            <Route path="catalogue" element={<Catalogue />} />
-            <Route path="market" element={<Market />} />
-            <Route path="finance" element={<Finance />} />
-            <Route path="models" element={<Models />} />
-          </Route>
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route index element={<Landing />} />
+            <Route path="login" element={<Login />} />
+            <Route path="signup" element={<Login mode="signup" />} />
+            <Route path="login/:provider" element={<ProviderSignIn />} />
+            <Route path="app" element={<RequireAuth><Shell /></RequireAuth>}>
+              <Route index element={<Overview />} />
+              <Route path="requests" element={<Requests />} />
+              <Route path="requests/new" element={<NewRequest />} />
+              <Route path="requests/:id" element={<RequestDetail />} />
+              <Route path="catalogue" element={<Catalogue />} />
+              <Route path="market" element={<Market />} />
+              <Route path="finance" element={<Finance />} />
+              <Route path="models" element={<Models />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

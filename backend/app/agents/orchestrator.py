@@ -37,6 +37,7 @@ from app.db.models import ApprovalEvent, Rfp, StageRun
 from app.db.seed import load_json
 from app.db.session import session_scope
 from app.services.pdf_renderer import document_dir, render_memo, render_quotation
+from app.services.report_renderer import render_report
 
 log = logging.getLogger("tenderdesk.pipeline")
 
@@ -65,7 +66,9 @@ def render_documents(ctx: PipelineContext, proposal: Proposal, approved: bool = 
                          loc=m["localisation"], proposal=proposal, approved=approved)
     memo = render_memo(folder / f"{stem}-pricing-memo.pdf", company=ctx.company, parsed=m["parsed"], strat=m["strategy"],
                        loc=m["localisation"], proposal=proposal, approval=approval)
-    return {"quotation": q.name, "memo": memo.name}
+    report = render_report(folder / f"{stem}-bid-report.pdf", company=ctx.company, parsed=m["parsed"], strat=m["strategy"],
+                           loc=m["localisation"], proposal=proposal, approval=approval)
+    return {"quotation": q.name, "memo": memo.name, "report": report.name}
 
 
 # --------------------------------------------------------------------------- persistence helpers
@@ -104,6 +107,59 @@ def _store_message(rfp: Rfp, key: str, message: BaseModel) -> None:
             rfp.total_client = message.grand_total  # type: ignore[attr-defined]
     elif key == "proposal":
         rfp.proposal = data
+
+
+REVIEWER_SOURCE = "added by reviewer"
+
+
+def apply_review_edits(parsed: ParsedRfp, overrides: dict[str, Any]) -> ParsedRfp:
+    """Apply reviewer corrections to the parsed request (idempotent).
+
+    * ``overrides["client"]`` corrects extracted client fields (name, country,
+      region, tax ID, buyer segment); ``overrides["terms"]`` corrects terms.
+    * ``overrides["added_lines"]`` adds catalogue items the request did not list.
+    """
+    from app.agents.messages import ProductMatch, RequestedItem
+    from app.db.models import Product
+    from app.nlp.gazetteer import countries
+
+    p = parsed.model_copy(deep=True)
+    client = overrides.get("client") or {}
+    for key in ("name", "region", "tax_id", "segment"):
+        if key in client:
+            setattr(p.client, key, client[key] or None if key != "segment" else client[key] or p.client.segment)
+    if client.get("country") and client["country"] != p.client.country:
+        info = countries().get(client["country"])
+        p.client.country = client["country"]
+        p.client.country_name = info.name if info else client["country"]
+        p.client.is_eu = bool(info and info.eu)
+        p.client.city = None
+        if "region" not in client:
+            p.client.region = None
+    if "segment" in client and client["segment"]:
+        p.client.segment_source = "reviewer"
+    terms = overrides.get("terms") or {}
+    if "incoterm" in terms:
+        p.terms.incoterm = terms["incoterm"] or None
+        p.terms.incoterm_source = "set by reviewer"
+
+    p.line_items = [i for i in p.line_items if i.quantity_source != REVIEWER_SOURCE]
+    added = overrides.get("added_lines") or []
+    if added:
+        with session_scope() as s:
+            for extra in added:
+                prod = s.scalar(select(Product).where(Product.sku == extra["sku"]))
+                if prod is None:
+                    continue
+                p.line_items.append(RequestedItem(
+                    line_no=int(extra["line_no"]), text=f"{extra['quantity']} x {prod.name}", description=prod.name,
+                    quantity=int(extra["quantity"]), quantity_source=REVIEWER_SOURCE, unit=prod.unit, category=prod.category,
+                    category_confidence=1.0, candidates=[ProductMatch(sku=prod.sku, name=prod.name, category=prod.category,
+                                                                      score=1.0, retrieval_score=1.0, reasons=["Added by reviewer"])],
+                    selected_sku=prod.sku, match_confidence=1.0, status="matched",
+                ))
+    p.stats = {**p.stats, "line_items": len(p.line_items)}
+    return p
 
 
 def _clear_from(rfp: Rfp, stage: str) -> None:
@@ -173,6 +229,10 @@ class Orchestrator:
             _clear_from(rfp, from_stage)
             ctx = PipelineContext(rfp.id, rfp.reference, rfp.raw_text, company, overrides=dict(rfp.overrides or {}),
                                   messages=_load_messages(rfp))
+            if from_stage != "intake" and "parsed" in ctx.messages:
+                edited = apply_review_edits(ctx.messages["parsed"], ctx.overrides)  # type: ignore[arg-type]
+                ctx.messages["parsed"] = edited
+                _store_message(rfp, "parsed", edited)
         # Proposal version increments on every completed re-draft.
         with session_scope() as s:
             drafts = len(list(s.scalars(select(StageRun.id).where(
@@ -200,6 +260,8 @@ class Orchestrator:
                     rfp = s.get(Rfp, rfp_id)
                     rfp.status, rfp.error = "failed", f"{agent.name} failed: {exc}"
                 raise
+            if agent.produces == "parsed" and ctx.overrides:
+                message = apply_review_edits(message, ctx.overrides)  # type: ignore[arg-type]
             ctx.messages[agent.produces] = message
             with session_scope() as s:
                 run = s.get(StageRun, run_id)
@@ -250,3 +312,11 @@ def get_orchestrator() -> Orchestrator:
     if orchestrator is None:
         orchestrator = Orchestrator()
     return orchestrator
+
+
+def shutdown_orchestrator() -> None:
+    """Stop the worker pool; a later call to :func:`get_orchestrator` starts a fresh one."""
+    global orchestrator
+    if orchestrator is not None:
+        orchestrator.shutdown()
+        orchestrator = None

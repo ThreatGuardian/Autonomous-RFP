@@ -25,7 +25,7 @@ export default function Overview() {
       <PageHeader
         title="Overview"
         description={today}
-        actions={<Link to="/requests/new"><Button variant="primary">New request</Button></Link>}
+        actions={<Link to="/app/requests/new"><Button variant="primary">New request</Button></Link>}
       />
       <Page className="space-y-6">
         {d ? (
@@ -42,12 +42,12 @@ export default function Overview() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_310px]">
           <Card title="Awaiting your review" subtitle="Draft quotations ready for commercial sign-off" bodyClassName="p-0"
-            actions={<Link to="/requests?status=review" className="text-[12.5px] font-medium text-link hover:underline">View all</Link>}>
+            actions={<Link to="/app/requests?status=review" className="text-[12.5px] font-medium text-link hover:underline">View all</Link>}>
             {rfps.isLoading ? (
               <div className="space-y-2 p-5">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-10" />)}</div>
             ) : review.length === 0 ? (
               <Empty icon={<FileStack className="size-4" />} title="Nothing waiting" description="New requests appear here as soon as their draft quotation is ready."
-                action={<Link to="/requests/new"><Button>Start a request</Button></Link>} />
+                action={<Link to="/app/requests/new"><Button>Start a request</Button></Link>} />
             ) : (
               <div className="overflow-x-auto"><table className="table-base">
                 <thead><tr><th>Request</th><th>Client</th><th>Due</th><th className="!text-right">Value</th><th className="!text-right">Margin</th><th className="!text-right">Win</th></tr></thead>
@@ -55,7 +55,7 @@ export default function Overview() {
                   {review.slice(0, 8).map((r) => {
                     const days = daysUntil(r.due_date);
                     return (
-                      <tr key={r.id} onClick={() => navigate(`/requests/${r.id}`)} className="cursor-pointer hover:bg-[#fafbfc]">
+                      <tr key={r.id} onClick={() => navigate(`/app/requests/${r.id}`)} className="cursor-pointer hover:bg-[#fafbfc]">
                         <td className="max-w-[230px]"><div className="truncate font-medium">{r.title}</div><div className="text-[11.5px] text-muted">{r.reference}</div></td>
                         <td className="max-w-[190px]"><div className="truncate">{r.client_name ?? "—"}</div><div className="mt-0.5"><CountryTag code={r.client_country} /></div></td>
                         <td className="whitespace-nowrap">{date(r.due_date)}{days !== null && <div className={days <= 7 ? "text-[11.5px] text-rose-700" : "text-[11.5px] text-muted"}>{days < 0 ? "Closed" : `${days} days left`}</div>}</td>
@@ -75,7 +75,7 @@ export default function Overview() {
               {active.length === 0 ? <div className="px-5 py-4 text-[12.5px] text-muted">New requests are parsed, priced and drafted automatically.</div> : (
                 <ul className="divide-y divide-line">
                   {active.map((r) => (
-                    <li key={r.id}><Link to={`/requests/${r.id}`} className="flex items-center justify-between px-5 py-3 hover:bg-[#fafbfc]">
+                    <li key={r.id}><Link to={`/app/requests/${r.id}`} className="flex items-center justify-between px-5 py-3 hover:bg-[#fafbfc]">
                       <span className="truncate font-medium">{r.client_name ?? r.title}</span><StatusBadge status={r.status} /></Link></li>
                   ))}
                 </ul>

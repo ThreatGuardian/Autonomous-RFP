@@ -37,8 +37,25 @@ class LineOverride(BaseModel):
     exclude: bool | None = None
 
 
+class ClientEdit(BaseModel):
+    name: str | None = Field(default=None, max_length=160)
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    region: str | None = Field(default=None, max_length=48)
+    tax_id: str | None = Field(default=None, max_length=32)
+    segment: str | None = Field(default=None, pattern=r"^(enterprise|smb|public|education|healthcare)$")
+
+
+class AddedLine(BaseModel):
+    sku: str = Field(min_length=3, max_length=32)
+    quantity: int = Field(gt=0, le=100000)
+
+
 class RepriceRequest(BaseModel):
     lines: dict[str, LineOverride] = Field(default_factory=dict)
+    client: ClientEdit | None = None
+    incoterm: str | None = Field(default=None, pattern=r"^(EXW|FCA|FAS|FOB|CFR|CIF|CPT|CIP|DAP|DPU|DDP|)$")
+    add_lines: list[AddedLine] = Field(default_factory=list)
+    remove_added: list[int] = Field(default_factory=list)
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     fx_buffer_pct: float | None = Field(default=None, ge=0, le=10)
     reset: bool = False
@@ -181,6 +198,20 @@ def reprice(rfp_id: int, body: RepriceRequest) -> dict[str, Any]:
             overrides["currency"] = body.currency.upper()
         if body.fx_buffer_pct is not None:
             overrides["fx_buffer_pct"] = body.fx_buffer_pct
+        if body.client is not None:
+            overrides["client"] = {**overrides.get("client", {}), **body.client.model_dump(exclude_unset=True)}
+            if "country" in overrides["client"]:
+                overrides["client"]["country"] = (overrides["client"]["country"] or "").upper() or None
+        if body.incoterm is not None:
+            overrides["terms"] = {**overrides.get("terms", {}), "incoterm": body.incoterm or None}
+        added = [a for a in overrides.get("added_lines", []) if a["line_no"] not in set(body.remove_added)]
+        if body.add_lines:
+            used = [i["line_no"] for i in (rfp.parsed or {}).get("line_items", [])] + [a["line_no"] for a in added]
+            next_no = max(used, default=0) + 1
+            for extra in body.add_lines:
+                added.append({"sku": extra.sku, "quantity": extra.quantity, "line_no": next_no})
+                next_no += 1
+        overrides["added_lines"] = added
         rfp.overrides = overrides
         # Match changes affect costing; price and bundle changes only need re-pricing downstream.
         from_stage = "costing"
@@ -244,7 +275,7 @@ def delete(rfp_id: int) -> None:
 def document(rfp_id: int, kind: str, db: Session = Depends(get_db)):
     r = _get(db, rfp_id)
     docs = (r.proposal or {}).get("documents") or {}
-    if kind not in ("quotation", "memo") or kind not in docs:
+    if kind not in ("quotation", "memo", "report") or kind not in docs:
         raise HTTPException(status_code=404, detail="Document not available")
     try:
         path = document_path(r.reference, docs[kind])

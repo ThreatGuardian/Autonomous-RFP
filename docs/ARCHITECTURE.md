@@ -233,14 +233,48 @@ with the same model. They are flagged, for example "Below margin floor" or
 * **Pricing memo** (landscape, confidential): KPIs, line economics, rationale and
   scenario table per line, FX/tax basis, approval stamp.
 
-## 8. Data model
+### Bid analysis report
 
-`products`, `price_tiers`, `value_adds`, `customers`, `deal_history`,
+`app/services/report_renderer.py` produces an executive document in a
+presentation style: a serif display face (Source Serif 4), letter-spaced
+section labels, rounded gradient score bars, soft cards and a milestone
+timeline. It contains:
+
+* the verdict and headline economics;
+* KPI tiles;
+* win probability by line;
+* margin structure (cost, services, margin);
+* how the price was set;
+* the strategy mix;
+* key pricing decision cards;
+* the delivery roadmap;
+* requirement coverage;
+* risks to weigh and next steps.
+
+## 8. Reviewer adjustments and sign-in
+
+* **Overrides** are stored on the request, and the approval events record them.
+  Line overrides cover price, service, quantity, SKU and exclusion.
+  `apply_review_edits` in the orchestrator merges the client and terms
+  corrections and the added catalogue items into the parsed request. It is
+  idempotent: added lines are rebuilt from the override list on every run, and
+  each keeps a stable line number. Costing, strategy, tax and drafting then
+  re-run.
+* **Authentication** (`app/api/auth.py`, `app/services/auth.py`):
+  * PBKDF2-SHA256 password hashes;
+  * HMAC-SHA256-signed, expiring, HTTP-only session cookies;
+  * middleware protecting `/api/*`;
+  * federated sign-in for Google and SSO, which accepts the identity returned
+    by the provider step.
+
+## 9. Data model
+
+`users`, `products`, `price_tiers`, `value_adds`, `customers`, `deal_history`,
 `tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message),
 `stage_runs`, `approval_events`. The seeder is idempotent, so edits made
 through the Catalogue screen survive restarts.
 
-## 9. Mock competitor market
+## 10. Mock competitor market
 
 `app/market/service.py` is a separate FastAPI app with `X-Api-Key`
 authentication and its own data file.

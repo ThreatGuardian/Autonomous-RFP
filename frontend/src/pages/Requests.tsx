@@ -33,7 +33,7 @@ export default function Requests() {
   return (
     <>
       <PageHeader title="Requests" description="Every request for proposal received, with its pricing outcome and review status."
-        actions={<Link to="/requests/new"><Button variant="primary">New request</Button></Link>} />
+        actions={<Link to="/app/requests/new"><Button variant="primary">New request</Button></Link>} />
       <Page>
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between gap-4 px-4">
@@ -49,7 +49,7 @@ export default function Requests() {
           ) : rows.length === 0 ? (
             <Empty icon={<FileStack className="size-4" />} title={all.length ? "No requests match" : "No requests yet"}
               description={all.length ? "Try a different filter or search term." : "Paste or upload a request for proposal to produce a priced quotation."}
-              action={!all.length && <Link to="/requests/new"><Button variant="primary">New request</Button></Link>} />
+              action={!all.length && <Link to="/app/requests/new"><Button variant="primary">New request</Button></Link>} />
           ) : (
             <div className="overflow-x-auto border-t border-line">
               <table className="table-base">
@@ -60,7 +60,7 @@ export default function Requests() {
                   {rows.map((r) => {
                     const days = daysUntil(r.due_date);
                     return (
-                      <tr key={r.id} className="cursor-pointer hover:bg-[#fafbfc]" onClick={() => navigate(`/requests/${r.id}`)}>
+                      <tr key={r.id} className="cursor-pointer hover:bg-[#fafbfc]" onClick={() => navigate(`/app/requests/${r.id}`)}>
                         <td className="whitespace-nowrap font-mono text-[12px] text-ink-soft">{r.reference}</td>
                         <td className="max-w-[300px]"><div className="truncate font-medium">{r.title}</div><div className="text-[11.5px] text-muted">{r.line_count ? `${r.line_count} line items` : r.source_filename ?? "Pasted text"}</div></td>
                         <td className="max-w-[220px]"><div className="truncate">{r.client_name ?? "—"}</div><div className="mt-0.5"><CountryTag code={r.client_country} /></div></td>

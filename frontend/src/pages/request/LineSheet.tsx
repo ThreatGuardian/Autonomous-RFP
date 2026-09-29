@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StrategyBadge } from "../../components/domain";
 import { Badge, Button, Field, Sheet } from "../../components/ui";
+import { useAuth } from "../../lib/auth";
 import { api, type LineOverride } from "../../lib/api";
 import type { CostedLine, PricedLine, RequestedItem } from "../../lib/types";
 import { money, pct, prob } from "../../lib/format";
@@ -13,6 +14,7 @@ export function LineSheet({ rfpId, line, costed, requested, currency, editable, 
   rfpId: number; line: PricedLine | null; costed?: CostedLine; requested?: RequestedItem; currency: string; editable: boolean; onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [price, setPrice] = useState("");
   const [bundle, setBundle] = useState<string>("");
   const [sku, setSku] = useState<string>("");
@@ -40,7 +42,7 @@ export function LineSheet({ rfpId, line, costed, requested, currency, editable, 
         else ov.clear_bundle = true;
         if (!ov.unit_price) ov.unit_price = p || line.unit_price;
       }
-      return api.reprice(rfpId, { lines: { [String(line!.line_no)]: ov }, note: note || undefined, actor: "Priya Shah" });
+      return api.reprice(rfpId, { lines: { [String(line!.line_no)]: ov }, note: note || undefined, actor: user?.name });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["rfp", rfpId] });

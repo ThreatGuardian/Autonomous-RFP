@@ -44,3 +44,22 @@
 .animate-slide-in { animation: slide-in .22s cubic-bezier(.2,.8,.2,1); }
 @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
 .animate-fade-in { animation: fade-in .18s ease-out; }
+
+/* ------------------------------------------------------------------ marketing */
+@keyframes float-a { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+@keyframes float-b { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(7px) } }
+.animate-float-a { animation: float-a 6s ease-in-out infinite; }
+.animate-float-b { animation: float-b 7s ease-in-out infinite; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); }
+.reveal.is-visible { opacity: 1; transform: none; }
+.animate-rise { animation: rise .8s cubic-bezier(.2,.8,.2,1) both; }
+.bg-grid { background-image: linear-gradient(to right, rgb(11 18 32 / .045) 1px, transparent 1px), linear-gradient(to bottom, rgb(11 18 32 / .045) 1px, transparent 1px); background-size: 44px 44px; }
+.bg-grid-dark { background-image: linear-gradient(to right, rgb(255 255 255 / .05) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / .05) 1px, transparent 1px); background-size: 44px 44px; }
+.text-balance { text-wrap: balance; }
+@keyframes shimmer { from { background-position: 200% 0 } to { background-position: -200% 0 } }
+.gold-text { background: linear-gradient(100deg, #9c6b12 0%, #d9a441 45%, #9c6b12 90%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 8s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-a, .animate-float-b, .gold-text, .animate-rise { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { BarChart3, Boxes, FileStack, Landmark, LayoutDashboard, Plus, Radar, Settings2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { BarChart3, Boxes, FileStack, Globe, Landmark, LayoutDashboard, LogOut, Plus, Radar, Settings2 } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { api } from "../../lib/api";
+import { initials, useAuth } from "../../lib/auth";
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -39,7 +40,7 @@ export function Shell() {
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-line bg-[#f3f4f6]/70 px-3 py-4">
-        <Link to="/" className="flex items-center gap-2.5 px-2">
+        <Link to="/app" className="flex items-center gap-2.5 px-2">
           <Logo className="size-7" />
           <div className="leading-tight">
             <div className="text-[14px] font-semibold tracking-[-0.01em]">Tenderdesk</div>
@@ -47,34 +48,27 @@ export function Shell() {
           </div>
         </Link>
 
-        <Link to="/requests/new"
+        <Link to="/app/requests/new"
           className="mt-5 flex h-9 items-center justify-center gap-1.5 rounded-lg bg-ink text-[13px] font-medium text-white shadow-[0_1px_2px_rgb(0_0_0/0.2)] hover:bg-ink-soft">
           <Plus className="size-4" /> New request
         </Link>
 
         <nav className="mt-5 space-y-0.5">
-          <NavItem to="/" end icon={<LayoutDashboard />}>Overview</NavItem>
-          <NavItem to="/requests" icon={<FileStack />} count={data?.length}>Requests</NavItem>
+          <NavItem to="/app" end icon={<LayoutDashboard />}>Overview</NavItem>
+          <NavItem to="/app/requests" icon={<FileStack />} count={data?.length}>Requests</NavItem>
         </nav>
         <div className="mt-6 px-2.5 label !text-[10.5px]">Commercial data</div>
         <nav className="mt-2 space-y-0.5">
-          <NavItem to="/catalogue" icon={<Boxes />}>Catalogue</NavItem>
-          <NavItem to="/market" icon={<Radar />}>Market</NavItem>
-          <NavItem to="/finance" icon={<Landmark />}>Tax &amp; currency</NavItem>
+          <NavItem to="/app/catalogue" icon={<Boxes />}>Catalogue</NavItem>
+          <NavItem to="/app/market" icon={<Radar />}>Market</NavItem>
+          <NavItem to="/app/finance" icon={<Landmark />}>Tax &amp; currency</NavItem>
         </nav>
         <div className="mt-6 px-2.5 label !text-[10.5px]">System</div>
         <nav className="mt-2 space-y-0.5">
-          <NavItem to="/models" icon={<BarChart3 />}>Models &amp; data</NavItem>
+          <NavItem to="/app/models" icon={<BarChart3 />}>Models &amp; data</NavItem>
         </nav>
 
-        <div className="mt-auto flex items-center gap-2.5 rounded-lg px-2 py-2">
-          <div className="grid size-8 place-items-center rounded-full bg-[#e7e0d2] text-[12px] font-semibold text-[#6b4e16]">PS</div>
-          <div className="min-w-0 flex-1 leading-tight">
-            <div className="truncate text-[12.5px] font-medium">Priya Shah</div>
-            <div className="truncate text-[11px] text-muted">Commercial lead</div>
-          </div>
-          <Settings2 className="size-4 text-subtle" />
-        </div>
+        <UserMenu />
       </aside>
       <main className="min-w-0 flex-1">
         <Outlet />
@@ -100,4 +94,40 @@ export function PageHeader({ title, description, actions, breadcrumb }: { title:
 
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={clsx("mx-auto max-w-[1320px] px-8 py-6", className)}>{children}</div>;
+}
+
+function UserMenu() {
+  const { user, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+  if (!user) return null;
+  const via = { password: "Username and password", google: "Google account", sso: "Single sign-on" }[user.provider];
+  return (
+    <div ref={ref} className="relative mt-auto">
+      {open && (
+        <div className="animate-fade-in absolute bottom-full left-0 right-0 mb-2 overflow-hidden rounded-xl border border-line bg-white shadow-[var(--shadow-pop)]">
+          <div className="border-b border-line px-3.5 py-3">
+            <div className="truncate text-[12.5px] font-medium">{user.name}</div>
+            <div className="truncate text-[11.5px] text-muted">{user.email ?? `@${user.username}`}</div>
+            <div className="mt-1 text-[11px] text-subtle">Signed in with {via}</div>
+          </div>
+          <Link to="/" className="flex items-center gap-2 px-3.5 py-2 text-[12.5px] text-ink-soft hover:bg-[#f6f7f9]"><Globe className="size-3.5" /> Product website</Link>
+          <button onClick={signOut} className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12.5px] text-rose-700 hover:bg-rose-50"><LogOut className="size-3.5" /> Sign out</button>
+        </div>
+      )}
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-black/[0.035]">
+        <div className="grid size-8 place-items-center rounded-full bg-[#e7e0d2] text-[12px] font-semibold text-[#6b4e16]">{initials(user.name)}</div>
+        <div className="min-w-0 flex-1 leading-tight">
+          <div className="truncate text-[12.5px] font-medium">{user.name}</div>
+          <div className="truncate text-[11px] text-muted">{user.title}</div>
+        </div>
+        <Settings2 className="size-4 text-subtle" />
+      </button>
+    </div>
+  );
 }

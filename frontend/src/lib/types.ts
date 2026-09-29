@@ -96,7 +96,7 @@ export interface Proposal {
   compliance_counts: Record<string, number>; delivery_plan: string[]; milestones: { label: string; day: number; detail: string }[];
   inclusions: { line_no: number; item: string; service: string; quantity: number; value: number; description: string }[];
   terms: string[]; signatory: Record<string, string>; retrieval_log: { purpose: string; query: string; passages: { source: string; section: string; score: number }[] }[];
-  documents: { quotation?: string; memo?: string };
+  documents: { quotation?: string; memo?: string; report?: string };
 }
 
 export interface RfpDetail extends RfpSummary {

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Download, FileText, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { BarChart3, CheckCircle2, Download, FileText, RotateCcw, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CountryTag, StageTracker, StatusBadge } from "../../components/domain";
 import { Page, PageHeader } from "../../components/layout/Shell";
 import { Button, Card, Dialog, Empty, Field, Skeleton, Spinner, Tabs } from "../../components/ui";
+import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
 import type { RfpDetail } from "../../lib/types";
 import { date, daysUntil, money } from "../../lib/format";
@@ -22,7 +23,8 @@ export default function RequestDetail() {
   const [tab, setTab] = useState<Tab>("pricing");
   const [stageFocus, setStageFocus] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "approve" | "reject" | "reopen" | "delete">(null);
-  const [actor, setActor] = useState("Priya Shah");
+  const { user } = useAuth();
+  const [actor, setActor] = useState(user?.name ?? "Reviewer");
   const [note, setNote] = useState("");
 
   const { data: rfp, isLoading, error } = useQuery({
@@ -47,13 +49,13 @@ export default function RequestDetail() {
       setNote("");
       qc.invalidateQueries({ queryKey: ["rfps"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
-      if (kind === "delete") navigate("/requests");
+      if (kind === "delete") navigate("/app/requests");
       else qc.invalidateQueries({ queryKey: ["rfp", id] });
     },
   });
 
   if (isLoading) return <Page><Skeleton className="mb-4 h-16" /><Skeleton className="h-72" /></Page>;
-  if (error || !rfp) return <Page><Empty title="Request not found" description="It may have been deleted." action={<Link to="/requests"><Button>Back to requests</Button></Link>} /></Page>;
+  if (error || !rfp) return <Page><Empty title="Request not found" description="It may have been deleted." action={<Link to="/app/requests"><Button>Back to requests</Button></Link>} /></Page>;
 
   const busy = rfp.running || rfp.status === "queued" || rfp.status === "processing";
   const ready = !!rfp.pricing?.strategy && !!rfp.proposal && !busy;
@@ -65,7 +67,7 @@ export default function RequestDetail() {
   return (
     <>
       <PageHeader
-        breadcrumb={<><Link to="/requests" className="hover:text-ink">Requests</Link> / <span className="font-mono">{rfp.reference}</span></>}
+        breadcrumb={<><Link to="/app/requests" className="hover:text-ink">Requests</Link> / <span className="font-mono">{rfp.reference}</span></>}
         title={rfp.parsed?.title ?? rfp.title}
         description={
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -80,6 +82,7 @@ export default function RequestDetail() {
           <>
             {docs.quotation && <a href={api.documentUrl(id, "quotation")} target="_blank" rel="noreferrer"><Button icon={<Download className="size-4" />}>Quotation</Button></a>}
             {docs.memo && <a href={api.documentUrl(id, "memo")} target="_blank" rel="noreferrer"><Button icon={<FileText className="size-4" />}>Pricing memo</Button></a>}
+            {docs.report && <a href={api.documentUrl(id, "report")} target="_blank" rel="noreferrer"><Button icon={<BarChart3 className="size-4" />}>Bid report</Button></a>}
             {rfp.status === "review" && !busy && <>
               <Button variant="danger" icon={<XCircle className="size-4" />} onClick={() => setDialog("reject")}>Decline</Button>
               <Button variant="success" icon={<CheckCircle2 className="size-4" />} onClick={() => setDialog("approve")}>Approve quotation</Button>

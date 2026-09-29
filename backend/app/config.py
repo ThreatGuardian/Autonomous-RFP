@@ -34,6 +34,11 @@ class Settings:
     fx_timeout_seconds: float = field(default_factory=lambda: float(_env("FX_TIMEOUT", "4")))
 
     pipeline_workers: int = field(default_factory=lambda: int(_env("PIPELINE_WORKERS", "4")))
+
+    # Authentication: session cookies signed with a per-install secret.
+    require_auth: bool = field(default_factory=lambda: _env("REQUIRE_AUTH", "1") not in ("0", "false", "no"))
+    session_hours: int = field(default_factory=lambda: int(_env("SESSION_HOURS", "12")))
+    secret_key: str = field(default_factory=lambda: _env("SECRET_KEY", ""))
     frontend_dist: Path = field(
         default_factory=lambda: Path(_env("FRONTEND_DIST", str(BACKEND_ROOT.parent / "frontend" / "dist")))
     )

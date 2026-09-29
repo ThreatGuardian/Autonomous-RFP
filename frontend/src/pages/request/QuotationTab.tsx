@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Badge, Button, Card, Field, Segmented } from "../../components/ui";
+import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
 import type { RfpDetail } from "../../lib/types";
 import { date, money } from "../../lib/format";
@@ -104,12 +105,13 @@ export function QuotationTab({ rfp, editable }: { rfp: RfpDetail; editable: bool
 function CurrencyCard({ rfp, editable }: { rfp: RfpDetail; editable: boolean }) {
   const loc = rfp.pricing!.localisation!;
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [ccy, setCcy] = useState(loc.currency);
   const [buffer, setBuffer] = useState(String(loc.fx_buffer_pct));
   const countries = useQuery({ queryKey: ["countries"], queryFn: api.countries, enabled: editable });
   const currencies = Array.from(new Set(["INR", "USD", "EUR", "GBP", "AED", ...(countries.data ?? []).map((c) => c.currency)])).sort();
   const apply = useMutation({
-    mutationFn: () => api.reprice(rfp.id, { currency: ccy, fx_buffer_pct: Number(buffer), actor: "Priya Shah", note: `Currency set to ${ccy}` }),
+    mutationFn: () => api.reprice(rfp.id, { currency: ccy, fx_buffer_pct: Number(buffer), actor: user?.name, note: `Currency set to ${ccy}` }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["rfp", rfp.id] }),
   });
   return (

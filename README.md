@@ -12,7 +12,7 @@ comes with a plain-language rationale.
 writing all use explicit rules, classical information retrieval, and models
 trained in this repository with scikit-learn.
 
-![Overview](docs/screenshots/01-overview.png)
+![Landing page](docs/screenshots/00-landing.png)
 
 ---
 
@@ -103,6 +103,19 @@ Requirements: **Python 3.10+** and **Node.js 18+**.
 Then open **http://127.0.0.1:8000**. On first start the database is seeded and
 the models are trained. This takes about ten seconds and happens once.
 
+The product website opens first; **Sign in** or **Get started** leads to the
+console at `/app`. Three sign-in methods are available:
+
+* **Username and password.** Use the demo workspace (`priya` / `tenderdesk`) or
+  create an account.
+* **Continue with Google** and **Continue with SSO.** Federated sign-in; the
+  provider step is simulated locally and would be replaced by Google OAuth /
+  OpenID Connect or a SAML identity provider in production (see
+  `backend/app/api/auth.py`).
+
+Sessions are HMAC-signed, HTTP-only cookies. Passwords are stored as
+PBKDF2-SHA256 hashes.
+
 ### Development mode
 
 ```bash
@@ -144,7 +157,27 @@ Configuration options are listed in [`.env.example`](.env.example).
 4. **Quotation** — commercial schedule in the client's currency with taxes, cover
    letter, delivery plan, inclusions and an embedded PDF preview. You can change
    the quote currency or FX buffer here.
-5. **Approve** — issues the final quotation and records the approval in the memo.
+5. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
+   every manual change, with a live revenue, margin and below-floor preview:
+   * **Line items:** inline price, quantity and service editing; include or
+     exclude lines; pick a product for unmatched lines; adjust all prices by a
+     percentage; lift everything to the margin floor.
+   * **Add items:** catalogue search, for items the client didn't list.
+   * **Client & terms:** correct the organisation, country, state, tax
+     registration, buyer segment, incoterm, currency and FX buffer.
+
+   *Apply* sends everything as one re-price and records a note.
+   *Reset to recommendations* clears all overrides.
+6. **Approve** — issues the final quotation and records the approval in the memo
+   and the bid report.
+
+Every request produces three PDFs:
+
+* a **client quotation**;
+* a confidential **pricing memo**;
+* a **bid analysis report** for leadership, covering the recommendation, win
+  probability by line, margin structure, key pricing decisions, delivery
+  roadmap, requirement coverage, risks and next steps.
 
 | | |
 |---|---|
@@ -152,6 +185,9 @@ Configuration options are listed in [`.env.example`](.env.example).
 | ![Curve](docs/screenshots/05-price-position.png) | ![Requirements](docs/screenshots/06-requirements.png) |
 | ![Quotation](docs/screenshots/07-quotation.png) | ![Activity](docs/screenshots/08-activity.png) |
 | ![Market](docs/screenshots/09-market.png) | ![Models](docs/screenshots/10-models.png) |
+| ![Sign in](docs/screenshots/00-sign-in.png) | ![Overview](docs/screenshots/01-overview.png) |
+| ![Workbench — lines](docs/screenshots/11-workbench-lines.png) | ![Workbench — terms](docs/screenshots/12-workbench-terms.png) |
+| ![Bid report page 1](docs/screenshots/13-bid-report-p1.png) | ![Bid report page 2](docs/screenshots/13-bid-report-p2.png) |
 
 ## How the intelligence works
 
@@ -243,12 +279,13 @@ is running. The main endpoints:
 
 | Method | Path | Purpose |
 |--------|------|---------|
+| `POST` | `/api/auth/login` · `register` · `federated` · `logout`, `GET /api/auth/me` | Sign-in and session |
 | `POST` | `/api/rfps` | Submit pasted text |
 | `POST` | `/api/rfps/upload` | Submit one or more PDF/DOCX/TXT files |
 | `GET` | `/api/rfps`, `/api/rfps/{id}` | List, and full detail (parsed data, pricing, proposal, stage logs, events) |
-| `POST` | `/api/rfps/{id}/reprice` | Apply reviewer overrides and re-run from costing |
+| `POST` | `/api/rfps/{id}/reprice` | Apply reviewer overrides (line prices, services, quantities, products, exclusions, added items, client and terms corrections, currency) and re-run from costing |
 | `POST` | `/api/rfps/{id}/approve` · `reject` · `reopen` · `retry` | Workflow actions |
-| `GET` | `/api/rfps/{id}/documents/{quotation\|memo}` | PDFs |
+| `GET` | `/api/rfps/{id}/documents/{quotation\|memo\|report}` | PDFs |
 | `GET` | `/api/dashboard` | KPIs |
 | `GET` | `/api/catalog/products` · `PATCH /api/catalog/products/{sku}` | Pricing database |
 | `GET` | `/api/market/offers` · `/api/market/competitors` | Market intelligence |
@@ -260,7 +297,7 @@ is running. The main endpoints:
 
 ```bash
 cd backend
-python -m pytest            # 44 tests: language core, parser, finance, pricing, drafting, API workflow
+python -m pytest            # 47 tests: language core, parser, finance, pricing, drafting, API workflow, sign-in, reviewer edits
 cd ../frontend
 npm run typecheck
 ```
@@ -274,4 +311,5 @@ The project was built in ten phases, each committed separately. See
 
 *Academic project. Company names, customers, competitors and prices are
 fictitious; product names are used descriptively. Inter font © The Inter
-Project Authors, SIL Open Font License 1.1.*
+Project Authors and Source Serif 4 © The Source Serif 4 Project Authors, both
+under the SIL Open Font License 1.1.*
