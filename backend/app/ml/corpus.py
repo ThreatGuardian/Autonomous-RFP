@@ -109,6 +109,9 @@ TEMPLATES: dict[str, tuple[list[str], list[str]]] = {
             "Support desk must be reachable during business hours with a {days} hour response.",
             "Provide details of your service level agreement and escalation matrix.",
             "Extended warranty options up to {months} months are preferred.",
+            "Minimum {months} warranty on all hardware.",
+            "{months} months onsite warranty required for all {item}.",
+            "Warranty: {months}, comprehensive, next business day.",
         ],
         [
             "Onsite comprehensive warranty of {months} is mandatory for every device.",

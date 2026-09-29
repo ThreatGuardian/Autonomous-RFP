@@ -15,7 +15,7 @@ from app.db.seed import load_json
 from app.db.session import session_scope
 from app.ml.models import CategoryClassifier, ClauseClassifier, WinProbabilityModel
 
-MODEL_VERSION = "1"
+MODEL_VERSION = "2"
 
 
 class ModelRegistry:

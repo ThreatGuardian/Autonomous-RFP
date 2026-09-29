@@ -103,3 +103,15 @@ def test_docx_ingestion():
     doc.save(buf)
     text = extract_text("rfq.docx", buf.getvalue())
     assert "| 27 inch monitors | 12 |" in text
+
+
+@pytest.mark.parametrize("name,currency,country,count", [
+    ("06_brightwater_medical_london.pdf", "GBP", "GB", 6),
+    ("07_lionsgate_singapore.docx", "SGD", "SG", 6),
+])
+def test_uploaded_document_formats(name, currency, country, count):
+    text = extract_text(name, (SAMPLES / name).read_bytes())
+    parsed = RfpParserAgent().run(PipelineContext(1, "T", text, load_json("company.json")), StageLog())
+    assert (parsed.currency.code, parsed.client.country) == (currency, country)
+    assert len(parsed.line_items) == count and all(i.status == "matched" for i in parsed.line_items)
+    assert all(i.quantity_source == "table column" for i in parsed.line_items)

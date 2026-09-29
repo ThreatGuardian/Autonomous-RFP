@@ -35,8 +35,11 @@ _TRANSLATE = str.maketrans(
 def normalize(text: str) -> str:
     """Unicode-normalise, unify punctuation and collapse horizontal whitespace."""
     text = unicodedata.normalize("NFKC", text).translate(_TRANSLATE)
-    text = re.sub(r"[ \t\r\f\v]+", " ", text)
-    return re.sub(r" *\n *", "\n", text).strip()
+    # Wide gaps are column separators in layout-extracted tables: keep them as tabs.
+    text = re.sub(r"(?<=\S)[ \u00a0]{3,}(?=\S)", "\t", text)
+    text = re.sub(r"[ \r\f\v]+", " ", text)
+    text = re.sub(r"[ \t]*\t[ \t]*", "\t", text)
+    return re.sub(r"[ \t]*\n[ \t]*", "\n", text).strip()
 
 
 def fold(text: str) -> str:

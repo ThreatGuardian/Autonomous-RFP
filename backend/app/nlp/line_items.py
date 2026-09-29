@@ -165,14 +165,14 @@ def _clean_description(text: str, span: tuple[int, int] | None) -> str:
 
 
 def _split_row(line: str) -> list[str] | None:
+    """Split a table row; empty cells are kept so columns stay aligned."""
     if "|" in line:
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
     elif "\t" in line:
-        cells = [c.strip() for c in line.split("\t")]
+        cells = [c.strip() for c in line.strip().split("\t")]
     else:
         cells = [c.strip() for c in re.split(r"\s{3,}", line.strip())]
-    cells = [c for c in cells if c != ""]
-    return cells if len(cells) >= 2 else None
+    return cells if sum(1 for c in cells if c) >= 2 else None
 
 
 def extract_table_items(lines: list[str]) -> tuple[list[RawItem], set[int]]:

@@ -175,13 +175,21 @@ class RfpParserAgent(Agent):
                     continue
                 if pred.label == "line_item":
                     log.warn("Quantity-like sentence rejected as line item", text=unit[:120], category_confidence=round(cat.confidence, 3))
+            label, confidence = pred.label, pred.confidence
+            if label == "line_item":
+                # Item-like wording without a quantity (e.g. "Minimum 3 years warranty on all
+                # hardware"): fall back to the most likely clause type that is not an item.
+                label, confidence = max(((k, v) for k, v in pred.distribution.items() if k != "line_item"), key=lambda kv: kv[1])
+                if confidence < 0.1:
+                    continue
             if (
-                pred.label != "line_item" and len(tokenize(unit)) >= 3 and not ex.is_heading(unit)
+                len(tokenize(unit)) >= 3 and not ex.is_heading(unit)
                 and not ex.labelled_value(unit + "\n", "client") and not ex.labelled_value(unit + "\n", "address")
             ):
                 # Low-confidence clauses are kept as general context rather than mislabelled.
-                label = pred.label if pred.confidence >= 0.45 else "scope"
-                requirements.append(Requirement(id=f"R{len(requirements) + 1:02d}", text=unit, type=label, confidence=round(pred.confidence, 3)))
+                if confidence < 0.45:
+                    label = "scope"
+                requirements.append(Requirement(id=f"R{len(requirements) + 1:02d}", text=unit, type=label, confidence=round(confidence, 3)))
 
         counts: dict[str, int] = {}
         for r in requirements:

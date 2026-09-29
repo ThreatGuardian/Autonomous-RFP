@@ -52,10 +52,8 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
                     <td className="text-muted tnum">{l.line_no}</td>
                     <td className="max-w-[300px]">
                       <div className="truncate font-medium">{l.name}</div>
-                      <div className="flex items-center gap-1.5 text-[11.5px] text-muted">
-                        <span className="font-mono">{l.sku}</span>
-                        {l.bundle && <span className="truncate text-[#8a5a0b]">· + {l.bundle.name}</span>}
-                      </div>
+                      <div className="font-mono text-[11.5px] text-muted">{l.sku}</div>
+                      {l.bundle && <div className="truncate text-[11.5px] text-[#8a5a0b]">+ {l.bundle.name}</div>}
                     </td>
                     <td className="text-right tnum">{l.quantity.toLocaleString()}</td>
                     <td className="text-right tnum text-muted">{money(l.unit_cost, base)}</td>

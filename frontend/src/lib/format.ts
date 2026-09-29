@@ -18,6 +18,8 @@ export function money(value: number | null | undefined, currency = "INR", opts: 
       const abs = Math.abs(value);
       if (abs >= 1e7) return `₹${(value / 1e7).toFixed(2)} Cr`;
       if (abs >= 1e5) return `₹${(value / 1e5).toFixed(2)} L`;
+      // Indian compact notation has no thousands suffix; show the full amount.
+      return nf("en-IN-INR-0", () => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })).format(value);
     }
     return nf(`${locale}-${currency}-c`, () => new Intl.NumberFormat(locale, { style: "currency", currency, notation: "compact", maximumFractionDigits: 1 })).format(value);
   }
