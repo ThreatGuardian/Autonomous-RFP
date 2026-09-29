@@ -1,0 +1,14 @@
+{
+ "_comment": "Commercial guard-rails for the pricing agents. All percentages are in percent.",
+ "fx_buffer_pct": 1.5,
+ "in_stock_lead_days": 3,
+ "price_grid_points": 90,
+ "default_price_weight_pct": 50,
+ "lowest_price_award_weight_pct": 100,
+ "max_bundle_cost_share_pct": 6.0,
+ "min_offer_reliability": 0.6,
+ "match_band_pct": 2.0,
+ "min_target_win_probability": 0.2,
+ "bundle_kinds": ["warranty", "service", "support"],
+ "currency_decimals": {"JPY": 0, "KWD": 3, "BHD": 3, "OMR": 3, "IDR": 0}
+}

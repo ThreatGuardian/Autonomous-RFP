@@ -1,0 +1,503 @@
+{
+ "_comment": "Mock competitor market. Owned by the market service; the pricing engine only sees it through the API.",
+ "competitors": [
+  {
+   "id": "apex",
+   "name": "Apex Distributors",
+   "hq": "Mumbai, IN",
+   "currency": "INR",
+   "positioning": "Volume discounter",
+   "serves": [
+    "IN",
+    "AE",
+    "SG"
+   ],
+   "reliability": 0.82,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    7,
+    18
+   ],
+   "category_factor": {
+    "laptop": 0.93,
+    "desktop": 0.94,
+    "monitor": 0.92,
+    "peripheral": 0.9,
+    "*": 0.97
+   },
+   "coverage": 0.85,
+   "volatility": 0.03
+  },
+  {
+   "id": "brightline",
+   "name": "Brightline Tech Solutions",
+   "hq": "Bengaluru, IN",
+   "currency": "INR",
+   "positioning": "Premium integrator",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.95,
+   "default_warranty_months": 36,
+   "lead_time_days": [
+    5,
+    12
+   ],
+   "category_factor": {
+    "server": 1.02,
+    "network_switch": 1.03,
+    "firewall": 1.04,
+    "*": 1.06
+   },
+   "coverage": 0.7,
+   "volatility": 0.02,
+   "bundle": "Free on-site installation"
+  },
+  {
+   "id": "vertex",
+   "name": "Vertex IT Mart",
+   "hq": "Pune, IN",
+   "currency": "INR",
+   "positioning": "Regional reseller",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.76,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    4,
+    10
+   ],
+   "category_factor": {
+    "network_switch": 0.9,
+    "wireless": 0.93,
+    "cabling": 0.9,
+    "power": 0.95,
+    "*": 0.99
+   },
+   "coverage": 0.6,
+   "volatility": 0.05
+  },
+  {
+   "id": "globalsource",
+   "name": "GlobalSource Trading FZE",
+   "hq": "Dubai, AE",
+   "currency": "USD",
+   "positioning": "Grey-market importer",
+   "serves": [
+    "AE",
+    "SA",
+    "OM",
+    "QA",
+    "BH",
+    "IN",
+    "SG",
+    "US",
+    "GB"
+   ],
+   "reliability": 0.7,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    14,
+    28
+   ],
+   "category_factor": {
+    "laptop": 0.9,
+    "monitor": 0.9,
+    "software": 0.95,
+    "*": 0.95
+   },
+   "coverage": 0.65,
+   "volatility": 0.04
+  },
+  {
+   "id": "euronet",
+   "name": "EuroNet Components GmbH",
+   "hq": "Frankfurt, DE",
+   "currency": "EUR",
+   "positioning": "EU distributor",
+   "serves": [
+    "DE",
+    "FR",
+    "NL",
+    "BE",
+    "AT",
+    "IE",
+    "ES",
+    "IT",
+    "PL",
+    "SE",
+    "DK",
+    "CH",
+    "GB"
+   ],
+   "reliability": 0.9,
+   "default_warranty_months": 24,
+   "lead_time_days": [
+    5,
+    15
+   ],
+   "category_factor": {
+    "*": 1.04
+   },
+   "coverage": 0.8,
+   "volatility": 0.02
+  },
+  {
+   "id": "pacificedge",
+   "name": "Pacific Edge Systems",
+   "hq": "Los Angeles, US",
+   "currency": "USD",
+   "positioning": "US education specialist",
+   "serves": [
+    "US",
+    "CA"
+   ],
+   "reliability": 0.88,
+   "default_warranty_months": 36,
+   "lead_time_days": [
+    5,
+    14
+   ],
+   "category_factor": {
+    "laptop": 0.96,
+    "wireless": 0.97,
+    "*": 1.01
+   },
+   "coverage": 0.8,
+   "volatility": 0.03
+  },
+  {
+   "id": "harbourtech",
+   "name": "HarbourTech Middle East",
+   "hq": "Abu Dhabi, AE",
+   "currency": "AED",
+   "positioning": "Gulf systems integrator",
+   "serves": [
+    "AE",
+    "SA",
+    "OM",
+    "QA",
+    "BH"
+   ],
+   "reliability": 0.86,
+   "default_warranty_months": 24,
+   "lead_time_days": [
+    6,
+    16
+   ],
+   "category_factor": {
+    "*": 1.03
+   },
+   "coverage": 0.75,
+   "volatility": 0.03,
+   "bundle": "12-month support desk"
+  }
+ ],
+ "promotions": [
+  {
+   "competitor": "apex",
+   "mpn": "DL-5450-I5-16-512",
+   "street_factor": 0.83,
+   "label": "Quarter-end clearance"
+  },
+  {
+   "competitor": "apex",
+   "mpn": "DL-P2425H",
+   "street_factor": 0.8,
+   "label": "Bulk monitor promotion"
+  },
+  {
+   "competitor": "vertex",
+   "mpn": "CS-C9200L-24P-4G-E",
+   "street_factor": 0.84,
+   "label": "Distributor rebate pass-through"
+  },
+  {
+   "competitor": "globalsource",
+   "mpn": "DL-5450-I5-16-512",
+   "street_factor": 0.84,
+   "label": "Parallel import"
+  },
+  {
+   "competitor": "globalsource",
+   "mpn": "DL-WD19S-130W",
+   "street_factor": 0.82,
+   "label": "Parallel import"
+  },
+  {
+   "competitor": "pacificedge",
+   "mpn": "HP-9C0B5PA-440G11",
+   "street_factor": 0.85,
+   "label": "Education bid pricing"
+  },
+  {
+   "competitor": "euronet",
+   "mpn": "DL-P3680-I9-A2000",
+   "street_factor": 0.86,
+   "label": "Workstation launch offer"
+  }
+ ],
+ "products": {
+  "DL-5450-I5-16-512": {
+   "category": "laptop",
+   "description": "Dell Latitude 5450 Business Laptop",
+   "street_price_usd": 910.77
+  },
+  "DL-7450-I7-32-1T": {
+   "category": "laptop",
+   "description": "Dell Latitude 7450 Premium Laptop",
+   "street_price_usd": 1423.16
+  },
+  "LN-21JR-E14G6": {
+   "category": "laptop",
+   "description": "Lenovo ThinkPad E14 Gen 6",
+   "street_price_usd": 766.22
+  },
+  "LN-21ML-T14G5": {
+   "category": "laptop",
+   "description": "Lenovo ThinkPad T14 Gen 5",
+   "street_price_usd": 1330.32
+  },
+  "HP-9C0B5PA-440G11": {
+   "category": "laptop",
+   "description": "HP ProBook 440 G11",
+   "street_price_usd": 670.65
+  },
+  "HP-A26N5PA-840G11": {
+   "category": "laptop",
+   "description": "HP EliteBook 840 G11",
+   "street_price_usd": 1203.13
+  },
+  "AP-MXCT3HN-A": {
+   "category": "laptop",
+   "description": "Apple MacBook Air 13-inch M3",
+   "street_price_usd": 1436.93
+  },
+  "DL-OP7020T-I5": {
+   "category": "desktop",
+   "description": "Dell OptiPlex 7020 Tower",
+   "street_price_usd": 716.71
+  },
+  "HP-8T1Q0PA-MINI400": {
+   "category": "desktop",
+   "description": "HP Pro Mini 400 G9",
+   "street_price_usd": 547.35
+  },
+  "LN-12E4-M70QG5": {
+   "category": "desktop",
+   "description": "Lenovo ThinkCentre M70q Gen 5",
+   "street_price_usd": 820.43
+  },
+  "DL-P3680-I9-A2000": {
+   "category": "workstation",
+   "description": "Dell Precision 3680 Tower Workstation",
+   "street_price_usd": 3016.98
+  },
+  "DL-P2425H": {
+   "category": "monitor",
+   "description": "Dell Pro 24 Monitor P2425H",
+   "street_price_usd": 156.76
+  },
+  "DL-P2725H": {
+   "category": "monitor",
+   "description": "Dell Pro 27 Monitor P2725H",
+   "street_price_usd": 211.54
+  },
+  "LG-27UP850N-W": {
+   "category": "monitor",
+   "description": "LG 27UP850N 27-inch 4K USB-C Monitor",
+   "street_price_usd": 377.15
+  },
+  "SS-LS32D804UA": {
+   "category": "monitor",
+   "description": "Samsung ViewFinity S80D 32-inch 4K",
+   "street_price_usd": 408.83
+  },
+  "HP-6N4E8AA-E24G5": {
+   "category": "monitor",
+   "description": "HP E24 G5 FHD Monitor",
+   "street_price_usd": 148.14
+  },
+  "CS-C9200L-24P-4G-E": {
+   "category": "network_switch",
+   "description": "Cisco Catalyst 9200L 24-port PoE+ Switch",
+   "street_price_usd": 3011.3
+  },
+  "CS-C9200L-48P-4G-E": {
+   "category": "network_switch",
+   "description": "Cisco Catalyst 9200L 48-port PoE+ Switch",
+   "street_price_usd": 5067.79
+  },
+  "AR-JL684A-1930": {
+   "category": "network_switch",
+   "description": "Aruba Instant On 1930 24G PoE Switch",
+   "street_price_usd": 507.0
+  },
+  "UB-U6-PRO": {
+   "category": "wireless",
+   "description": "Ubiquiti UniFi U6 Pro Access Point",
+   "street_price_usd": 182.28
+  },
+  "CS-MR36-HW": {
+   "category": "wireless",
+   "description": "Cisco Meraki MR36 Access Point",
+   "street_price_usd": 737.27
+  },
+  "FT-FG-60F": {
+   "category": "firewall",
+   "description": "Fortinet FortiGate 60F Firewall",
+   "street_price_usd": 832.91
+  },
+  "FT-FG-100F": {
+   "category": "firewall",
+   "description": "Fortinet FortiGate 100F Firewall",
+   "street_price_usd": 3110.74
+  },
+  "TP-ER7206": {
+   "category": "router",
+   "description": "TP-Link Omada ER7206 VPN Router",
+   "street_price_usd": 152.15
+  },
+  "DL-R660XS-2S4410Y": {
+   "category": "server",
+   "description": "Dell PowerEdge R660xs Rack Server",
+   "street_price_usd": 6338.28
+  },
+  "DL-T360-E2434": {
+   "category": "server",
+   "description": "Dell PowerEdge T360 Tower Server",
+   "street_price_usd": 3037.12
+  },
+  "HPE-DL380G11-4416": {
+   "category": "server",
+   "description": "HPE ProLiant DL380 Gen11",
+   "street_price_usd": 9179.18
+  },
+  "SY-RS1221PLUS": {
+   "category": "storage",
+   "description": "Synology RackStation RS1221+ 8-bay NAS",
+   "street_price_usd": 1473.39
+  },
+  "SY-DS923PLUS": {
+   "category": "storage",
+   "description": "Synology DiskStation DS923+ 4-bay NAS",
+   "street_price_usd": 660.14
+  },
+  "SG-ST8000NT001": {
+   "category": "storage_media",
+   "description": "Seagate IronWolf Pro 8TB NAS HDD",
+   "street_price_usd": 240.05
+  },
+  "SS-MZ-77E1T0BW": {
+   "category": "storage_media",
+   "description": "Samsung 870 EVO 1TB SATA SSD",
+   "street_price_usd": 92.17
+  },
+  "APC-SMT1500IC": {
+   "category": "power",
+   "description": "APC Smart-UPS 1500VA LCD",
+   "street_price_usd": 622.4
+  },
+  "APC-SRT3KXLI": {
+   "category": "power",
+   "description": "APC Smart-UPS SRT 3000VA Online",
+   "street_price_usd": 1788.17
+  },
+  "APC-AP7920B": {
+   "category": "power",
+   "description": "APC Switched Rack PDU 1U",
+   "street_price_usd": 408.24
+  },
+  "NT-42U-8010": {
+   "category": "rack",
+   "description": "Netrack 42U Server Rack 800x1000",
+   "street_price_usd": 891.47
+  },
+  "CM-CAT6-305M": {
+   "category": "cabling",
+   "description": "CommScope Cat6 UTP Cable 305 m",
+   "street_price_usd": 134.67
+  },
+  "CM-PP-CAT6-24": {
+   "category": "cabling",
+   "description": "CommScope Cat6 24-port Patch Panel",
+   "street_price_usd": 48.93
+  },
+  "CM-PC-CAT6-1M": {
+   "category": "cabling",
+   "description": "CommScope Cat6 Patch Cord 1 m",
+   "street_price_usd": 2.28
+  },
+  "LG-920-002602": {
+   "category": "peripheral",
+   "description": "Logitech MK540 Keyboard and Mouse Combo",
+   "street_price_usd": 36.58
+  },
+  "LG-960-001372": {
+   "category": "peripheral",
+   "description": "Logitech C920 HD Pro Webcam",
+   "street_price_usd": 81.62
+  },
+  "JB-25089-999": {
+   "category": "peripheral",
+   "description": "Jabra Evolve2 40 SE USB Headset",
+   "street_price_usd": 104.27
+  },
+  "DL-WD19S-130W": {
+   "category": "peripheral",
+   "description": "Dell Dock WD19S 130W",
+   "street_price_usd": 197.58
+  },
+  "HP-W1A56A-M404DN": {
+   "category": "printer",
+   "description": "HP LaserJet Pro M404dn Printer",
+   "street_price_usd": 329.05
+  },
+  "PL-2200-86260": {
+   "category": "av",
+   "description": "Poly Studio X30 Video Bar",
+   "street_price_usd": 2379.17
+  },
+  "MS-CFQ7TTC0LDPB": {
+   "category": "software",
+   "description": "Microsoft 365 Business Standard (annual)",
+   "street_price_usd": 128.16
+  },
+  "MS-P73-08328": {
+   "category": "software",
+   "description": "Windows Server 2022 Standard 16-core",
+   "street_price_usd": 913.28
+  },
+  "VM-V-VDPESS-5": {
+   "category": "software",
+   "description": "Veeam Data Platform Essentials (5 instances)",
+   "street_price_usd": 733.27
+  },
+  "SP-CIXA1CSAA": {
+   "category": "software",
+   "description": "Sophos Intercept X Advanced (annual)",
+   "street_price_usd": 30.71
+  },
+  "FT-FC-10-0060F-950": {
+   "category": "software",
+   "description": "FortiGate 60F UTP Subscription (1 year)",
+   "street_price_usd": 473.53
+  },
+  "MSS-SVC-INSTALL": {
+   "category": "service",
+   "description": "On-site Installation and Configuration",
+   "street_price_usd": 26.92
+  },
+  "MSS-SVC-NETDEPLOY": {
+   "category": "service",
+   "description": "Network Design and Deployment",
+   "street_price_usd": 338.57
+  },
+  "MSS-SVC-MIGRATE": {
+   "category": "service",
+   "description": "Data Migration Service",
+   "street_price_usd": 120.89
+  }
+ }
+}

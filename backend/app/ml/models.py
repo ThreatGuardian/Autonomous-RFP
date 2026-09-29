@@ -125,6 +125,8 @@ class CategoryClassifier(TextClassifier):
 # --------------------------------------------------------------------------- win probability
 
 SEGMENTS = ["enterprise", "smb", "public", "education", "healthcare"]
+WARRANTY_CLIP = 24  # months; the bid ledger spans -12..+24
+LEAD_CLIP = 21  # days
 
 
 @dataclass
@@ -142,9 +144,13 @@ def featurize(rows: Sequence[BidFeatures]) -> np.ndarray:
     out = []
     for r in rows:
         gap = r.price_ratio - 1.0
+        # Clip service terms to the support of the training data so that, e.g., a
+        # lifetime cable warranty cannot extrapolate into a certain win.
+        warranty = max(-WARRANTY_CLIP, min(WARRANTY_CLIP, r.warranty_delta_months))
+        lead = max(-LEAD_CLIP, min(LEAD_CLIP, r.lead_time_delta_days))
         seg = [1.0 if r.segment == s else 0.0 for s in SEGMENTS]
         out.append(
-            [gap, *[gap * s for s in seg], r.warranty_delta_months / 12.0, r.lead_time_delta_days / 7.0,
+            [gap, *[gap * s for s in seg], warranty / 12.0, lead / 7.0,
              float(r.bundled_value_add), float(r.repeat_customer), *seg[1:]]
         )
     return np.asarray(out, dtype=float)
