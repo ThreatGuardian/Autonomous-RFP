@@ -14,6 +14,35 @@ trained in this repository with scikit-learn.
 
 ![Landing page](docs/screenshots/00-landing.png)
 
+### Trial run: Data Care Corp × DES Pune University
+
+The install runs as **Data Care Corp Pvt. Ltd.**, a Pune wholesale dealer of laptops, desktops, monitors,
+keyboards, mice, headsets, graphics cards, processors, memory, storage and UPS units (77 catalogue items).
+Its competitors are **Amazon Business, Flipkart Wholesale, HP World (factory outlet), an Apple authorised
+store and the Dell Exclusive Store**; brand stores only sell their own brand and offer their nearest
+equivalent model. A 12-page RFP from **DES Pune University**
+([`samples/10_des_pune_university_rfp.pdf`](samples/10_des_pune_university_rfp.pdf)) asks for 50 units each
+of desktops, monitors, keyboards, mice, USB headsets, headphones, webcams, faculty laptops, RTX 4060 graphics
+cards and 600 VA UPS units. The result:
+
+* all ten items matched to the right product, 50 units each. The 1000 DPI requirement moves the mouse from
+  an 800 DPI model to the Dell MS116;
+* 94 of 94 mandatory clauses met and all nine eligibility criteria checked against the company profile, so
+  the recommendation is **Bid**;
+* the whole bid is **L1** at ₹70.77 lakh before GST (₹83.51 lakh with GST) against HP World's estimated
+  ₹72.49 lakh, at 7.3% gross margin, using live feed prices, collected quotes and past GeM awards;
+* the full **submission pack**: technical proposal (PDF and Word), compliance statement, financial bid,
+  OEM authorisation request letters and a submission index.
+
+The generated documents are in [`docs/trial/`](docs/trial/).
+
+| | |
+|---|---|
+| ![Award position](docs/screenshots/21-dc-award.png) | ![Compliance](docs/screenshots/22-dc-compliance.png) |
+| ![Requirements](docs/screenshots/29-dc-requirements.png) | ![Bid report](docs/screenshots/27-dc-bid-report.png) |
+| ![Market intelligence](docs/screenshots/23-market-intelligence.png) | ![Catalogue import](docs/screenshots/24-catalogue-import.png) |
+| ![Submission pack](docs/screenshots/25-submission-pack-menu.png) | ![Technical proposal](docs/screenshots/28-technical-proposal.png) |
+
 ---
 
 ## Contents
@@ -152,6 +181,16 @@ console at `/app`. Three sign-in methods are available:
 Sessions are HMAC-signed, HTTP-only cookies. Passwords are stored as
 PBKDF2-SHA256 hashes.
 
+### Company data set
+
+Everything the system knows about the bidding company lives in
+`backend/app/data/companies/<name>/`: its profile, catalogue, customers,
+competitors, collected quotes, award history and knowledge base. The default is
+`datacare` (Data Care Corp). Set `TD_COMPANY=meridian` to run as the original
+IT-infrastructure integrator instead. Each company keeps its own database under
+`backend/var/<name>/`. `python scripts/make_datacare.py` regenerates the Data
+Care Corp files.
+
 ### Development mode
 
 ```bash
@@ -226,6 +265,30 @@ Configuration options are listed in [`.env.example`](.env.example).
    *Reset to recommendations* clears all overrides.
 8. **Approve** — issues the final quotation and records the approval in the memo
    and the bid report.
+9. **Submission pack** (*Documents → Submission pack*) — one ZIP containing the
+   technical proposal (PDF and editable Word), the compliance statement, the
+   financial bid, OEM authorisation request letters and a submission index that
+   says which file goes in which envelope.
+10. **Record outcome** — won, lost (with the winning price and winner) or
+    cancelled. Outcomes are added to the deal ledger and the win-probability
+    model retrains on them.
+11. **Teach the classifier** — in *Requirements*, correct any clause's type; the
+    sentence becomes a training label and the clause model retrains after a few
+    corrections. Swapping a line's product for another category teaches the
+    category model the same way.
+
+**Company data** (*Catalogue → Import*): upload a CSV or Excel sheet, or a Tally
+stock-item XML export. Columns are recognised by name ("Item Name", "Stock
+Group", "Purchase Rate", "Closing Qty", "HSN/SAC", …). The preview shows what
+will be created or updated and flags problems such as price below cost, invalid
+HSN codes or non-standard GST slabs; nothing changes until you apply it. Every
+change to cost, price or stock is kept in the product's price history.
+
+**Competitor intelligence** (*Market*): the live price feed, sheets of quotes
+your sales team collected, public award results (GeM or state portals) and
+saved product web pages all become dated, sourced price observations. For each
+bid the freshest price per competitor is used, and older observations count for
+less. Every offer on screen shows where it came from and when.
 
 Every request produces these PDFs (under *Documents* in the request header):
 
@@ -243,7 +306,7 @@ Every request produces these PDFs (under *Documents* in the request header):
 | ![Pricing](docs/screenshots/03-pricing.png) | ![Rationale](docs/screenshots/04-line-rationale.png) |
 | ![Curve](docs/screenshots/05-price-position.png) | ![Requirements](docs/screenshots/06-requirements.png) |
 | ![Quotation](docs/screenshots/07-quotation.png) | ![Activity](docs/screenshots/08-activity.png) |
-| ![Market](docs/screenshots/09-market.png) | ![Models](docs/screenshots/10-models.png) |
+| ![Market](docs/screenshots/09-market.png) | ![Record outcome](docs/screenshots/26-record-outcome.png) |
 | ![Sign in](docs/screenshots/00-sign-in.png) | ![Overview](docs/screenshots/01-overview.png) |
 | ![Workbench — lines](docs/screenshots/11-workbench-lines.png) | ![Workbench — terms](docs/screenshots/12-workbench-terms.png) |
 | ![Bid report page 1](docs/screenshots/13-bid-report-p1.png) | ![Bid report page 2](docs/screenshots/13-bid-report-p2.png) |
@@ -316,10 +379,16 @@ capture, Value premium, Standard pricing* and *Reviewer override*.
 backend/
   app/
     agents/        base contract, typed messages, six agents, orchestrator
-    api/           REST endpoints (requests, reference data)
+    api/           REST endpoints (requests, reference data, report, data import,
+                   competitor intelligence, learning loop, submission pack)
     db/            SQLAlchemy models, session, seeder
-    data/          catalogue, tax rules, FX reference, gazetteer, market data,
-                   pricing policy, knowledge base (markdown)
+    data/          shared: tax rules, FX reference, gazetteer, pricing policy
+    data/companies/<company>/  profile, catalogue, customers, competitors and
+                   street prices, collected quotes, award history, knowledge base
+    imports/       spreadsheet and Tally readers, catalogue import with preview
+    intel/         competitor intelligence adapters and the per-bid market view
+    learning/      reviewer labels, bid outcomes, real-data evaluation
+    pack/          submission pack builder
     finance/       currency provider chain, tax engine, money formatting
     market/        mock competitor market API (separate FastAPI app)
     ml/            corpora, models, registry
@@ -333,8 +402,9 @@ backend/
     assets/fonts/  Inter (OFL) for PDFs
   tests/           unit, agent, API and end-to-end tests
 frontend/          React + TypeScript + Tailwind review console
-samples/           seven short requests (TXT, PDF, DOCX) and two full tenders
-scripts/           sample and tender document generators
+samples/           seven short requests (TXT, PDF, DOCX) and three full tenders,
+                   including the DES Pune University RFP
+scripts/           sample, tender and Data Care Corp data generators
 docs/              roadmap, architecture notes, screenshots
 ```
 
@@ -361,6 +431,10 @@ is running. The main endpoints:
 | `GET` | `/api/catalog/products` · `PATCH /api/catalog/products/{sku}` | Pricing database |
 | `GET` | `/api/market/offers` · `/api/market/competitors` | Market intelligence |
 | `GET` | `/api/finance/fx` · `POST /api/finance/tax-preview` | Currency and tax |
+| `POST` | `/api/catalog/import/preview` · `/api/catalog/import/commit`, `GET /api/catalog/imports`, `/api/catalog/products/{sku}/history` | Company data import and price history |
+| `GET` · `POST` | `/api/market/sources`, `/api/market/observations` (`/upload`, `/web`) | Competitor intelligence sources and observations |
+| `GET` · `POST` | `/api/rfps/{id}/outcome`, `/api/rfps/{id}/labels`, `/api/learning/status`, `/api/learning/evaluate` | Learning loop |
+| `GET` | `/api/rfps/{id}/pack` | Submission pack (ZIP) |
 | `GET` | `/api/models` · `POST /api/models/retrain` · `GET /api/knowledge/search` | Models and retrieval |
 | `GET` | `/market-api/v1/...` | The mock market service (requires `X-Api-Key`) |
 
@@ -368,7 +442,7 @@ is running. The main endpoints:
 
 ```bash
 cd backend
-python -m pytest            # 66 tests: language core, parser, long tenders, compliance, award analysis, report editing, finance, pricing, drafting, API workflow, sign-in, reviewer edits
+python -m pytest            # 77 tests: language core, parser, long tenders, compliance, award analysis, report editing, finance, pricing, drafting, API workflow, sign-in, reviewer edits, data import, competitor intelligence, learning loop, submission pack, and the Data Care Corp × DES Pune University trial
 cd ../frontend
 npm run typecheck
 ```
@@ -380,7 +454,9 @@ The project was built in phases, each committed separately. See
 
 ---
 
-*Academic project. Company names, customers, competitors and prices are
-fictitious; product names are used descriptively. Inter font © The Inter
+*Academic project. Data Care Corp, its customers and all prices are fictitious. Amazon Business,
+Flipkart Wholesale, HP World, the Apple authorised store and the Dell Exclusive Store appear only as
+illustrative market participants: their prices, stock and terms are mock data, not real offers. Product
+names are used descriptively. Inter font © The Inter
 Project Authors and Source Serif 4 © The Source Serif 4 Project Authors, both
 under the SIL Open Font License 1.1.*

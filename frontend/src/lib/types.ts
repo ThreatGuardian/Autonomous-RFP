@@ -43,7 +43,7 @@ export interface Requirement {
   id: string; text: string; type: string; confidence: number;
   section?: string | null; clause?: string | null; page?: number | null;
   modality?: "mandatory" | "desirable" | "information"; actor?: "bidder" | "buyer"; category?: string;
-  line_no?: number | null; source?: "text" | "table";
+  line_no?: number | null; source?: "text" | "table"; reviewed?: boolean;
 }
 export interface TenderSection {
   id: string; number: string | null; title: string; level: number; kind: string; kind_confidence: number; parent: string | null;
@@ -171,4 +171,5 @@ export interface Product {
   sku: string; mpn: string; name: string; brand: string; category: string; description: string; specs: Record<string, unknown>;
   keywords: string[]; unit: string; unit_cost: number; list_price: number; min_margin_pct: number; floor_price: number;
   stock_qty: number; lead_time_days: number; warranty_months: number; tax_category: string; active: boolean; list_margin_pct: number;
+  hsn: string | null; gst_rate_pct: number | null; price_updated_at: string | null;
 }

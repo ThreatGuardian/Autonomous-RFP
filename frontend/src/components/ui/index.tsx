@@ -101,10 +101,12 @@ export function StatGrid({ children, cols = 4 }: { children: ReactNode; cols?: n
 export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { value: T; label: ReactNode; count?: number }[] }) {
   const ids = useId();
   return (
-    <div className="flex items-center gap-1 border-b border-line">
+    <div role="tablist" className="flex items-center gap-1 border-b border-line">
       {items.map((it) => (
         <button
           key={it.value}
+          role="tab"
+          aria-selected={value === it.value}
           onClick={() => onChange(it.value)}
           className={clsx(
             "relative -mb-px inline-flex h-10 items-center gap-2 px-3 text-[13px] font-medium transition-colors",

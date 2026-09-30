@@ -171,7 +171,7 @@ def _display_title(title: str) -> str:
         else:
             out.append(w[:1].upper() + w[1:])
     result = " ".join(out)
-    return re.sub(r"\b(Boq|Emd|Nit|Gcc|Scc|Itb|Oem|Maf|Gst|Msme?)\b", lambda m: m.group(1).upper(), result)
+    return re.sub(r"\b(Boq|Emd|Nit|Gcc|Scc|Itb|Oem|Maf|Gst|Msme?|Ups|Usb|Gpu|Cpu|Ai|Ml|Ict)\b", lambda m: m.group(1).upper(), result)
 
 
 # --------------------------------------------------------------------------- agent

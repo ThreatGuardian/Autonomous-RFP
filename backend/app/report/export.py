@@ -9,7 +9,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import BaseDocTemplate, CondPageBreak, Frame, KeepTogether, PageTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    BaseDocTemplate, CondPageBreak, Frame, KeepTogether, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle,
+)
 
 from app.services.pdf_renderer import NumberedCanvas, esc
 from app.services.report_renderer import (
@@ -23,7 +25,8 @@ def _visible(doc: dict[str, Any]) -> list[dict[str, Any]]:
     return [s for s in doc["sections"] if not s.get("hidden")]
 
 
-def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = False) -> Path:
+def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = False, *, label: str = "BID ANALYSIS",
+               footer: str = "Bid analysis report", draft_note: str | None = "Draft for internal review") -> Path:
     st = _styles()
     page_w, page_h = A4
     margin = 22 * mm
@@ -44,19 +47,19 @@ def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = 
         c.drawString(x + 14, y + 1.5, " ".join(company["short_name"].upper()))
         c.setFont("Inter-Regular", 6.8)
         c.setFillColor(MUTED)
-        c.drawRightString(page_w - margin, y + 7, "BID ANALYSIS")
+        c.drawRightString(page_w - margin, y + 7, label)
         c.setFont("Inter-SemiBold", 9.5)
         c.setFillColor(GOLD)
         c.drawRightString(page_w - margin, y - 4, " ".join(doc.get("quote_number", "")))
         c.setFont("Inter-Regular", 7)
         c.setFillColor(MUTED)
-        c.drawString(margin, 10 * mm, f"{company['short_name']} · Bid analysis report")
-        if not approved:
-            c.drawCentredString(page_w / 2, 10 * mm, "Draft for internal review")
+        c.drawString(margin, 10 * mm, f"{company['short_name']} · {footer}")
+        if not approved and draft_note:
+            c.drawCentredString(page_w / 2, 10 * mm, draft_note)
         c.restoreState()
 
     pdf = BaseDocTemplate(str(path), pagesize=A4, leftMargin=margin, rightMargin=margin, topMargin=28 * mm,
-                          bottomMargin=22 * mm, title=f"Bid analysis — {doc['title']}", author=company["name"])
+                          bottomMargin=22 * mm, title=doc["title"], author=company["name"])
     pdf.addPageTemplates([PageTemplate("r", [Frame(margin, 20 * mm, width, page_h - 48 * mm, id="f")], onPage=decorate)])
     s: list = [Paragraph(esc(doc["title"]), st["title"]), Spacer(1, 4), Paragraph(esc(doc.get("subtitle", "")), st["meta"]),
                Spacer(1, 10), Table([[""]], colWidths=[width], rowHeights=[1], style=[("LINEABOVE", (0, 0), (-1, -1), 0.6, CARD_LINE)])]
@@ -78,13 +81,17 @@ def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = 
                 flow += [Tiles([(i["value"], i["label"]) for i in b["items"][:4]], width, 48), Spacer(1, 8)]
             elif t == "bars":
                 for i in b.get("items", []):
-                    label = i["label"] if len(i["label"]) < 46 else i["label"][:44] + "…"
-                    flow.append(ScoreBar(label, i.get("note", ""), float(i.get("value", 0)), width, str(i.get("display", ""))))
+                    bar_label = i["label"] if len(i["label"]) < 46 else i["label"][:44] + "…"
+                    flow.append(ScoreBar(bar_label, i.get("note", ""), float(i.get("value", 0)), width, str(i.get("display", ""))))
                 flow.append(Spacer(1, 4))
             elif t == "table" and b.get("rows"):
                 n = len(b["header"])
                 data = [[Paragraph(esc(h), head) for h in b["header"]]] + [[Paragraph(esc(c), cell) for c in r] for r in b["rows"]]
-                widths = [width / n] * n if n != 3 else [width * 0.22, width * 0.2, width * 0.58]
+                if b.get("widths"):
+                    total = sum(b["widths"])
+                    widths = [width * w / total for w in b["widths"]]
+                else:
+                    widths = [width / n] * n if n != 3 else [width * 0.22, width * 0.2, width * 0.58]
                 tbl = Table(data, colWidths=widths, repeatRows=1)
                 tbl.setStyle(TableStyle([
                     ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LINEBELOW", (0, 0), (-1, -1), 0.5, CARD_LINE),
@@ -92,6 +99,8 @@ def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = 
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 4), ("LEFTPADDING", (0, 0), (-1, -1), 5),
                 ]))
                 flow += [tbl, Spacer(1, 8)]
+            elif t == "pagebreak":
+                flow.append(PageBreak())
             elif t == "callout":
                 tone = TONES.get(b.get("tone", "neutral"), MUTED)
                 para = Paragraph(f"<font name='Inter-SemiBold' color='{tone.hexval()}'>{esc(b['text'])}</font>", st["body"])
@@ -104,7 +113,7 @@ def render_pdf(doc: dict[str, Any], path: Path, company: dict, approved: bool = 
     return path
 
 
-def render_docx(doc: dict[str, Any], path: Path, company: dict) -> Path:
+def render_docx(doc: dict[str, Any], path: Path, company: dict, *, label: str = "Bid analysis") -> Path:
     import docx
     from docx.enum.table import WD_TABLE_ALIGNMENT
     from docx.oxml import OxmlElement
@@ -119,7 +128,7 @@ def render_docx(doc: dict[str, Any], path: Path, company: dict) -> Path:
     ink = RGBColor(0x1E, 0x2A, 0x36)
 
     header = d.sections[0].header.paragraphs[0]
-    header.text = f"{company['short_name']}  ·  Bid analysis  ·  {doc.get('quote_number', '')}"
+    header.text = f"{company['short_name']}  ·  {label}  ·  {doc.get('quote_number', '')}"
     header.runs[0].font.size = Pt(8)
     header.runs[0].font.color.rgb = RGBColor(0x8A, 0x7E, 0x6B)
 
@@ -164,6 +173,8 @@ def render_docx(doc: dict[str, Any], path: Path, company: dict) -> Path:
             elif t == "bullets":
                 for item in b.get("items", []):
                     d.add_paragraph(item, style="List Bullet")
+            elif t == "pagebreak":
+                d.add_page_break()
             elif t == "kpis" and b.get("items"):
                 table = d.add_table(rows=2, cols=len(b["items"]))
                 table.alignment = WD_TABLE_ALIGNMENT.CENTER

@@ -13,7 +13,6 @@ import ProviderSignIn from "./pages/public/ProviderSignIn";
 import Catalogue from "./pages/Catalogue";
 import Finance from "./pages/Finance";
 import Market from "./pages/Market";
-import Models from "./pages/Models";
 import NewRequest from "./pages/NewRequest";
 import Overview from "./pages/Overview";
 import Requests from "./pages/Requests";
@@ -40,7 +39,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="catalogue" element={<Catalogue />} />
               <Route path="market" element={<Market />} />
               <Route path="finance" element={<Finance />} />
-              <Route path="models" element={<Models />} />
+              <Route path="models" element={<Navigate to="/app" replace />} />
             </Route>
             <Route path="app/requests/:id/report" element={<RequireAuth><ReportEditor /></RequireAuth>} />
             <Route path="*" element={<Navigate to="/" replace />} />

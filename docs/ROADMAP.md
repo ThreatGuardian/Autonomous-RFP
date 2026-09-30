@@ -22,10 +22,19 @@ increment and is committed separately so the history reads as the build log.
 |---|-------|---------|
 | 10 | Long-tender understanding | Layout-aware PDF/DOCX parsing, section tree, key dates and data, evaluation method, eligibility criteria, items only from the schedule with linked specifications, Tender Compliance Agent, compliance statement PDF, Compliance tab with reviewer decisions |
 | 11 | Award-rule strategy *(done)* | Whole-bid L1 / QCBS analysis, MSE purchase preference, reverse-auction floor, no bundle credit under L1; editable bid report with an editing assistant and PDF/Word export; decluttered dashboard with motion |
-| 12 | Company data import | CSV / Excel / Tally import of catalogue, prices, stock, HSN and GST; versioned prices |
-| 13 | Competitor intelligence adapters | Pluggable sources (mock market, CSV of collected quotes, public award data, optional web extraction) with dated, sourced price observations |
-| 14 | Learning loop | Labelled corrections from reviewer edits, retraining on real documents, held-out evaluation and calibration |
-| 15 | Full response pack | Technical response and forms filled from the knowledge base, bundled into one submission-ready pack |
+| 12 | Company data import *(done)* | CSV / Excel / Tally XML import of catalogue, prices, stock, HSN and GST with header recognition, preview and commit, row-level issues, and a price version for every change |
+| 13 | Competitor intelligence adapters *(done)* | Market feed, collected-quote sheets, public award results and saved web pages become dated, sourced price observations; the freshest per competitor is merged into every bid, older ones weigh less; brand stores offer their own equivalent model |
+| 14 | Learning loop *(done)* | Reviewer corrections (requirement type, product swaps) become labels and bid outcomes become real deals; models retrain automatically; leave-one-document-out evaluation and calibration (ECE) on real labels |
+| 15 | Full response pack *(done)* | Technical proposal (PDF + Word) with covering letter, bidder form, eligibility statement, item-by-item technical compliance, conditions, deviations, declarations and checklist; OEM authorisation request letters; submission index; bundled with the compliance statement and financial bid as one ZIP |
+
+### Trial: Data Care Corp answers DES Pune University
+
+Data Care Corp (a Pune wholesale dealer of computers, components and electronics) is the default
+company data set, with Amazon Business, Flipkart Wholesale, HP World, an Apple authorised store and
+a Dell Exclusive Store as mock competitors. `samples/10_des_pune_university_rfp.pdf` is a 12-page RFP
+for 50 units each of ten laboratory products. The system matches all ten items, meets 94 of 94
+mandatory clauses, recommends *Bid*, ranks the whole bid L1 and produces the full submission pack
+(`docs/trial/`). The trial runs as an automated test.
 
 ## Design principles
 

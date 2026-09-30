@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { BarChart3, Boxes, FileStack, Globe, Landmark, LayoutDashboard, LogOut, Plus, Radar, Settings2 } from "lucide-react";
+import { Boxes, FileStack, Globe, Landmark, LayoutDashboard, LogOut, Plus, Radar, Settings2 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
@@ -47,6 +47,7 @@ function NavItem({ to, icon, children, count, end }: { to: string; icon: ReactNo
 export function Shell() {
   const location = useLocation();
   const { data } = useQuery({ queryKey: ["rfps", "review-count"], queryFn: () => api.rfps({ status: "review" }), refetchInterval: 10_000 });
+  const company = useQuery({ queryKey: ["company"], queryFn: api.company, staleTime: Infinity });
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-line bg-[#f3f4f6]/70 px-3 py-4">
@@ -54,7 +55,7 @@ export function Shell() {
           <Logo className="size-7" />
           <div className="leading-tight">
             <div className="text-[14px] font-semibold tracking-[-0.01em]">Tenderdesk</div>
-            <div className="text-[11px] text-muted">Meridian Systems</div>
+            <div className="text-[11px] text-muted">{company.data?.short_name ?? "\u00a0"}</div>
           </div>
         </Link>
 
@@ -72,10 +73,6 @@ export function Shell() {
           <NavItem to="/app/catalogue" icon={<Boxes />}>Catalogue</NavItem>
           <NavItem to="/app/market" icon={<Radar />}>Market</NavItem>
           <NavItem to="/app/finance" icon={<Landmark />}>Tax &amp; currency</NavItem>
-        </nav>
-        <div className="mt-6 px-2.5 label !text-[10.5px]">System</div>
-        <nav className="mt-2 space-y-0.5">
-          <NavItem to="/app/models" icon={<BarChart3 />}>Models &amp; data</NavItem>
         </nav>
 
         <UserMenu />

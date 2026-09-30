@@ -212,7 +212,7 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
           )}
         </div>
 
-        <div className="text-[11.5px] text-subtle">© Meridian Systems · Tenderdesk</div>
+        <div className="text-[11.5px] text-subtle">© Tenderdesk</div>
       </div>
       <AsidePanel />
     </div>

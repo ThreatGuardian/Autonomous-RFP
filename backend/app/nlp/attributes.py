@@ -88,14 +88,20 @@ def check(param: str, want: str, product) -> tuple[bool | None, str]:
     text = _DROP.sub(" ", text)
     blob = product_blob(product)
     missing: list[str] = []
+    wanted: set[str] = set()
     for conjunct in re.split(r",|;|\band\b|&", text):
         options = [o for o in re.split(r"\bor\b|/", conjunct) if _tokens(o)]
         if not options:
             continue
-        if not any(_tokens(o) <= blob for o in options):
+        hit = next((o for o in options if _tokens(o) <= blob), None)
+        if hit is None:
             missing.append(" or ".join(o.strip() for o in options))
+        else:
+            wanted |= _tokens(hit)
     if missing:
         return None, f"catalogue data does not mention {missing[0]}"
     if not measured and not _tokens(text):
         return None, "nothing to compare"
-    return True, "; ".join(measured) if measured else "matches catalogue data"
+    # Quote the catalogue attributes that carry the matched words, so the reader sees the evidence.
+    shown = [str(v) for k, v in specs.items() if isinstance(v, str) and _tokens(v) & wanted]
+    return True, "; ".join(measured + shown[:2]) if (measured or shown) else "matches catalogue data"

@@ -199,8 +199,10 @@ def _load(filename: str, data: bytes) -> tuple[Table, str]:
     return read_table(filename, data), "xlsx" if name.endswith((".xlsx", ".xlsm")) else "csv"
 
 
-_TRACKED = ("name", "brand", "category", "hsn", "gst_rate_pct", "unit_cost", "list_price", "stock_qty", "lead_time_days",
-            "warranty_months", "min_margin_pct", "unit", "description")
+# Fields an import may change on an existing product. Names and descriptions stay as curated in the
+# catalogue: accounting exports usually carry abbreviated item names.
+_TRACKED = ("brand", "category", "hsn", "gst_rate_pct", "unit_cost", "list_price", "stock_qty", "lead_time_days",
+            "warranty_months", "min_margin_pct", "unit")
 
 
 def preview(db: Session, filename: str, data: bytes) -> ImportPlan:

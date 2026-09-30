@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.models import User
+from app.db.seed import load_json
 from app.db.session import get_db, session_scope
 from app.services.auth import COOKIE_NAME, hash_password, issue_token, read_token, verify_password
 
@@ -73,7 +74,8 @@ def current_user_id(request: Request) -> int | None:
 def seed_demo_user() -> None:
     with session_scope() as s:
         if s.scalar(select(User).where(User.username == "priya")) is None:
-            s.add(User(username="priya", name="Priya Shah", email="priya.shah@meridiansystems.in",
+            domain = load_json("company.json").get("email", "tenders@example.in").split("@")[-1]
+            s.add(User(username="priya", name="Priya Shah", email=f"priya.shah@{domain}",
                        title="Commercial lead", provider="password", password_hash=hash_password("tenderdesk")))
 
 

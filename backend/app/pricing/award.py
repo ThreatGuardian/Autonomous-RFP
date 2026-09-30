@@ -110,9 +110,14 @@ def analyse(rule: str, lines: list[PricedLine], costing: InternalPricing, policy
         a.msme_match = bool(msme and a.rank > 1 and within and lowest["total"] > cost)
         a.options = [option("Submit as priced", ours, "Wins as L1" if a.rank == 1 else
                             f"Ranked L{a.rank}, {a.gap_pct:+.1f}% vs L1")]
-        a.options.append(option("Price to become L1", reached,
-                                "Wins as L1" if a.target_feasible else "Cannot reach L1 above the margin floor"))
-        if msme:
+        if a.rank == 1:
+            # Already lowest: the useful question is how much headroom sits below the next rival.
+            a.options.append(option("Highest price that stays L1", target,
+                                    f"{m(target - ours)} more margin; {m(lowest['total'] - target)} gap to {lowest['name']}"))
+        else:
+            a.options.append(option("Price to become L1", reached,
+                                    "Wins as L1" if a.target_feasible else "Cannot reach L1 above the margin floor"))
+        if msme and a.rank > 1:
             mse = option(f"MSE match for {int(share * 100)}% of the order", lowest["total"],
                          f"Match L1 on {int(share * 100)}% of quantities" if a.msme_match
                          else "Matching L1 would be below cost" if within else f"Outside the {band:g}% band")
@@ -121,6 +126,8 @@ def analyse(rule: str, lines: list[PricedLine], costing: InternalPricing, policy
         if a.rank == 1:
             a.recommendation = "Submit as priced — already L1"
             a.reasons.append(f"Our total {m(ours)} is below the lowest estimated rival ({lowest['name']}, {m(lowest['total'])}).")
+            a.reasons.append(f"There is {m(target - ours)} of headroom below that rival; keep it as a safety margin against "
+                             f"price estimates that may be a few days old.")
         elif a.target_feasible:
             a.recommendation = "Reprice to become L1"
             a.reasons.append(f"{lowest['name']} is estimated at {m(lowest['total'])}, {abs(a.gap_pct):.1f}% below us. "

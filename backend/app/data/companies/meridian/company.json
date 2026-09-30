@@ -214,5 +214,6 @@
       "class": "Class-II local supplier",
       "note": "Imported OEM hardware with local integration, staging and warranty services; local content 28-45% depending on the item."
     }
-  }
+  },
+  "quote_prefix": "MSS"
 }

@@ -582,8 +582,11 @@ class ComplianceAgent(Agent):
                                       clause=item.clause, page=item.page,
                                       detail=f"{m.group(1)}% per {m.group(2)} up to {cap:g}% (≈ {fmt_inr(value * cap / 100)})."))
             return
-        if re.search(r"performance (?:security|bank guarantee|guarantee)", t, re.I):
-            m = re.search(r"(\d{1,2}(?:\.\d+)?)\s*%", t)
+        # The rate must belong to the guarantee itself ("performance security of 3% of the order value"), not
+        # to a payment clause that merely mentions it ("balance 10% after submission of the performance security").
+        pbg = re.search(r"performance (?:security|bank guarantee|guarantee)[^.%]{0,60}?(\d{1,2}(?:\.\d+)?)\s*%", t, re.I)
+        if pbg:
+            m = pbg
             if m:
                 pct = float(m.group(1))
                 item.response = f"Accepted; bank guarantee of {pct:g}% (about {fmt_inr(value * pct / 100)}) will be furnished."

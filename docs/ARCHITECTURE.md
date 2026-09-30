@@ -74,8 +74,8 @@ with `failed` on error, and `reopen` / `retry` to go back.
 ## 3. Trained models
 
 All three live in `app/ml/`. They are trained on first start and persisted with
-joblib in `var/models`. The **Retrain models** button (Models & data page)
-rebuilds them.
+joblib in `var/<company>/models`. `POST /api/models/retrain` rebuilds them, and they
+retrain on their own as reviewer labels and bid outcomes arrive (section 13.4).
 
 ### 3.1 Clause classifier
 
@@ -422,3 +422,85 @@ authentication and its own data file.
 
 It is mounted at `/market-api`, and can also run standalone on its own port
 (`TD_MARKET_API_URL`).
+
+
+## 13. Company data, competitor intelligence, learning loop and the response pack
+
+### 13.1 Company data sets (`app/config.py`)
+Company-specific files (`company.json`, `catalog.json`, `customers.json`, `market.json`, `value_adds.json`,
+`price_tiers.json`, `knowledge/`, `competitor_quotes.csv`, `award_history.csv`) live in
+`data/companies/<TD_COMPANY>/`; shared reference data (tax rules, countries, FX, pricing policy) stays in
+`data/`. `data_file(name)` resolves a name to the active company's copy first.
+
+### 13.2 Company data import (`app/imports/`)
+* `tabular.read_table` reads CSV (delimiter sniffed, BOM tolerated) and Excel. The header row is the one
+  with the most text cells among the first ten, so title lines of accounting exports are skipped.
+* `map_headers` assigns each field its header: exact synonym match first, then all-words match
+  ("Purchase Rate" → landed cost, "Closing Qty" → stock, "HSN/SAC" → HSN).
+* Values are parsed with Indian conventions: `₹1,23,456.50`, `45,000/Nos`, `2.5 lakh`, `18%`, `3 years`.
+* `tally_to_table` flattens a Tally stock-item XML export: name, group, opening or closing balance,
+  standard cost and price lists, HSN and the integrated-tax GST rate.
+* `preview` matches every row to a product (SKU, then MPN, then exact name) and plans create, update,
+  unchanged or skip. It raises row-level issues: price below cost, a change of 25% or more, an HSN code
+  that is not 4, 6 or 8 digits, a non-standard GST slab, missing name or cost. New products get a category
+  (group rules, then the trained category classifier), specifications inferred from the name, and keywords.
+* `commit` applies the plan, writes a `PriceVersion` row for every cost, price or stock change and
+  records the `ImportBatch`. Retrieval rebuilds automatically and the category model retrains when new
+  products arrive.
+
+### 13.3 Competitor intelligence (`app/intel/sources.py`)
+Every competitor price is a `PriceObservation`: competitor, product (MPN), unit price, currency, quantity,
+date, adapter and source reference.
+
+| Adapter | Input | Notes |
+|---|---|---|
+| `feed` | market API, per bid | brand stores (`brands` in `market.json`) offer their nearest same-category model within 40% of the price, reported as *equivalent* |
+| `quotes` | CSV or Excel of collected quotes | columns recognised by name |
+| `awards` | public award results | the winner becomes a competitor; the company's own awards are skipped |
+| `web` | saved product page | schema.org `Offer`, then price meta tags, then visible `₹ 12,345` text; nothing is fetched |
+
+`market_view` merges feed offers and stored observations for the lines of a bid. For each competitor and
+product the freshest observation wins. Observations older than `observation_max_age_days` (180) are
+dropped. Reliability is scaled by source (quotes 0.90, awards 0.88, web 0.75) and by age:
+`× (1 − 0.35 · age / max_age)`. The strategy agent logs how many offers each source supplied.
+
+### 13.4 Learning loop (`app/learning/loop.py`, `app/ml/registry.py`)
+* **Labels.** Correcting a requirement's type stores (sentence → type) for the clause model. Swapping a
+  line's product stores (line description → category) for the category model. Real labels are weighted
+  five times a synthetic example.
+* **Outcomes.** Won or lost becomes a `DealHistory` row with `source = "outcome"`. The price ratio is our
+  total against the winning price, or against the best rival total if we won; warranty and lead-time
+  deltas are medians over the lines. Real outcomes are weighted ten times.
+* **Retraining.** A model is stale when five new labels or outcomes have arrived since it was trained, or
+  when labels were removed; it retrains on next use.
+* **Evaluation** (`/api/learning/evaluate`). Leave-one-document-out accuracy on reviewer labels: a model
+  trained on synthetic data plus the other documents' labels, compared with the synthetic-only baseline.
+  Also expected calibration error with a reliability table, and Brier score and calibration of the win
+  model against recorded outcomes. It needs at least eight real labels or outcomes.
+
+### 13.5 Specification rows against catalogue data (`app/nlp/attributes.py`)
+Measurable limits ("Minimum 1000 DPI", "30 mm drivers", "Minimum 6 hours battery", "3 Indian sockets") are
+compared with the product attribute for that unit. A failure is a deviation, and a compliant catalogue
+alternative is named. Descriptive requirements are split into conjuncts (",", "and") and alternatives
+("or"). Purpose phrases ("for the language laboratory") are dropped, and a conjunct is met when every
+significant word of one alternative appears in the product's attributes, description or keywords. The
+response quotes the matching attribute. Warranty clauses that name several groups ("graphics cards three
+years and UPS units two years") are split per category by `months_by_category`.
+
+### 13.6 Submission pack (`app/pack/builder.py`)
+The technical proposal is a document in the same section and block model as the editable report, so it
+renders to PDF and Word with the same exporter. It contains:
+
+* covering letter;
+* bidder information form (legal, statutory, MSME, turnover, net worth, certifications, bank);
+* eligibility statement with evidence;
+* make and model offered per item, and a parameter-by-parameter compliance table per item;
+* commercial and general conditions, and the statement of deviations (or "Nil");
+* delivery plan;
+* warranty and support, grounded in retrieved knowledge-base passages;
+* declarations: non-blacklisting, MSE, local content and integrity;
+* checklist of documents.
+
+`maf_letters` writes one authorisation request per OEM offered. The ZIP adds the compliance statement, the
+quotation (as the financial bid) and a submission index that separates the technical and financial
+envelopes.

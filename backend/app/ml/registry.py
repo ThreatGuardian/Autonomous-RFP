@@ -59,7 +59,8 @@ class ModelRegistry:
         """True when enough new real labels have arrived since the model was trained."""
         metrics = getattr(model, "metrics", {}) or {}
         seen = metrics.get("real_outcomes" if source == "win" else "real_labels", 0)
-        return _count(source) - seen >= RETRAIN_EVERY
+        now = _count(source)
+        return now - seen >= RETRAIN_EVERY or now < seen  # new labels arrived, or labels were removed
 
     def _load_or_train(self, name: str, trainer, source: str | None = None) -> Any:
         with self._lock:

@@ -255,6 +255,10 @@ def reprice(rfp_id: int, body: RepriceRequest) -> dict[str, Any]:
         overrides: dict[str, Any] = {k: current[k] for k in ("compliance", "eligibility") if k in current} if body.reset else current
         lines = dict(overrides.get("lines", {}))
         for key, ov in body.lines.items():
+            if ov.sku:
+                from app.learning.loop import record_line_correction
+
+                record_line_correction(db, rfp, key, ov.sku)  # a product swap teaches the category model
             entry = {**lines.get(key, {}), **ov.model_dump(exclude_none=True, exclude={"clear_bundle"})}
             if ov.clear_bundle:
                 entry["bundle"] = None

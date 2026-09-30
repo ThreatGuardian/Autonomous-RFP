@@ -64,7 +64,8 @@ class ProposalDraftingAgent(Agent):
         version = int(ctx.overrides.get("_version", 1)) if ctx.overrides else 1
         issued = date.today()
         valid_until = issued + timedelta(days=company["quote_validity_days"])
-        quote_number = f"MSS-Q-{issued.year}-{ctx.rfp_id:04d}"
+        prefix = ctx.company.get("quote_prefix") or "".join(w[0] for w in ctx.company["short_name"].split()).upper()
+        quote_number = f"{prefix}-Q-{issued.year}-{ctx.rfp_id:04d}"
         money = lambda v: fmt(v, loc.currency, loc.decimals)  # noqa: E731
 
         categories: dict[str, int] = {}

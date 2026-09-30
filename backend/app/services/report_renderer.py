@@ -287,10 +287,17 @@ def _verdict(strat: CompetitiveAnalysis, compliance: ComplianceReport | None = N
         label, advice = _verdict(strat)
         return label, advice.rstrip(".") + "; declare the deviations and seek clarifications before submitting."
     p, m = strat.win_probability, strat.margin_pct
+    award = strat.award
+    if award is not None and award.rule == "L1" and award.rank == 1:
+        return ("Strong bid" if m >= 5 else "Competitive bid",
+                f"Recommend submitting as priced; we are the lowest estimated bid, "
+                f"{fmt(award.lowest_total - award.our_total, strat.base_currency, 0)} below {award.lowest_competitor}.")
     if p >= 0.55 and m >= 10:
         return "Strong bid", "Recommend submitting as priced."
     if p >= 0.35:
-        return "Competitive bid", "Recommend submitting; value-led positioning carries the offer."
+        bundled = any(line.bundle for line in strat.lines)
+        return "Competitive bid", ("Recommend submitting; value-led positioning carries the offer." if bundled
+                                   else "Recommend submitting; prices sit at or just under the market.")
     return "Stretch bid", "Submit only if the relationship justifies it; several lines face aggressive pricing."
 
 
