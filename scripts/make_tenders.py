@@ -19,6 +19,7 @@ from reportlab.lib.units import mm
 from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from des_rfp import DES, ORG as DES_ORG, REF as DES_REF  # noqa: E402
 from tender_content import GODAVARI, GV_ORG, GV_REF, KONKAN  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "samples"
@@ -36,8 +37,8 @@ def _decorate(canvas, doc) -> None:
     w, h = A4
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(colors.HexColor("#333333"))
-    canvas.drawString(20 * mm, h - 12 * mm, GV_ORG)
-    canvas.drawRightString(w - 20 * mm, h - 12 * mm, f"Tender No. {GV_REF}")
+    canvas.drawString(20 * mm, h - 12 * mm, doc._org)
+    canvas.drawRightString(w - 20 * mm, h - 12 * mm, doc._ref_label)
     canvas.setStrokeColor(colors.HexColor("#999999"))
     canvas.line(20 * mm, h - 14 * mm, w - 20 * mm, h - 14 * mm)
     canvas.drawString(20 * mm, 11 * mm, "Signature of bidder with seal")
@@ -47,6 +48,8 @@ def _decorate(canvas, doc) -> None:
 
 class _Doc(SimpleDocTemplate):
     _total = 0
+    _org = GV_ORG
+    _ref_label = f"Tender No. {GV_REF}"
 
 
 def _pdf_story(elements: list[tuple]) -> list:
@@ -87,12 +90,13 @@ def _pdf_story(elements: list[tuple]) -> list:
     return out
 
 
-def make_pdf(path: Path) -> int:
+def make_pdf(path: Path, elements: list[tuple] = GODAVARI, org: str = GV_ORG, ref_label: str = f"Tender No. {GV_REF}",
+             title: str = f"Tender {GV_REF}") -> int:
     def build(total: int) -> int:
         doc = _Doc(str(path), pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=22 * mm, bottomMargin=20 * mm,
-                   title=f"Tender {GV_REF}", author=GV_ORG)
-        doc._total = total
-        doc.build(_pdf_story(GODAVARI), onFirstPage=_decorate, onLaterPages=_decorate)
+                   title=title, author=org)
+        doc._total, doc._org, doc._ref_label = total, org, ref_label
+        doc.build(_pdf_story(elements), onFirstPage=_decorate, onLaterPages=_decorate)
         return doc.page
 
     return build(build(0))  # second pass prints the correct "of N"
@@ -135,4 +139,5 @@ def make_docx(path: Path) -> None:
 if __name__ == "__main__":
     pages = make_pdf(OUT / "08_godavari_smart_city_tender.pdf")
     make_docx(OUT / "09_konkan_university_rfp.docx")
-    print(f"Tender PDF: {pages} pages; university RFP written to {OUT}")
+    des = make_pdf(OUT / "10_des_pune_university_rfp.pdf", DES, DES_ORG, f"RFP No. {DES_REF}", f"RFP {DES_REF}")
+    print(f"Tender PDF: {pages} pages; DES Pune University RFP: {des} pages; written to {OUT}")

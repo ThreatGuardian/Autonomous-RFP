@@ -15,7 +15,7 @@ from typing import Any
 
 from sqlalchemy import select
 
-from app.config import DATA_DIR
+from app.config import get_settings
 from app.db.models import Product
 from app.db.session import session_scope
 from app.nlp.text import split_sentences
@@ -39,7 +39,7 @@ class KnowledgeStore:
     def __init__(self) -> None:
         sections: list[Document] = []
         sentences: list[Document] = []
-        for path in sorted((DATA_DIR / "knowledge").glob("*.md")):
+        for path in sorted(get_settings().knowledge_dir.glob("*.md")):
             text = path.read_text(encoding="utf-8")
             title_match = re.search(r"^# (.+)$", text, re.M)
             title = title_match.group(1).strip() if title_match else path.stem

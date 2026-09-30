@@ -70,5 +70,6 @@ def test_reference_endpoints():
         samples = client.get("/api/rfps/samples").json()
         assert sum(s["kind"] == "text" for s in samples) == 5
         assert [s["filename"] for s in samples if s["kind"] == "file"] == ["08_godavari_smart_city_tender.pdf",
-                                                                           "09_konkan_university_rfp.docx"]
+                                                                           "09_konkan_university_rfp.docx",
+                                                                               "10_des_pune_university_rfp.pdf"]
         assert client.get("/market-api/v1/competitors").status_code == 401

@@ -5,6 +5,8 @@ from __future__ import annotations
 from app.agents.base import Agent, PipelineContext, StageLog
 from app.agents.messages import CompetitiveAnalysis, InternalPricing, MarketOffer, ParsedRfp
 from app.db.seed import load_json
+from app.db.session import session_scope
+from app.intel.sources import ADAPTERS, market_view
 from app.finance.currency import UnknownCurrency, fx
 from app.finance.money import fmt
 from app.ml.registry import registry
@@ -45,8 +47,19 @@ class CompetitiveStrategyAgent(Agent):
                      offers=sum(len(v) for v in offers_by_mpn.values()), latency_ms=latency, attempts=resp.attempts)
         except MarketUnavailable as exc:
             available = False
-            warnings.append("Competitor market data unavailable; lines priced at standard price.")
             log.warn("Market API unavailable", error=str(exc))
+
+        # ---- stored competitor intelligence (collected quotes, public awards, saved pages)
+        try:
+            with session_scope() as db:
+                offers_by_mpn, used = market_view(db, [(l.mpn, l.quantity) for l in costing.lines], offers_by_mpn, policy)
+            if any(v for k, v in used.items() if k != "feed"):
+                available = True
+                log.info("Competitor observations merged", **{ADAPTERS[k]: v for k, v in used.items() if v})
+        except Exception as exc:  # observations are an enrichment; never block pricing on them
+            log.warn("Stored competitor observations unavailable", error=str(exc))
+        if not available:
+            warnings.append("Competitor market data unavailable; lines priced at standard price.")
 
         # ---- buyer context
         weight = parsed.terms.price_weight_pct or (

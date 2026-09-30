@@ -36,6 +36,7 @@ from app.agents.messages import (
 from app.agents.parser_agent import spec_fit
 from app.db.models import Product
 from app.db.session import session_scope
+from app.nlp.attributes import check as attribute_check
 from app.nlp.line_items import extract_specs
 from app.nlp.tender import fmt_inr
 from app.nlp.text import analyze, fold
@@ -54,6 +55,20 @@ LD_CAP_LIMIT_PCT = 10.0
 def _join(items: list[str]) -> str:
     items = [i for i in items if i]
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1] if items else ""
+
+
+_SEGMENT_SYNONYMS = {"computer": "it", "computers": "it", "ict": "it", "information": "it", "hardware": "hardware",
+                     "sale": "supply", "sales": "supply", "trading": "supply", "supplies": "supply"}
+_SEGMENT_STOP = {"of", "the", "and", "from", "in", "for", "technology", "products", "equipment"}
+
+
+def _same_segment(asked: str, held: str) -> bool:
+    """'supply of computer hardware' ~ 'it hardware supply'; 'ict system integration' ~ 'system integration'."""
+    def toks(t: str) -> set[str]:
+        return {_SEGMENT_SYNONYMS.get(w, w) for w in re.findall(r"[a-z]+", t.lower()) if w not in _SEGMENT_STOP}
+
+    a, h = toks(asked), toks(held)
+    return bool(a) and (a <= h or h <= a or len(a & h) >= 2)
 
 
 def _days(text: str) -> int | None:
@@ -80,7 +95,7 @@ class ComplianceAgent(Agent):
         parsed: ParsedRfp = ctx.require("parsed")
         costing: InternalPricing = ctx.require("costing")
         company = ctx.company
-        profile = company.get("profile", {})
+        profile = {"short_name": company.get("short_name", "local"), **company.get("profile", {})}
         doc = parsed.document
         long_form = bool(doc and doc.long_form)
         self._kb = knowledge_store()
@@ -207,8 +222,7 @@ class ComplianceAgent(Agent):
             seg_text = p.get("segment") or ""
             seg = seg_text.lower()
             if ok and seg:
-                share = next((v for k, v in profile.get("turnover_segments_pct", {}).items()
-                              if k in seg or seg.replace("ict ", "") in k or all(w in k for w in seg.split()[-2:])), None)
+                share = next((v for k, v in profile.get("turnover_segments_pct", {}).items() if _same_segment(seg, k)), None)
                 need = p.get("segment_share_pct")
                 if share is not None and need:
                     chk.evidence.append(f"{seg_text} share of turnover: {share}%")
@@ -380,6 +394,8 @@ class ComplianceAgent(Agent):
                                      f"propose OEM extended support or seek a clarification.")
                 return
         requested = extract_specs(f"{param} {want}")
+        if line.category == "component":
+            requested.pop("form_factor", None)  # "tower" here describes the host machine, not the card
         if re.match(r"\s*(operating system|os)\b", param, re.I) and product is not None:
             os_have = fold(str((product.specs or {}).get("os", "")))
             ok = "windows 11" in os_have and ("pro" in os_have or "professional" not in fold(want))
@@ -400,6 +416,17 @@ class ComplianceAgent(Agent):
                     alt = self._alternative(line, requested)
                     item.response = f"{name}: {'; '.join(failed)}." + (f" Compliant alternative: {alt}." if alt else
                                                                        " No compliant model in the catalogue.")
+                return
+        if product is not None:
+            met, why = attribute_check(param, want, product)
+            if met is True:
+                item.status, item.response = "Complies", f"{name}: {why}."
+                return
+            if met is False:
+                item.status = "Deviation"
+                alt = next((f"{p.name} ({p.sku})" for p in self._products.values()
+                            if p.category == line.category and p.sku != line.sku and attribute_check(param, want, p)[0]), None)
+                item.response = f"{name}: {why}." + (f" Compliant alternative: {alt}." if alt else "")
                 return
         item.status = "Complies with note"
         item.verify = True
@@ -444,22 +471,25 @@ class ComplianceAgent(Agent):
         support = profile.get("support", {})
         need = months_in(t) if re.search(r"warrant", t, re.I) else None
         if need:
-            from app.pricing.warranty import _named_categories
+            from app.pricing.warranty import months_by_category
 
-            cats = _named_categories(t) or {l.category for l in costing.lines}
-            hw = [l for l in costing.lines if l.category in cats and l.category not in ("software", "service", "cabling")]
-            short = [l for l in hw if l.warranty_months < need]
-            extended = [l for l in hw if l.included_addons and l.warranty_months >= need]
+            per = months_by_category(t)
+            required = lambda l: per.get(l.category, need) if per else need  # noqa: E731
+            hw = [l for l in costing.lines if (not per or l.category in per) and l.category not in ("software", "service", "cabling")]
+            short = [l for l in hw if l.warranty_months < required(l)]
+            extended = [l for l in hw if l.included_addons and l.warranty_months >= required(l)]
             item.basis = "Warranty quoted per line (including mandated extensions)"
+            spans = sorted(set(per.values())) if per else [need]
+            label = " / ".join(f"{m}-month" for m in spans)
             if short:
                 item.status = "Deviation"
-                item.response = (f"{_join([l.name for l in short[:3]])} cannot be offered with {need} months; "
+                item.response = (f"{_join([l.name for l in short[:3]])} cannot be offered with the required cover; "
                                  f"{len(hw) - len(short)} of {len(hw)} lines comply.")
             elif extended:
                 item.status = "Complies with note"
-                item.response = f"{need}-month cover quoted; extended warranty priced in for {len(extended)} line(s)."
+                item.response = f"{label} cover quoted as required; extended warranty priced in for {len(extended)} line(s)."
             else:
-                item.status, item.response = "Complies", f"All covered lines carry {need}+ months."
+                item.status, item.response = "Complies", f"All covered lines carry the required {label} warranty."
             return
         hours = re.findall(r"within\s+(\d+)\s*(?:hours|hrs)", t, re.I) if re.search(r"attend|respon|report", t, re.I) else []
         if re.search(r"standby|replacement unit", t, re.I):
@@ -488,7 +518,7 @@ class ComplianceAgent(Agent):
                 item.status, item.response = "Complies", f"On-site response within {within} hours from our {city or 'nearest'} office."
             else:
                 item.status = "Complies with note"
-                where = f"{city} has no Meridian office" if city and city not in offices else "response time is tighter than standard"
+                where = f"{city} has no {profile.get('short_name', 'local')} office" if city and city not in offices else "response time is tighter than standard"
                 item.response = (f"{where[:1].upper() + where[1:]}; a field engineer will be stationed locally for the warranty "
                                  f"period to meet the {respond}-hour response.")
                 item.verify = True

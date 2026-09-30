@@ -142,6 +142,9 @@ def extract_specs(text: str) -> dict[str, Any]:
     m = re.search(r"(\d+)\s*g(?:b|be)?\s*sfp\+?|(\d+)\s*g\s*uplink|sfp\+", t)
     if m and re.search(r"uplink|sfp", t):
         specs["uplink_gbps"] = int(m.group(1) or m.group(2) or 10)
+    m = re.search(r"(\d{3,5})\s*dpi", t)
+    if m:
+        specs["dpi"] = int(m.group(1))
     m = re.search(r"(\d{2,3})\s*ppm", t)
     if m:
         specs["ppm"] = int(m.group(1))
@@ -150,6 +153,13 @@ def extract_specs(text: str) -> dict[str, Any]:
         specs["form_factor"] = f"{m.group(1)}U"
     elif re.search(r"form factor[^.;\n]{0,10}\btower\b|\btower\b(?! server)", t):
         specs["form_factor"] = "tower"
+    if re.search(r"graphics card|\bgpu\b|\brtx\b|\bgddr\d", t):
+        # On a graphics card the memory figure is video memory, and "tower" describes the host machine.
+        specs.pop("form_factor", None)
+        vram = specs.pop("ram_gb", None)
+        m = re.search(r"(\d{1,2})\s*gb\s*(?:of\s*)?(?:gddr\d\w*|vram|video memory)?", t)
+        if vram or m:
+            specs["vram_gb"] = int(vram or m.group(1))
     return specs
 
 

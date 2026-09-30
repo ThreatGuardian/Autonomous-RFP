@@ -246,6 +246,10 @@ CATEGORY_PHRASES: dict[str, list[str]] = {
                 "ethernet cable", "fibre patch cord", "cable box"],
     "peripheral": ["keyboard", "mouse", "keyboard mouse combo", "webcam", "headset", "docking station", "usb dock",
                    "speakerphone", "headphones"],
+    "audio": ["headphones", "headset", "usb headset", "headset with microphone", "over-ear headphones", "earphones",
+              "wireless headphones", "language lab headset", "speakers", "stereo headphones"],
+    "component": ["graphics card", "gpu card", "nvidia graphics card", "processor", "cpu chip", "desktop processor",
+                  "ram module", "memory module", "ddr5 ram", "motherboard", "power supply unit", "smps", "rtx card"],
     "printer": ["printer", "laser printer", "multifunction printer", "mfp", "network printer", "scanner printer"],
     "av": ["video conferencing", "video bar", "conference room system", "meeting room camera", "vc system",
            "room kit", "interactive display"],
@@ -254,6 +258,8 @@ CATEGORY_PHRASES: dict[str, list[str]] = {
     "service": ["installation", "configuration service", "deployment service", "implementation", "migration service",
                 "professional services", "engineer days", "onsite setup", "commissioning", "training"],
 }
+
+SPECIALISES = {"audio": "peripheral", "component": "storage_media"}
 
 _QUALIFIERS = ["", "", "new", "enterprise grade", "high performance", "energy efficient", "branded", "genuine",
                "business class", "rugged", "compact", "latest generation"]
@@ -266,7 +272,14 @@ _SPECLETS = ["16gb ram", "512gb ssd", "i5", "i7", "poe+", "4k", "dual psu", "1u"
 def category_corpus(catalog: list[dict], per_category: int = 160, seed: int = 5) -> tuple[list[str], list[str]]:
     """Line-item phrases labelled with product category, seeded from the catalogue itself."""
     rng = random.Random(seed)
-    bank: dict[str, list[str]] = {c: list(p) for c, p in CATEGORY_PHRASES.items()}
+    present = {p["category"] for p in catalog}
+    # Generic phrases only for categories this company actually sells; a narrower
+    # category (audio) takes its phrases away from the broader one (peripheral).
+    bank: dict[str, list[str]] = {c: list(p) for c, p in CATEGORY_PHRASES.items() if c in present}
+    for narrow, broad in SPECIALISES.items():
+        if narrow in bank and broad in bank:
+            taken = set(CATEGORY_PHRASES[narrow])
+            bank[broad] = [p for p in bank[broad] if p not in taken and p not in ("headset", "headphones")]
     for prod in catalog:
         bank.setdefault(prod["category"], []).extend(
             [prod["name"].lower(), f"{prod['brand']} {prod['category'].replace('_', ' ')}".lower(), *prod["keywords"]]

@@ -250,6 +250,9 @@ class MarketOffer(BaseModel):
     reliability: float
     bundle: str | None = None
     promotion: str | None = None
+    equivalent: str | None = None
+    source: str = "Market feed"
+    observed_on: str | None = None
 
 
 class MarketView(BaseModel):

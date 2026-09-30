@@ -293,7 +293,10 @@ def extract_evaluation(units: list[Unit]) -> EvaluationMethod:
 _ELIG_RULES: list[tuple[str, str, re.Pattern[str]]] = [
     ("turnover", "Annual turnover", re.compile(r"turnover", re.I)),
     ("net_worth", "Net worth", re.compile(r"net worth", re.I)),
-    ("similar_works", "Similar work experience", re.compile(r"\bsimilar\b[^.]{0,40}(?:works?|projects?|orders?|contracts?|suppl)", re.I)),
+    ("similar_works", "Similar work experience", re.compile(
+        r"\bsimilar\b[^.]{0,40}(?:works?|projects?|orders?|contracts?|suppl)|"
+        r"(?:completed|executed)\s+(?:at least\s+)?(?:one|two|three|four|five|\d)\s+(?:purchase\s+)?(?:orders?|works?|projects?|contracts?)",
+        re.I)),
     ("supplied_quantity", "Supply volume", re.compile(r"supplied\s+(?:at least|a minimum of|not less than|minimum)?\s*\d[\d,]*\s+[a-z]", re.I)),
     ("certification", "Certifications", re.compile(r"\biso\b|\bcmmi\b|certificat(?:e|ion)s?\b(?![^.]{0,20}engineer)", re.I)),
     ("oem_authorisation", "OEM authorisation", re.compile(r"authori[sz]ation form|\bmaf\b|authori[sz]ed (?:partner|dealer|distributor|reseller)|"
@@ -342,7 +345,8 @@ def parse_criterion(kind: str, text: str) -> dict[str, Any]:
         if m:
             p["segment_share_pct"], p["segment"] = float(m.group(1)), m.group(2).strip()
         else:
-            m = re.search(r"from\s+((?:it|ict)?\s*[a-z ]{3,40}?(?:supply|business|services|integration))", t, re.I)
+            m = (re.search(r"from\s+(?:the\s+)?((?:supply|sale|trading) of [a-z ]{3,40}?)(?=\s+in\b|\s+during\b|[.,;(]|$)", t, re.I)
+                 or re.search(r"from\s+((?:it|ict)?\s*[a-z ]{3,40}?(?:supply|business|services|integration))", t, re.I))
             if m:
                 p["segment"] = m.group(1).strip()
     elif kind == "net_worth":

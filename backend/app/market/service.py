@@ -23,14 +23,14 @@ from typing import Any
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app.config import DATA_DIR, get_settings
+from app.config import data_file, get_settings
 
 REFERENCE_FX_TO_USD = {"USD": 1.0, "INR": 88.2, "EUR": 0.8555, "AED": 3.6725, "GBP": 0.745}
 
 
 @lru_cache
 def market() -> dict[str, Any]:
-    with open(DATA_DIR / "market.json", encoding="utf-8") as fh:
+    with open(data_file("market.json"), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -74,6 +74,8 @@ class Offer(BaseModel):
     reliability: float
     bundle: str | None = None
     promotion: str | None = None
+    equivalent: str | None = None  # a brand store offers its own like-for-like model
+    source: str = "Market feed"
     observed_at: str
 
 
@@ -87,10 +89,22 @@ class BatchRequest(BaseModel):
     items: list[OfferQuery]
 
 
+def _equivalent(product: dict[str, Any], brands: list[str]) -> tuple[str, dict[str, Any]] | None:
+    """The closest-priced product of the same category from one of ``brands`` (within 40%)."""
+    best = None
+    for other_mpn, other in market()["products"].items():
+        if other["category"] != product["category"] or other.get("brand") not in brands:
+            continue
+        gap = abs(math.log(other["street_price_usd"] / product["street_price_usd"]))
+        if gap <= math.log(1.4) and (best is None or gap < best[0]):
+            best = (gap, other_mpn, other)
+    return (best[1], best[2]) if best else None
+
+
 def offers_for(mpn: str, qty: int, country: str, day: date | None = None) -> list[Offer]:
     data = market()
-    product = data["products"].get(mpn)
-    if not product:
+    requested = data["products"].get(mpn)
+    if not requested:
         return []
     day = day or date.today()
     promos = {(p["competitor"], p["mpn"]): p for p in data["promotions"]}
@@ -98,14 +112,23 @@ def offers_for(mpn: str, qty: int, country: str, day: date | None = None) -> lis
     for comp in data["competitors"]:
         if country.upper() not in comp["serves"]:
             continue
+        product, priced_mpn, equivalent = requested, mpn, None
+        brands = comp.get("brands", "*")
+        if brands != "*" and requested.get("brand") not in brands:
+            # A brand store cannot sell another brand; it offers its own nearest model instead.
+            eq = _equivalent(requested, brands)
+            if eq is None:
+                continue
+            priced_mpn, product = eq
+            equivalent = product["description"]
         rng = _rng(comp["id"], mpn, "coverage")
-        if rng.random() > comp["coverage"] and (comp["id"], mpn) not in promos:
+        if rng.random() > comp["coverage"] and (comp["id"], priced_mpn) not in promos:
             continue  # competitor does not carry this product
         factor = comp["category_factor"].get(product["category"], comp["category_factor"]["*"])
-        promo = promos.get((comp["id"], mpn))
+        promo = promos.get((comp["id"], priced_mpn))
         if promo:
             factor = promo["street_factor"]
-        usd = product["street_price_usd"] * factor * _daily_drift(comp["id"], mpn, day, comp["volatility"])
+        usd = product["street_price_usd"] * factor * _daily_drift(comp["id"], priced_mpn, day, comp["volatility"])
         usd *= 1 - _volume_discount(qty)
         price = usd * REFERENCE_FX_TO_USD[comp["currency"]]
         lo, hi = comp["lead_time_days"]
@@ -116,7 +139,7 @@ def offers_for(mpn: str, qty: int, country: str, day: date | None = None) -> lis
                 unit_price=round(price, 2), currency=comp["currency"],
                 warranty_months=comp["default_warranty_months"], lead_time_days=day_rng.randint(lo, hi),
                 in_stock=day_rng.random() < 0.85, reliability=comp["reliability"], bundle=comp.get("bundle"),
-                promotion=promo["label"] if promo else None,
+                promotion=promo["label"] if promo else None, equivalent=equivalent,
                 observed_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
             )
         )
@@ -139,7 +162,7 @@ def create_market_app() -> FastAPI:
     def competitors() -> list[dict[str, Any]]:
         return [
             {k: c[k] for k in ("id", "name", "hq", "currency", "positioning", "serves", "reliability", "default_warranty_months")}
-            | {"bundle": c.get("bundle")}
+            | {"bundle": c.get("bundle"), "brands": c.get("brands", "*"), "channel": c.get("channel"), "notes": c.get("notes")}
             for c in market()["competitors"]
         ]
 

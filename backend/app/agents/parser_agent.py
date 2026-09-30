@@ -51,7 +51,7 @@ BRAND_ALIASES = {"fortigate": "fortinet", "meraki": "cisco", "hpe": "hpe", "hp":
 def _product_spec_view(p: Product) -> dict[str, Any]:
     s = dict(p.specs or {})
     view: dict[str, Any] = {
-        k: s[k] for k in ("ram_gb", "storage_gb", "screen_in", "ports", "capacity_va", "bays")
+        k: s[k] for k in ("ram_gb", "storage_gb", "screen_in", "ports", "capacity_va", "bays", "vram_gb", "dpi")
         if isinstance(s.get(k), (int, float)) and not isinstance(s.get(k), bool)
     }
     for k in ("poe", "wifi"):
@@ -106,6 +106,8 @@ def spec_fit(requested: dict[str, Any], product: Product) -> tuple[float | None,
     at_least("ram_gb", "RAM", " GB")
     at_least("storage_gb", "Storage", " GB")
     at_least("bays", "Drive bays")
+    at_least("vram_gb", "Video memory", " GB")
+    at_least("dpi", "Sensor resolution", " DPI")
     if "cpu_tier" in requested:
         want, got = requested["cpu_tier"], have.get("cpu_tier")
         cpu = (product.specs or {}).get("cpu", "")

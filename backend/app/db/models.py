@@ -56,6 +56,9 @@ class Product(Base):
     warranty_months: Mapped[int] = mapped_column(Integer, default=12)
     tax_category: Mapped[str] = mapped_column(String(32), default="goods_standard")
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    hsn: Mapped[str | None] = mapped_column(String(12), nullable=True)  # HSN / SAC code
+    gst_rate_pct: Mapped[float | None] = mapped_column(Float, nullable=True)  # when it differs from the tax category
+    price_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     @property
     def floor_price(self) -> float:
@@ -134,6 +137,8 @@ class DealHistory(Base):
     bundled_value_add: Mapped[bool] = mapped_column(Boolean)
     repeat_customer: Mapped[bool] = mapped_column(Boolean)
     won: Mapped[bool] = mapped_column(Boolean)
+    source: Mapped[str | None] = mapped_column(String(16), nullable=True)  # None/synthetic | outcome
+    rfp_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 # --------------------------------------------------------------------------- finance
@@ -235,3 +240,98 @@ class ApprovalEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     rfp: Mapped[Rfp] = relationship(back_populates="events")
+
+
+# --------------------------------------------------------------------------- company data import (phase 12)
+
+
+class ImportBatch(Base):
+    """One upload of company data (catalogue, prices, stock) from CSV, Excel or Tally."""
+
+    __tablename__ = "import_batches"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    filename: Mapped[str] = mapped_column(String(240))
+    format: Mapped[str] = mapped_column(String(16))  # csv | xlsx | tally
+    rows: Mapped[int] = mapped_column(Integer, default=0)
+    created: Mapped[int] = mapped_column(Integer, default=0)
+    updated: Mapped[int] = mapped_column(Integer, default=0)
+    unchanged: Mapped[int] = mapped_column(Integer, default=0)
+    skipped: Mapped[int] = mapped_column(Integer, default=0)
+    mapping: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    issues: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    actor: Mapped[str] = mapped_column(String(80), default="Reviewer")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PriceVersion(Base):
+    """Price and stock history for a product; one row each time a value changes."""
+
+    __tablename__ = "price_versions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sku: Mapped[str] = mapped_column(String(32), index=True)
+    unit_cost: Mapped[float] = mapped_column(Float)
+    list_price: Mapped[float] = mapped_column(Float)
+    stock_qty: Mapped[int] = mapped_column(Integer, default=0)
+    effective_from: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    source: Mapped[str] = mapped_column(String(80), default="seed")
+    batch_id: Mapped[int | None] = mapped_column(ForeignKey("import_batches.id"), nullable=True)
+
+
+# --------------------------------------------------------------------------- competitor intelligence (phase 13)
+
+
+class PriceObservation(Base):
+    """A dated, sourced competitor price for one product."""
+
+    __tablename__ = "price_observations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    competitor_id: Mapped[str] = mapped_column(String(48), index=True)
+    competitor: Mapped[str] = mapped_column(String(120))
+    mpn: Mapped[str] = mapped_column(String(48), index=True)
+    product: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    unit_price: Mapped[float] = mapped_column(Float)
+    currency: Mapped[str] = mapped_column(String(3), default="INR")
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+    warranty_months: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    observed_on: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    adapter: Mapped[str] = mapped_column(String(24))  # quotes | awards | web | feed
+    source: Mapped[str] = mapped_column(String(80))
+    reference: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    collected_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+# --------------------------------------------------------------------------- learning loop (phase 14)
+
+
+class TrainingLabel(Base):
+    """A label produced by a reviewer's correction, used to retrain a model."""
+
+    __tablename__ = "training_labels"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    model: Mapped[str] = mapped_column(String(32), index=True)  # clause | category
+    text: Mapped[str] = mapped_column(Text)
+    label: Mapped[str] = mapped_column(String(48))
+    predicted: Mapped[str | None] = mapped_column(String(48), nullable=True)
+    rfp_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    source: Mapped[str] = mapped_column(String(48), default="reviewer")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class BidOutcome(Base):
+    """What happened to a submitted bid; feeds the win-probability model."""
+
+    __tablename__ = "bid_outcomes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rfp_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    result: Mapped[str] = mapped_column(String(16))  # won | lost | cancelled
+    our_total: Mapped[float | None] = mapped_column(Float, nullable=True)
+    winning_total: Mapped[float | None] = mapped_column(Float, nullable=True)
+    winner: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

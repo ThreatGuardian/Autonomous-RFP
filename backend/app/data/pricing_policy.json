@@ -13,6 +13,22 @@
  "msme_purchase_preference_share_pct": 25,
  "l1_undercut_pct": 0.5,
  "assumed_competitor_technical_score": 75,
- "bundle_kinds": ["warranty", "service", "support"],
- "currency_decimals": {"JPY": 0, "KWD": 3, "BHD": 3, "OMR": 3, "IDR": 0}
+ "bundle_kinds": [
+  "warranty",
+  "service",
+  "support"
+ ],
+ "currency_decimals": {
+  "JPY": 0,
+  "KWD": 3,
+  "BHD": 3,
+  "OMR": 3,
+  "IDR": 0
+ },
+ "observation_max_age_days": 180,
+ "observation_source_reliability": {
+  "quotes": 0.9,
+  "awards": 0.88,
+  "web": 0.75
+ }
 }

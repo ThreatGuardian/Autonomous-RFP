@@ -24,7 +24,8 @@ CATEGORY_LABELS = {
     "network_switch": "network switches", "wireless": "wireless access points", "firewall": "firewalls",
     "router": "routers", "server": "servers", "storage": "storage systems", "storage_media": "drives",
     "power": "power protection", "rack": "racks", "cabling": "structured cabling", "peripheral": "peripherals",
-    "printer": "printers", "av": "collaboration systems", "software": "software licences", "service": "professional services",
+    "printer": "printers", "av": "projectors and collaboration systems",
+    "audio": "headsets and headphones", "component": "graphics cards and components", "software": "software licences", "service": "professional services",
 }
 SIGNATORY = {"name": "Aarav Kulkarni", "title": "Bid Manager", "email": "bids@meridiansystems.in"}
 CERT_TOKENS = re.compile(r"(iso\s*/?\s*(?:iec\s*)?\d{4,5}|gdpr|dpdp|soc ?2|energy star|epeat|bis|rohs|ce marking|ukca)", re.I)
@@ -191,7 +192,7 @@ class ProposalDraftingAgent(Agent):
             quote_number=quote_number, version=version, issue_date=issued.isoformat(), valid_until=valid_until.isoformat(),
             salutation=salutation, cover_letter=cover, executive_summary=exec_summary, highlights=highlights,
             compliance=compliance, compliance_counts=counts, delivery_plan=plan, milestones=milestones,
-            inclusions=inclusions, terms=terms, signatory=SIGNATORY, retrieval_log=retrieval_log,
+            inclusions=inclusions, terms=terms, signatory=ctx.company.get("signatory", SIGNATORY), retrieval_log=retrieval_log,
         )
         if self._renderer is not None:
             proposal.documents = self._renderer(ctx, proposal)
