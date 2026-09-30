@@ -36,10 +36,45 @@ trained in this repository with scikit-learn.
 | Step | Stage (agent) | Result |
 |------|---------------|--------|
 | 1 | **RFP Parser Agent** | Extracts the client, contact, delivery location, currency, deadlines, commercial terms, every requested item with its specification, and every requirement clause. Matches each item to a catalogue SKU. |
-| 2 | **Internal Pricing Agent** | Reads landed cost, list price, margin floor, volume tier, stock, lead time and eligible bundle services from the internal pricing database. |
-| 3 | **Competitive Strategy Agent** | Queries the competitor market API and normalises offers to rupees. Picks the price and bundle that maximise expected profit within policy, and applies the value-differentiation pivot when a competitor is below cost. |
-| 4 | **Currency & Tax Agent** | Converts to the client's currency (live FX with fallbacks and a hedging buffer) and applies jurisdiction tax: GST/IGST, destination VAT/GST/sales tax, export zero-rating and reverse charge. |
-| 5 | **Proposal Drafting Agent** | Writes the proposal from retrieved knowledge-base evidence: cover letter, executive summary, compliance matrix, delivery plan and terms. Renders a **client quotation PDF** and a **confidential pricing memo PDF**. |
+| 2 | **Internal Pricing Agent** | Reads landed cost, list price, margin floor, volume tier, stock, lead time and eligible bundle services from the internal pricing database. A warranty the tender mandates is priced into the line rather than given away. |
+| 3 | **Tender Compliance Agent** | For long tenders: checks every eligibility criterion against the company profile, every specification row against the offered product, and every commercial and contractual clause against policy. Produces a clause-by-clause compliance matrix, risk flags, a bid-documents checklist and a **bid / no-bid recommendation**. |
+| 4 | **Competitive Strategy Agent** | Queries the competitor market API and normalises offers to rupees. Picks the price and bundle that maximise expected profit within policy, and applies the value-differentiation pivot when a competitor is below cost. |
+| 5 | **Currency & Tax Agent** | Converts to the client's currency (live FX with fallbacks and a hedging buffer) and applies jurisdiction tax: GST/IGST, destination VAT/GST/sales tax, export zero-rating and reverse charge. |
+| 6 | **Proposal Drafting Agent** | Writes the proposal from retrieved knowledge-base evidence: cover letter, executive summary, compliance matrix, delivery plan and terms. Renders a **client quotation**, a **compliance statement**, a **bid report** and a **confidential pricing memo** as PDFs. |
+
+### Long tenders (10–15 pages)
+
+A real tender is not a list of items. The parser reads the document's structure
+first:
+
+* **Layout.** Pages, fonts and ruled tables from PDF (PyMuPDF), Word heading
+  styles and page breaks from DOCX. Running headers and footers ("Tender No. …
+  Page 3 of 14") are removed, and tables split across pages are stitched back
+  together. Scanned pages are reported, and OCR'd when Tesseract is installed.
+* **Section tree.** Numbered sections, "Section III", "Annexure-2" and styled
+  headings are recognised; numbered *clauses* ("2.3.1 The bid shall …") are
+  told apart from headings. Each section is typed as notice, instructions,
+  eligibility, scope, technical specification, bill of quantities, commercial,
+  evaluation, conditions or forms.
+* **What it extracts.** Key dates with times (queries, pre-bid meeting,
+  submission, opening), EMD and MSE exemption, estimated value, bid validity,
+  performance security, liquidated damages, payment milestones, the evaluation
+  method (L1 or QCBS with its weights, minimum technical score and marking
+  scheme) and every pre-qualification criterion with its parameters.
+* **Items only from the schedule.** Line items are taken from the bill of
+  quantities, so "must have supplied 500 laptops" in the eligibility section is
+  never priced. Each schedule line is linked to its technical-specification
+  section ("as per specification 5.1") and inherits those specs for matching.
+* **Obligations.** Every clause gets its clause number, page, obligation
+  strength (mandatory / desirable / information), who it binds (bidder or
+  buyer) and a category.
+
+Two full sample tenders are included and can be processed from the New request
+page in one click: an 11-page municipal PDF (L1, EMD with MSE exemption, 10
+eligibility criteria, 10 specification tables) and an 11-page university RFP in
+Word (QCBS 70:30, which the system correctly recommends **not** bidding for,
+because ISO/IEC 20000-1 is not held and the offered server brand is not
+authorised).
 
 The reviewer works in the web console. They inspect each line's rationale,
 adjust price, bundle, product match or currency, re-price, and approve. Approval
@@ -152,12 +187,19 @@ Configuration options are listed in [`.env.example`](.env.example).
    the price-position scale, the win/profit curve, alternatives considered and
    competitor offers. You can override price, bundle, product or quantity, or
    exclude the line.
-3. **Requirements** — extracted terms, item-to-product matching with confidence,
-   and each clause with the compliance response and cited evidence.
-4. **Quotation** — commercial schedule in the client's currency with taxes, cover
+3. **Compliance** — the bid recommendation and its reasons, key dates with
+   countdowns, tender data, the evaluation method, eligibility checked against
+   the company profile, and the clause-by-clause matrix with a document outline,
+   filters (deviations, clarifications, items to verify) and search. Open any
+   clause to see the offered product, evidence and assessment basis, and record
+   your own decision; the statement and report are regenerated. Risks to price
+   in and the bid-documents checklist (ready / to prepare / to obtain) follow.
+4. **Requirements** — extracted terms, item-to-product matching with confidence,
+   and each clause with its location, type and compliance response.
+5. **Quotation** — commercial schedule in the client's currency with taxes, cover
    letter, delivery plan, inclusions and an embedded PDF preview. You can change
    the quote currency or FX buffer here.
-5. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
+6. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
    every manual change, with a live revenue, margin and below-floor preview:
    * **Line items:** inline price, quantity and service editing; include or
      exclude lines; pick a product for unmatched lines; adjust all prices by a
@@ -168,12 +210,15 @@ Configuration options are listed in [`.env.example`](.env.example).
 
    *Apply* sends everything as one re-price and records a note.
    *Reset to recommendations* clears all overrides.
-6. **Approve** — issues the final quotation and records the approval in the memo
+7. **Approve** — issues the final quotation and records the approval in the memo
    and the bid report.
 
-Every request produces three PDFs:
+Every request produces these PDFs (under *Documents* in the request header):
 
 * a **client quotation**;
+* a **compliance statement** for long tenders: eligibility with documents,
+  the clause-by-clause matrix grouped by the tender's own sections, the
+  statement of deviations and the declaration;
 * a confidential **pricing memo**;
 * a **bid analysis report** for leadership, covering the recommendation, win
   probability by line, margin structure, key pricing decisions, delivery
@@ -188,6 +233,9 @@ Every request produces three PDFs:
 | ![Sign in](docs/screenshots/00-sign-in.png) | ![Overview](docs/screenshots/01-overview.png) |
 | ![Workbench — lines](docs/screenshots/11-workbench-lines.png) | ![Workbench — terms](docs/screenshots/12-workbench-terms.png) |
 | ![Bid report page 1](docs/screenshots/13-bid-report-p1.png) | ![Bid report page 2](docs/screenshots/13-bid-report-p2.png) |
+| ![Compliance review](docs/screenshots/14-compliance-review.png) | ![Compliance matrix](docs/screenshots/15-compliance-matrix.png) |
+| ![Clause decision](docs/screenshots/16-clause-decision.png) | ![No-bid recommendation](docs/screenshots/17-no-bid.png) |
+| ![Compliance statement](docs/screenshots/18-compliance-statement.png) | |
 
 ## How the intelligence works
 
@@ -252,7 +300,7 @@ capture, Value premium, Standard pricing* and *Reviewer override*.
 ```
 backend/
   app/
-    agents/        base contract, typed messages, five agents, orchestrator
+    agents/        base contract, typed messages, six agents, orchestrator
     api/           REST endpoints (requests, reference data)
     db/            SQLAlchemy models, session, seeder
     data/          catalogue, tax rules, FX reference, gazetteer, market data,
@@ -260,15 +308,17 @@ backend/
     finance/       currency provider chain, tax engine, money formatting
     market/        mock competitor market API (separate FastAPI app)
     ml/            corpora, models, registry
-    nlp/           analyser, gazetteer, extractors, line-item extraction
-    pricing/       strategy engine
+    nlp/           analyser, gazetteer, extractors, line-item extraction,
+                   layout analysis, section tree, tender facts and eligibility
+    pricing/       strategy engine, mandated-warranty rules
     rag/           hybrid index, knowledge and catalogue stores
-    services/      document ingestion, market client, PDF renderer
+    services/      document ingestion, market client, PDF renderers (quotation,
+                   memo, bid report, compliance statement)
     assets/fonts/  Inter (OFL) for PDFs
   tests/           unit, agent, API and end-to-end tests
 frontend/          React + TypeScript + Tailwind review console
-samples/           seven sample requests (TXT, PDF, DOCX)
-scripts/           sample document generator
+samples/           seven short requests (TXT, PDF, DOCX) and two full tenders
+scripts/           sample and tender document generators
 docs/              roadmap, architecture notes, screenshots
 ```
 
@@ -281,11 +331,13 @@ is running. The main endpoints:
 |--------|------|---------|
 | `POST` | `/api/auth/login` · `register` · `federated` · `logout`, `GET /api/auth/me` | Sign-in and session |
 | `POST` | `/api/rfps` | Submit pasted text |
-| `POST` | `/api/rfps/upload` | Submit one or more PDF/DOCX/TXT files |
+| `POST` | `/api/rfps/upload` | Submit one or more PDF/DOCX/TXT files (originals are kept) |
+| `GET` · `POST` | `/api/rfps/samples`, `/api/rfps/samples/{file}` | List sample requests; process a sample tender file |
 | `GET` | `/api/rfps`, `/api/rfps/{id}` | List, and full detail (parsed data, pricing, proposal, stage logs, events) |
 | `POST` | `/api/rfps/{id}/reprice` | Apply reviewer overrides (line prices, services, quantities, products, exclusions, added items, client and terms corrections, currency) and re-run from costing |
 | `POST` | `/api/rfps/{id}/approve` · `reject` · `reopen` · `retry` | Workflow actions |
-| `GET` | `/api/rfps/{id}/documents/{quotation\|memo\|report}` | PDFs |
+| `POST` | `/api/rfps/{id}/compliance` | Reviewer decisions on clauses and eligibility criteria; re-runs from compliance |
+| `GET` | `/api/rfps/{id}/documents/{quotation\|memo\|report\|compliance}`, `/api/rfps/{id}/original` | PDFs, and the original upload |
 | `GET` | `/api/dashboard` | KPIs |
 | `GET` | `/api/catalog/products` · `PATCH /api/catalog/products/{sku}` | Pricing database |
 | `GET` | `/api/market/offers` · `/api/market/competitors` | Market intelligence |
@@ -297,14 +349,14 @@ is running. The main endpoints:
 
 ```bash
 cd backend
-python -m pytest            # 47 tests: language core, parser, finance, pricing, drafting, API workflow, sign-in, reviewer edits
+python -m pytest            # 57 tests: language core, parser, long tenders, compliance, finance, pricing, drafting, API workflow, sign-in, reviewer edits
 cd ../frontend
 npm run typecheck
 ```
 
 ## Build phases
 
-The project was built in ten phases, each committed separately. See
+The project was built in phases, each committed separately. See
 [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---

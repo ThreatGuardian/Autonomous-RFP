@@ -197,7 +197,7 @@ _DATE_PATTERNS = [
     (re.compile(r"\b(\d{4})-(\d{1,2})-(\d{1,2})\b"), "ymd"),
     (re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([A-Za-z]{3,9})\.?,?\s+(\d{4})\b"), "dMy"),
     (re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b"), "Mdy"),
-    (re.compile(r"\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b"), "numeric"),
+    (re.compile(r"\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})\b"), "numeric"),
 ]
 _DATE_ROLES = [
     ("due", re.compile(
@@ -320,7 +320,8 @@ def extract_terms(text: str) -> dict[str, object]:
 _SEGMENT_CUES = [
     ("education", r"\b(universit\w*|college|school|institute of technology|academy|campus|students?)\b"),
     ("healthcare", r"\b(hospital|health\w*|medical|clinic\w*|patients?)\b"),
-    ("public", r"\b(municipal\w*|city of|council|ministry|government|authority|public sector|department of|district)\b"),
+    ("public", r"\b(municipal\w*|city of|council|ministry|government|authority|public sector|department of|district|smart city|"
+               r"nagar|zilla|parishad|panchayat|\bpsu\b|development corporation)\b"),
     ("enterprise", r"\b(enterprise|group|corporation|multinational|global operations|\d{4,}\s+employees)\b"),
 ]
 

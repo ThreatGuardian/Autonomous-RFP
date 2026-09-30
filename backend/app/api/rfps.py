@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -12,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.agents.orchestrator import STAGES, document_path, get_orchestrator, record_event
+from app.agents.orchestrator import STAGES, document_path, get_orchestrator, record_event, source_path
 from app.config import BACKEND_ROOT
 from app.db.models import Rfp
 from app.db.session import get_db, session_scope
@@ -63,6 +64,24 @@ class RepriceRequest(BaseModel):
     note: str | None = None
 
 
+class ComplianceEdit(BaseModel):
+    status: str = Field(pattern=r"^(Complies|Complies with note|Clarification required|Deviation|Noted)$")
+    response: str | None = Field(default=None, max_length=1200)
+
+
+class EligibilityEdit(BaseModel):
+    status: str = Field(pattern=r"^(Meets|Documents required|Needs review|Does not meet)$")
+    position: str | None = Field(default=None, max_length=1200)
+
+
+class ComplianceRequest(BaseModel):
+    items: dict[str, ComplianceEdit] = Field(default_factory=dict)
+    eligibility: dict[str, EligibilityEdit] = Field(default_factory=dict)
+    clear: list[str] = Field(default_factory=list)
+    actor: str = "Reviewer"
+    note: str | None = None
+
+
 class Decision(BaseModel):
     actor: str = Field(default="Reviewer", max_length=80)
     note: str | None = Field(default=None, max_length=2000)
@@ -77,6 +96,9 @@ def _summary(r: Rfp, running: bool = False) -> dict[str, Any]:
         "win_probability": strategy.get("win_probability"), "strategy_summary": r.strategy_summary,
         "line_count": len(strategy.get("lines", [])) or len((r.parsed or {}).get("line_items", [])),
         "below_cost_competitors": strategy.get("below_cost_competitors"),
+        "recommendation": (r.compliance or {}).get("recommendation"),
+        "eligibility_verdict": (r.compliance or {}).get("eligibility_verdict"),
+        "pages": ((r.parsed or {}).get("document") or {}).get("pages"),
         "source_filename": r.source_filename, "created_at": r.created_at.isoformat(), "updated_at": r.updated_at.isoformat(),
         "error": r.error,
     }
@@ -120,25 +142,36 @@ def create_rfp(body: CreateRfp) -> dict[str, Any]:
         return _summary(db.get(Rfp, rfp_id), True)
 
 
+def _ingest(filename: str, data: bytes) -> tuple[int | None, str | None]:
+    """Create an RFP from an uploaded file, keeping the original next to its documents."""
+    if len(data) > MAX_UPLOAD_BYTES:
+        return None, f"{filename}: file exceeds 10 MB"
+    try:
+        text = extract_text(filename, data)
+    except UnsupportedDocument as exc:
+        return None, f"{filename}: {exc}"
+    if len(text.strip()) < 40:
+        return None, f"{filename}: not enough readable text"
+    with session_scope() as db:
+        rfp = _create(db, text, filename)
+        rfp_id = rfp.id
+        original = source_path(rfp.reference, filename)
+    if original is not None:
+        # Keep the original so the parser can use pages, fonts and tables, and reviewers can open it.
+        original.write_bytes(data)
+    return rfp_id, None
+
+
 @router.post("/upload", status_code=201)
 async def upload_rfps(files: list[UploadFile] = File(...)) -> list[dict[str, Any]]:
     created: list[int] = []
     errors: list[str] = []
     for f in files:
-        data = await f.read()
-        if len(data) > MAX_UPLOAD_BYTES:
-            errors.append(f"{f.filename}: file exceeds 10 MB")
-            continue
-        try:
-            text = extract_text(f.filename or "upload.txt", data)
-        except UnsupportedDocument as exc:
-            errors.append(f"{f.filename}: {exc}")
-            continue
-        if len(text.strip()) < 40:
-            errors.append(f"{f.filename}: not enough readable text")
-            continue
-        with session_scope() as db:
-            created.append(_create(db, text, f.filename).id)
+        rfp_id, error = _ingest(f.filename or "upload.txt", await f.read())
+        if rfp_id is not None:
+            created.append(rfp_id)
+        if error:
+            errors.append(error)
     if not created:
         raise HTTPException(status_code=422, detail="; ".join(errors) or "No files received")
     orch = get_orchestrator()
@@ -148,15 +181,44 @@ async def upload_rfps(files: list[UploadFile] = File(...)) -> list[dict[str, Any
         return [_summary(db.get(Rfp, i), True) | {"upload_errors": errors} for i in created]
 
 
+@lru_cache(maxsize=32)
+def _file_sample(name: str, mtime: float) -> dict[str, Any]:
+    path = SAMPLES_DIR / name
+    text = extract_text(name, path.read_bytes())
+    subject = re.search(r"^\s*(?:subject|title)\s*:\s*(.+)$", text, re.I | re.M)
+    org = next((l.strip() for l in text.splitlines() if l.strip()), name)
+    return {"filename": name, "title": f"{org} — {subject.group(1).strip()}" if subject else org, "text": "",
+            "kind": "file", "format": path.suffix.lstrip(".").upper(), "pages": text.count("\f") + 1}
+
+
 @router.get("/samples")
-def samples() -> list[dict[str, str]]:
-    out = []
+def samples() -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    # Long tender documents first: they exercise layout analysis and the compliance review.
+    for p in sorted(SAMPLES_DIR.glob("*")):
+        if p.suffix.lower() in (".pdf", ".docx"):
+            info = _file_sample(p.name, p.stat().st_mtime)
+            if info["pages"] >= 4:
+                out.append(info)
     for p in sorted(SAMPLES_DIR.glob("*.txt")):
         text = p.read_text(encoding="utf-8")
         first = next((l.strip() for l in text.splitlines() if l.strip()), p.stem)
         first = re.sub(r"^(from|to|issued by)\s*:\s*", "", first, flags=re.I)
-        out.append({"filename": p.name, "title": first, "text": text})
+        out.append({"filename": p.name, "title": first, "text": text, "kind": "text"})
     return out
+
+
+@router.post("/samples/{filename}", status_code=201)
+def process_sample(filename: str) -> list[dict[str, Any]]:
+    path = (SAMPLES_DIR / filename).resolve()
+    if path.parent != SAMPLES_DIR.resolve() or not path.is_file() or path.suffix.lower() not in (".pdf", ".docx", ".txt"):
+        raise HTTPException(status_code=404, detail="Sample not found")
+    rfp_id, error = _ingest(path.name, path.read_bytes())
+    if rfp_id is None:
+        raise HTTPException(status_code=422, detail=error)
+    get_orchestrator().submit(rfp_id)
+    with session_scope() as db:
+        return [_summary(db.get(Rfp, rfp_id), True)]
 
 
 def _get(db: Session, rfp_id: int) -> Rfp:
@@ -171,7 +233,9 @@ def get_rfp(rfp_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
     r = _get(db, rfp_id)
     return {
         **_summary(r, get_orchestrator().is_running(r.id)),
-        "raw_text": r.raw_text, "parsed": r.parsed, "pricing": r.pricing, "proposal": r.proposal, "overrides": r.overrides,
+        "raw_text": r.raw_text, "parsed": r.parsed, "pricing": r.pricing, "compliance": r.compliance, "proposal": r.proposal,
+        "overrides": r.overrides,
+        "has_original": bool((p := source_path(r.reference, r.source_filename)) and p.exists()),
         "stages": [_stage_dict(s) for s in r.stages], "stage_order": STAGES,
         "events": [{"id": e.id, "action": e.action, "actor": e.actor, "note": e.note, "payload": e.payload,
                     "created_at": e.created_at.isoformat()} for e in r.events],
@@ -186,7 +250,9 @@ def reprice(rfp_id: int, body: RepriceRequest) -> dict[str, Any]:
             raise HTTPException(status_code=409, detail="The request is still being processed")
         if not rfp.parsed:
             raise HTTPException(status_code=409, detail="The request has not been parsed yet")
-        overrides: dict[str, Any] = {} if body.reset else dict(rfp.overrides or {})
+        current = dict(rfp.overrides or {})
+        # A pricing reset keeps the reviewer's compliance decisions.
+        overrides: dict[str, Any] = {k: current[k] for k in ("compliance", "eligibility") if k in current} if body.reset else current
         lines = dict(overrides.get("lines", {}))
         for key, ov in body.lines.items():
             entry = {**lines.get(key, {}), **ov.model_dump(exclude_none=True, exclude={"clear_bundle"})}
@@ -218,6 +284,43 @@ def reprice(rfp_id: int, body: RepriceRequest) -> dict[str, Any]:
     record_event(rfp_id, "repriced", body.actor, body.note, body.model_dump(exclude={"actor", "note"}))
     get_orchestrator().submit(rfp_id, from_stage)
     return {"status": "queued", "from_stage": from_stage}
+
+
+@router.post("/{rfp_id}/compliance")
+def update_compliance(rfp_id: int, body: ComplianceRequest) -> dict[str, Any]:
+    """Reviewer corrections to the compliance matrix and eligibility checks; re-runs compliance onwards."""
+    with session_scope() as db:
+        rfp = _get(db, rfp_id)
+        if rfp.status in ("processing", "queued"):
+            raise HTTPException(status_code=409, detail="The request is still being processed")
+        if not rfp.compliance:
+            raise HTTPException(status_code=409, detail="The compliance review has not been prepared yet")
+        overrides = dict(rfp.overrides or {})
+        items = dict(overrides.get("compliance", {}))
+        elig = dict(overrides.get("eligibility", {}))
+        for key, edit in body.items.items():
+            items[key] = edit.model_dump(exclude_none=True)
+        for key, edit in body.eligibility.items():
+            elig[key] = edit.model_dump(exclude_none=True)
+        for key in body.clear:
+            items.pop(key, None)
+            elig.pop(key, None)
+        overrides["compliance"], overrides["eligibility"] = items, elig
+        rfp.overrides = overrides
+    record_event(rfp_id, "compliance_updated", body.actor, body.note, body.model_dump(exclude={"actor", "note"}))
+    get_orchestrator().submit(rfp_id, "compliance")
+    return {"status": "queued", "from_stage": "compliance"}
+
+
+@router.get("/{rfp_id}/original")
+def original(rfp_id: int, db: Session = Depends(get_db)):
+    r = _get(db, rfp_id)
+    path = source_path(r.reference, r.source_filename)
+    if path is None or not path.exists():
+        raise HTTPException(status_code=404, detail="Original document not kept for this request")
+    media = "application/pdf" if path.suffix == ".pdf" else \
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    return FileResponse(path, media_type=media, filename=r.source_filename or path.name, content_disposition_type="inline")
 
 
 @router.post("/{rfp_id}/approve")
@@ -275,7 +378,7 @@ def delete(rfp_id: int) -> None:
 def document(rfp_id: int, kind: str, db: Session = Depends(get_db)):
     r = _get(db, rfp_id)
     docs = (r.proposal or {}).get("documents") or {}
-    if kind not in ("quotation", "memo", "report") or kind not in docs:
+    if kind not in ("quotation", "memo", "report", "compliance") or kind not in docs:
         raise HTTPException(status_code=404, detail="Document not available")
     try:
         path = document_path(r.reference, docs[kind])

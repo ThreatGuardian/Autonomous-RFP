@@ -45,6 +45,8 @@ class RawItem:
     unit: str | None = None
     specs: dict[str, Any] = field(default_factory=dict)
     brand: str | None = None
+    context: str = ""  # specification text linked from elsewhere in the document
+    section: str | None = None
 
 
 def _to_int(s: str) -> int:
@@ -134,6 +136,20 @@ def extract_specs(text: str) -> dict[str, Any]:
     m = re.search(r"(\d{1,2})\s*(?:-?\s*)?bays?", t)
     if m:
         specs["bays"] = int(m.group(1))
+    m = re.search(r"(?:throughput|firewall)[^.;\n]{0,40}?(\d+(?:\.\d+)?)\s*gbps|(\d+(?:\.\d+)?)\s*gbps[^.;\n]{0,20}throughput", t)
+    if m:
+        specs["throughput_gbps"] = float(m.group(1) or m.group(2))
+    m = re.search(r"(\d+)\s*g(?:b|be)?\s*sfp\+?|(\d+)\s*g\s*uplink|sfp\+", t)
+    if m and re.search(r"uplink|sfp", t):
+        specs["uplink_gbps"] = int(m.group(1) or m.group(2) or 10)
+    m = re.search(r"(\d{2,3})\s*ppm", t)
+    if m:
+        specs["ppm"] = int(m.group(1))
+    m = re.search(r"\b([124])\s?u\b(?!\w)", t)
+    if m:
+        specs["form_factor"] = f"{m.group(1)}U"
+    elif re.search(r"form factor[^.;\n]{0,10}\btower\b|\btower\b(?! server)", t):
+        specs["form_factor"] = "tower"
     return specs
 
 

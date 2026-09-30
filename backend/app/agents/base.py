@@ -10,6 +10,7 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
@@ -43,6 +44,9 @@ class PipelineContext:
     company: dict[str, Any]
     overrides: dict[str, Any] = field(default_factory=dict)
     messages: dict[str, BaseModel] = field(default_factory=dict)
+    #: Original uploaded file, when kept (enables page- and typography-aware parsing).
+    source_filename: str | None = None
+    source_path: Path | None = None
 
     def require(self, key: str) -> Any:
         if key not in self.messages:

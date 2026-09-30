@@ -29,6 +29,16 @@ def extract_text(filename: str, data: bytes) -> str:
 
 
 def _pdf(data: bytes) -> str:
+    from app.nlp.layout import analyse_pdf
+
+    layout = analyse_pdf(data)
+    text = layout.to_text().strip()
+    if not text.replace("\f", "").strip():
+        raise UnsupportedDocument("The PDF contains no extractable text (it may be a scanned image without OCR).")
+    return text
+
+
+def _pdf_plain(data: bytes) -> str:
     from pypdf import PdfReader
 
     reader = PdfReader(io.BytesIO(data))
@@ -45,6 +55,12 @@ def _pdf(data: bytes) -> str:
 
 
 def _docx(data: bytes) -> str:
+    from app.nlp.layout import analyse_docx
+
+    return analyse_docx(data).to_text()
+
+
+def _docx_plain(data: bytes) -> str:
     import docx
 
     document = docx.Document(io.BytesIO(data))

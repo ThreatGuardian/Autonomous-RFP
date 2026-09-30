@@ -6,10 +6,10 @@ import { date, titleCase } from "../../lib/format";
 
 const TYPE_LABEL: Record<string, string> = {
   delivery: "Delivery", payment: "Commercial", warranty_support: "Warranty & support", compliance: "Compliance",
-  evaluation: "Evaluation", submission: "Submission", scope: "Context",
+  evaluation: "Evaluation", submission: "Submission", scope: "Context", technical: "Technical", eligibility: "Eligibility",
 };
-const STATUS_TONE: Record<string, "green" | "amber" | "red" | "neutral"> = {
-  Complies: "green", "Complies with note": "amber", "Clarification required": "red", Noted: "neutral",
+const STATUS_TONE: Record<string, "green" | "amber" | "red" | "neutral" | "blue"> = {
+  Complies: "green", "Complies with note": "amber", "Clarification required": "blue", Deviation: "red", Noted: "neutral",
 };
 
 export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
@@ -17,7 +17,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
   if (!p) return null;
   const c = p.client;
   const t = p.terms;
-  const compliance = new Map((rfp.proposal?.compliance ?? []).map((r) => [r.ref, r]));
+  const compliance = new Map((rfp.proposal?.compliance ?? []).map((r) => [r.req_id ?? r.ref, r]));
 
   return (
     <div className="space-y-5">
@@ -86,7 +86,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
               const row = compliance.get(r.id);
               return (
                 <tr key={r.id}>
-                  <td className="font-mono text-[11.5px] text-muted">{r.id}</td>
+                  <td className="font-mono text-[11.5px] text-muted">{r.clause ?? r.id}{r.page && p.document?.long_form ? <div className="font-sans text-[11px] text-subtle">p. {r.page}</div> : null}</td>
                   <td className="max-w-[380px] text-ink-soft">{r.text}</td>
                   <td><span className={clsx("text-[12.5px]", r.type === "scope" ? "text-muted" : "text-ink")}>{TYPE_LABEL[r.type] ?? r.type}</span>
                     <div className="text-[11px] text-muted tnum">{Math.round(r.confidence * 100)}% confidence</div></td>

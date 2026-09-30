@@ -107,8 +107,16 @@ class ProposalDraftingAgent(Agent):
         cover.append("We would welcome the opportunity to walk you through this proposal and look forward to working with you.")
         log.info("Cover letter composed", paragraphs=len(cover), grounded_passages=len(profile) + len(case))
 
-        # ---- compliance matrix
-        compliance = self._compliance(parsed, strat, loc, retrieve)
+        # ---- compliance matrix (from the Tender Compliance Agent when it ran)
+        report = ctx.messages.get("compliance")
+        if report is not None:
+            compliance = [
+                ComplianceRow(ref=i.clause or i.id, requirement=i.text, type=i.category, status=i.status, response=i.response,
+                              evidence=i.evidence, req_id=i.id)
+                for i in report.items
+            ]
+        else:
+            compliance = self._compliance(parsed, strat, loc, retrieve)
         counts: dict[str, int] = {}
         for row in compliance:
             counts[row.status] = counts.get(row.status, 0) + 1

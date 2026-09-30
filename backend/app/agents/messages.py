@@ -65,6 +65,15 @@ class Requirement(BaseModel):
     text: str
     type: str
     confidence: float
+    # Location and nature of the clause in long documents (defaults keep short requests unchanged).
+    section: str | None = None
+    clause: str | None = None
+    page: int | None = None
+    modality: Literal["mandatory", "desirable", "information"] = "information"
+    actor: Literal["bidder", "buyer"] = "bidder"
+    category: str = "scope"
+    line_no: int | None = None
+    source: Literal["text", "table"] = "text"
 
 
 class CommercialTerms(BaseModel):
@@ -77,6 +86,81 @@ class CommercialTerms(BaseModel):
     warranty_months_required: int | None = None
     price_weight_pct: float | None = None
     lowest_price_award: bool = False
+
+
+class TenderSection(BaseModel):
+    id: str
+    number: str | None = None
+    title: str
+    level: int
+    kind: str
+    kind_confidence: float
+    parent: str | None = None
+    page_start: int | None = None
+    page_end: int | None = None
+    requirement_count: int = 0
+    mandatory_count: int = 0
+    line_nos: list[int] = Field(default_factory=list)
+
+
+class TenderFact(BaseModel):
+    key: str
+    label: str
+    value: str
+    amount: float | None = None
+    section: str | None = None
+    page: int | None = None
+    evidence: str | None = None
+
+
+class KeyDate(BaseModel):
+    key: str
+    label: str
+    date: str
+    time: str | None = None
+    section: str | None = None
+    page: int | None = None
+    evidence: str | None = None
+
+
+class EligibilityCriterion(BaseModel):
+    id: str
+    kind: str
+    label: str
+    text: str
+    clause: str | None = None
+    section: str | None = None
+    page: int | None = None
+    params: dict[str, Any] = Field(default_factory=dict)
+    documents: str | None = None
+
+
+class EvaluationMethod(BaseModel):
+    method: Literal["L1", "QCBS", "Weighted", "Not stated"] = "Not stated"
+    technical_weight: float | None = None
+    financial_weight: float | None = None
+    min_technical_score: float | None = None
+    criteria: list[dict[str, Any]] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+    evidence: str | None = None
+
+
+class TenderDocument(BaseModel):
+    format: str
+    pages: int
+    pages_estimated: bool = False
+    words: int = 0
+    tables: int = 0
+    scanned_pages: list[int] = Field(default_factory=list)
+    removed_lines: int = 0
+    long_form: bool = False
+    sections: list[TenderSection] = Field(default_factory=list)
+    facts: list[TenderFact] = Field(default_factory=list)
+    key_dates: list[KeyDate] = Field(default_factory=list)
+    eligibility: list[EligibilityCriterion] = Field(default_factory=list)
+    evaluation: EvaluationMethod = Field(default_factory=EvaluationMethod)
+    forms: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
 
 
 class ParsedRfp(BaseModel):
@@ -93,6 +177,7 @@ class ParsedRfp(BaseModel):
     requirement_counts: dict[str, int]
     warnings: list[str] = Field(default_factory=list)
     stats: dict[str, Any] = Field(default_factory=dict)
+    document: TenderDocument | None = None
 
 
 # --------------------------------------------------------------------------- internal pricing
@@ -131,6 +216,9 @@ class CostedLine(BaseModel):
     warranty_months: int
     tax_category: str
     value_adds: list[ValueAddOption] = Field(default_factory=list)
+    #: Value-adds the tender makes mandatory (e.g. a 5-year warranty), folded into cost and price.
+    included_addons: list[ValueAddOption] = Field(default_factory=list)
+    warranty_required_months: int | None = None
 
 
 class ExcludedLine(BaseModel):
@@ -319,9 +407,10 @@ class ComplianceRow(BaseModel):
     ref: str
     requirement: str
     type: str
-    status: Literal["Complies", "Complies with note", "Clarification required", "Noted"]
+    status: Literal["Complies", "Complies with note", "Clarification required", "Deviation", "Noted"]
     response: str
     evidence: list[Evidence] = Field(default_factory=list)
+    req_id: str | None = None
 
 
 class Milestone(BaseModel):
@@ -348,3 +437,73 @@ class Proposal(BaseModel):
     signatory: dict[str, str]
     retrieval_log: list[dict[str, Any]]
     documents: dict[str, str] = Field(default_factory=dict)
+
+
+# --------------------------------------------------------------------------- tender compliance
+
+ComplianceStatus = Literal["Complies", "Complies with note", "Clarification required", "Deviation", "Noted"]
+EligibilityStatus = Literal["Meets", "Documents required", "Needs review", "Does not meet"]
+
+
+class ComplianceItem(BaseModel):
+    id: str
+    clause: str | None = None
+    section: str | None = None
+    section_title: str | None = None
+    page: int | None = None
+    text: str
+    category: str
+    modality: str
+    line_no: int | None = None
+    status: ComplianceStatus
+    response: str
+    basis: str
+    verify: bool = False
+    evidence: list[Evidence] = Field(default_factory=list)
+    risk: str | None = None
+    overridden: bool = False
+
+
+class EligibilityCheck(BaseModel):
+    id: str
+    kind: str
+    label: str
+    text: str
+    clause: str | None = None
+    page: int | None = None
+    status: EligibilityStatus
+    position: str
+    evidence: list[str] = Field(default_factory=list)
+    documents: str | None = None
+    overridden: bool = False
+
+
+class RiskFlag(BaseModel):
+    title: str
+    detail: str
+    severity: Literal["high", "medium", "low"]
+    clause: str | None = None
+    page: int | None = None
+
+
+class ChecklistItem(BaseModel):
+    name: str
+    status: Literal["Ready", "To prepare", "To obtain"]
+    source: str | None = None
+    note: str | None = None
+
+
+class ComplianceReport(BaseModel):
+    items: list[ComplianceItem]
+    eligibility: list[EligibilityCheck]
+    eligibility_verdict: Literal["Eligible", "Eligible subject to documents", "Review required", "Not eligible", "Not assessed"]
+    recommendation: Literal["Bid", "Bid with clarifications", "Do not bid"]
+    reasons: list[str]
+    counts: dict[str, int]
+    mandatory_total: int
+    mandatory_met: int
+    risks: list[RiskFlag] = Field(default_factory=list)
+    checklist: list[ChecklistItem] = Field(default_factory=list)
+    benefits: list[str] = Field(default_factory=list)
+    contract_value_estimate: float = 0.0
+    summary: str

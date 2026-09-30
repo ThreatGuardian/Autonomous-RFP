@@ -36,6 +36,12 @@ export interface RepriceBody {
   incoterm?: string; add_lines?: { sku: string; quantity: number }[]; remove_added?: number[];
 }
 
+export interface ComplianceBody {
+  items?: Record<string, { status: string; response?: string }>;
+  eligibility?: Record<string, { status: string; position?: string }>;
+  clear?: string[]; actor?: string; note?: string;
+}
+
 export interface LineOverride { unit_price?: number; bundle?: string; clear_bundle?: boolean; sku?: string; quantity?: number; exclude?: boolean }
 
 export interface User { id: number; username: string; name: string; email: string | null; title: string; provider: "password" | "google" | "sso" }
@@ -61,7 +67,10 @@ export const api = {
     files.forEach((f) => form.append("files", f));
     return request<(RfpSummary & { upload_errors: string[] })[]>("/api/rfps/upload", { method: "POST", body: form });
   },
-  samples: () => request<{ filename: string; title: string; text: string }[]>("/api/rfps/samples"),
+  samples: () => request<{ filename: string; title: string; text: string; kind: "text" | "file"; pages?: number; format?: string }[]>("/api/rfps/samples"),
+  processSample: (filename: string) => post<RfpSummary[]>(`/api/rfps/samples/${encodeURIComponent(filename)}`),
+  updateCompliance: (id: number, body: ComplianceBody) => post<{ status: string }>(`/api/rfps/${id}/compliance`, body),
+  originalUrl: (id: number) => `/api/rfps/${id}/original`,
   reprice: (id: number, body: RepriceBody) =>
     post<{ status: string }>(`/api/rfps/${id}/reprice`, body),
   approve: (id: number, actor: string, note?: string) => post(`/api/rfps/${id}/approve`, { actor, note }),
@@ -69,7 +78,7 @@ export const api = {
   reopen: (id: number, actor: string, note?: string) => post(`/api/rfps/${id}/reopen`, { actor, note }),
   retry: (id: number) => post(`/api/rfps/${id}/retry`),
   remove: (id: number) => request<void>(`/api/rfps/${id}`, { method: "DELETE" }),
-  documentUrl: (id: number, kind: "quotation" | "memo" | "report") => `/api/rfps/${id}/documents/${kind}`,
+  documentUrl: (id: number, kind: "quotation" | "memo" | "report" | "compliance") => `/api/rfps/${id}/documents/${kind}`,
 
   products: (params: { q?: string; category?: string } = {}) => {
     const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v) as [string, string][]).toString();

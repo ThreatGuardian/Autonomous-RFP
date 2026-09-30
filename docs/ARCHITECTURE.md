@@ -6,8 +6,8 @@ reproduce or extend it.
 ## 1. Pipeline and agents
 
 ```
-RFP text ─▶ RFP Parser ─▶ Internal Pricing ─▶ Competitive Strategy ─▶ Currency & Tax ─▶ Proposal Drafting
-             (parsed)       (costing)            (strategy)              (localisation)     (proposal + PDFs)
+RFP ─▶ RFP Parser ─▶ Internal Pricing ─▶ Tender Compliance ─▶ Competitive Strategy ─▶ Currency & Tax ─▶ Proposal Drafting
+        (parsed)       (costing)           (compliance)          (strategy)             (localisation)     (proposal + PDFs)
 ```
 
 * **Contract.** Every agent implements `run(ctx, log) -> message`
@@ -251,7 +251,97 @@ timeline. It contains:
 * requirement coverage;
 * risks to weigh and next steps.
 
-## 8. Reviewer adjustments and sign-in
+## 8. Long tenders and compliance
+
+### 8.1 Layout (`app/nlp/layout.py`)
+
+The original upload is kept (`documents/<ref>/source.pdf|docx`) and re-read at
+intake, so structure is not lost to plain-text extraction.
+
+* **PDF** (PyMuPDF): text lines with font size and weight; ruled tables via the
+  table finder, emitted as cell rows. Lines inside tables are not repeated as
+  text. Span gaps wider than ~2 em become tab separators (rule-less tables).
+* **Running headers/footers**: lines in the top/bottom 7.5% of the page whose
+  digit-normalised shape repeats on ≥ 40% of pages, plus "Page x of y".
+* **Continued tables**: a table whose first row repeats the previous table's
+  header is merged into it.
+* **Typography**: a line is `title` at ≥ 1.45× the body size, `heading` at
+  ≥ 1.12× or when fully bold and short without sentence punctuation.
+* **DOCX**: Word heading styles give levels; explicit and rendered page breaks
+  give pages (estimated at 3,200 characters per page otherwise).
+* **Scans**: pages without a text layer are OCR'd when Tesseract is available,
+  otherwise listed in the parse warnings.
+
+### 8.2 Section tree (`app/nlp/sections.py`)
+
+A block is a heading when it matches `Section/Part N`, `Annexure/Appendix N`,
+a short numbered title (`5.1 Desktop Computer`), a styled line or an all-caps
+line. Numbered blocks that read like sentences (modal verbs, > 12 words,
+terminal punctuation) are **clauses**; their numbers become the clause
+reference of the requirements inside them. Addresses and numbered request lines
+are rejected. Everything before the first structural heading is the cover.
+
+Section types come from a weighted lexicon over the title (e.g.
+`bill of quantities` 3.5, `commercial` 4, `annexure` 2), then the body, then
+the parent: "5.3 Laptop" inherits *technical* from "Section V".
+
+### 8.3 Tender understanding (`app/nlp/tender.py`)
+
+* **Units** are sentences, list items and table rows with section, page and
+  clause. Specification rows become `Parameter: value` requirements; the
+  criterion column of eligibility tables becomes the requirement text.
+* **Modality**: prohibitions and `shall/must/should/required` → mandatory;
+  `preferably/desirable/preference` → desirable; clauses whose subject is the
+  purchaser, or that reserve rights, bind the buyer.
+* **Category**: the section type decides for eligibility, technical, BOQ and
+  evaluation sections; elsewhere keyword rules, then the trained clause
+  classifier.
+* **Key data**: label/value pairs from key-data tables and `Label: value`
+  lines; amounts in Indian notation (`Rs. 4,50,000`, `2.25 crore`) are
+  normalised; dates are assigned roles (queries, pre-bid, submission, opening,
+  publication) from their labels, with times.
+* **Evaluation**: QCBS with its weights (`70:30`), L1, minimum technical score
+  and the marking-scheme table.
+* **Eligibility**: each criterion is typed (turnover, net worth, similar
+  works, supply volume, certifications, OEM authorisation, manpower, local
+  presence, blacklisting, years in business, registration, local content) and
+  its parameters parsed — e.g. the "three works of 40% / two of 50% / one of
+  80% of the estimated cost in seven years" options.
+* **Items** are extracted only from bill-of-quantities sections in long
+  documents. Each line is linked to a technical section by explicit reference
+  ("as per specification 5.1") or by title overlap plus category agreement,
+  and inherits its specifications (RAM, storage, CPU class, throughput, uplink
+  speed, print speed, form factor …) for matching.
+
+### 8.4 Tender Compliance Agent (`app/agents/compliance_agent.py`)
+
+Runs after costing, so it knows the product offered and the warranty quoted
+for every line.
+
+| Clause type | Assessed against |
+|-------------|------------------|
+| Eligibility | Company profile in `data/company.json`: turnover by financial year and segment share, incorporation date, net worth, completed credentials (value, sector, date, device counts), certifications, OEM authorisations, offices, engineers, Udyam registration |
+| Specification row | Catalogue data of the offered SKU via the same spec-fit function used for matching; failures name the parameter and search for a compliant alternative. Unknown parameters are marked *verify against datasheet* |
+| Warranty | The warranty actually quoted. `pricing/warranty.py` folds a mandated extension into cost and price at costing time |
+| Delivery | Lead times + transit + installation vs the days required |
+| Support levels | Service desk hours, on-site response and office locations |
+| Payment, LD, securities | MSMED Act 45-day rule, LD cap, bank-guarantee exposure on the estimated contract value |
+| Liability, indemnity, termination | Policy: liability capped at contract value |
+| Other | Knowledge-base evidence, accepted only with real topical overlap; otherwise an undertaking |
+
+Outputs: the matrix, eligibility verdict (*Eligible*, *subject to documents*,
+*review required*, *not eligible*), risk flags, a bid-documents checklist,
+MSE benefits and a recommendation: **Do not bid** if any criterion fails,
+**Bid with clarifications** for mandatory deviations, high risks or criteria
+needing review, otherwise **Bid**. Reviewer decisions per clause or criterion
+are stored in the overrides and applied last.
+
+The **compliance statement** PDF (`services/compliance_renderer.py`) is the
+client-facing annexure: eligibility with documents, the matrix grouped by the
+tender's sections with page references, the statement of deviations ("Nil"
+when there are none) and the declaration.
+
+## 9. Reviewer adjustments and sign-in
 
 * **Overrides** are stored on the request, and the approval events record them.
   Line overrides cover price, service, quantity, SKU and exclusion.
@@ -267,14 +357,16 @@ timeline. It contains:
   * federated sign-in for Google and SSO, which accepts the identity returned
     by the provider step.
 
-## 9. Data model
+## 10. Data model
 
 `users`, `products`, `price_tiers`, `value_adds`, `customers`, `deal_history`,
-`tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message),
+`tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message, including
+`compliance`),
 `stage_runs`, `approval_events`. The seeder is idempotent, so edits made
-through the Catalogue screen survive restarts.
+through the Catalogue screen survive restarts. New nullable columns are added
+to existing databases automatically at start-up.
 
-## 10. Mock competitor market
+## 11. Mock competitor market
 
 `app/market/service.py` is a separate FastAPI app with `X-Api-Key`
 authentication and its own data file.

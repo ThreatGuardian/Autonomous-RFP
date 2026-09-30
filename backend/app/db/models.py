@@ -182,6 +182,7 @@ class Rfp(Base):
 
     parsed: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     pricing: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    compliance: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     proposal: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     overrides: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 

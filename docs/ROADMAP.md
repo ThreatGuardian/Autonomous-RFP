@@ -16,6 +16,16 @@ increment and is committed separately so the history reads as the build log.
 | 8 | Web application | React + TypeScript review console: intake, pipeline board, pricing review, competitor landscape, catalogue |
 | 9 | Hardening | End-to-end tests, sample RFPs, documentation, one-command run |
 
+## Stage 2 — real-world tenders for Indian MSMEs
+
+| # | Phase | Outcome |
+|---|-------|---------|
+| 10 | Long-tender understanding | Layout-aware PDF/DOCX parsing, section tree, key dates and data, evaluation method, eligibility criteria, items only from the schedule with linked specifications, Tender Compliance Agent, compliance statement PDF, Compliance tab with reviewer decisions |
+| 11 | Company data import | CSV / Excel / Tally import of catalogue, prices, stock, HSN and GST; versioned prices |
+| 12 | Competitor intelligence adapters | Pluggable sources (mock market, CSV of collected quotes, public award data, optional web extraction) with dated, sourced price observations |
+| 13 | Award-rule strategy | L1 and QCBS-aware pricing, MSE purchase preference and reverse-auction playbooks |
+| 14 | Learning loop | Labelled corrections from reviewer edits, retraining on real documents, held-out evaluation and calibration |
+
 ## Design principles
 
 * **No large language model.** Every decision is made by explicit rules,

@@ -40,6 +40,7 @@ export function StrategyBadge({ strategy }: { strategy: string }) {
 export const STAGE_LABEL: Record<string, string> = {
   intake: "Intake & parsing",
   costing: "Internal costing",
+  compliance: "Tender compliance",
   strategy: "Market & strategy",
   localisation: "Currency & tax",
   drafting: "Proposal drafting",
@@ -50,7 +51,7 @@ export function StageTracker({ order, stages, onSelect, active }: { order: strin
   const latest = new Map<string, StageRun>();
   stages.forEach((s) => latest.set(s.stage, s));
   return (
-    <ol className="grid grid-cols-5 gap-0 overflow-hidden rounded-xl border border-line bg-white">
+    <ol className="grid gap-0 overflow-hidden rounded-xl border border-line bg-white" style={{ gridTemplateColumns: `repeat(${order.length}, minmax(0, 1fr))` }}>
       {order.map((key, i) => {
         const run = latest.get(key);
         const state = run?.status ?? "pending";
