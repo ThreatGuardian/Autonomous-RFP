@@ -45,6 +45,7 @@ export const auth = {
   login: (username: string, password: string) => post<User>("/api/auth/login", { username, password }),
   register: (body: { name: string; username: string; email?: string; password: string }) => post<User>("/api/auth/register", body),
   federated: (provider: "google" | "sso", email: string, name?: string) => post<User>("/api/auth/federated", { provider, email, name }),
+  firebaseLogin: (token: string) => post<User>("/api/auth/firebase", { token }),
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),
 };
 
