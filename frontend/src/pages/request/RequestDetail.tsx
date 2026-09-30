@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, CheckCircle2, ChevronDown, Download, ExternalLink, FileCheck2, FileText, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { BarChart3, CheckCircle2, ChevronDown, Download, ExternalLink, FileCheck2, FileText, PenLine, RotateCcw, Trash2, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CountryTag, StageTracker, StatusBadge } from "../../components/domain";
@@ -81,6 +81,7 @@ export default function RequestDetail() {
         }
         actions={
           <>
+            {docs.report && <Link to={`/app/requests/${id}/report`}><Button icon={<PenLine className="size-4" />}>Edit report</Button></Link>}
             <DocumentsMenu id={id} docs={docs} compliance={!!rfp.parsed?.document?.long_form} />
             {rfp.status === "review" && !busy && <>
               <Button variant="danger" icon={<XCircle className="size-4" />} onClick={() => setDialog("reject")}>Decline</Button>

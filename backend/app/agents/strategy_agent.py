@@ -8,8 +8,13 @@ from app.db.seed import load_json
 from app.finance.currency import UnknownCurrency, fx
 from app.finance.money import fmt
 from app.ml.registry import registry
+from app.pricing.award import analyse
 from app.pricing.strategy import VALUE_DIFFERENTIATION, BuyerContext, StrategyEngine
 from app.services.market_client import MarketClient, MarketUnavailable
+
+
+def market_ok(available: bool, priced: list) -> bool:
+    return available and any(p.market.count for p in priced)
 
 
 class CompetitiveStrategyAgent(Agent):
@@ -47,7 +52,11 @@ class CompetitiveStrategyAgent(Agent):
         weight = parsed.terms.price_weight_pct or (
             policy["lowest_price_award_weight_pct"] if parsed.terms.lowest_price_award else policy["default_price_weight_pct"]
         )
-        buyer = BuyerContext(parsed.client.segment, parsed.client.repeat_customer, float(weight))
+        doc = parsed.document
+        method = doc.evaluation.method if doc is not None else "Not stated"
+        rule = "L1" if (method == "L1" or (method == "Not stated" and parsed.terms.lowest_price_award)) else \
+            "QCBS" if method == "QCBS" else "Weighted"
+        buyer = BuyerContext(parsed.client.segment, parsed.client.repeat_customer, float(weight), award=rule)
         log.info("Buyer context", segment=buyer.segment, repeat_customer=buyer.repeat_customer, price_weight_pct=weight,
                  award_rule="lowest compliant bid" if parsed.terms.lowest_price_award else "weighted evaluation")
 
@@ -87,12 +96,26 @@ class CompetitiveStrategyAgent(Agent):
         for p in priced:
             counts[p.strategy] = counts.get(p.strategy, 0) + 1
         summary = self._summary(priced, revenue, margin, win, below_cost, base)
+        profile = ctx.company.get("profile", {})
+        facts = {f.key for f in doc.facts} if doc is not None else set()
+        award = analyse(
+            rule, priced, costing, policy, base, msme=bool(profile.get("msme", {}).get("valid")),
+            reverse_auction="reverse_auction" in facts,
+            technical_weight=doc.evaluation.technical_weight if doc is not None else None,
+            financial_weight=(doc.evaluation.financial_weight if doc is not None else None) or parsed.terms.price_weight_pct,
+            min_technical=doc.evaluation.min_technical_score if doc is not None else None,
+            compliance=ctx.messages.get("compliance"),
+        ) if market_ok(available, priced) else None
+        if award is not None:
+            log.decision(f"Award analysis ({award.rule}): {award.recommendation}", our_total=award.our_total,
+                         lowest_rival=award.lowest_competitor, lowest_total=award.lowest_total, rank=award.rank,
+                         gap_pct=award.gap_pct, target_total=award.target_total, msme_match=award.msme_match)
         return CompetitiveAnalysis(
             base_currency=base, market_endpoint=endpoint, market_latency_ms=latency, market_available=available,
             lines=priced, revenue=revenue, cost=cost, bundle_cost=bcost, margin=margin,
             margin_pct=round(100 * margin / revenue, 2) if revenue else 0.0, expected_profit=exp_profit,
             win_probability=win, strategy_counts=counts, below_cost_competitors=below_cost, summary=summary,
-            warnings=warnings,
+            warnings=warnings, award=award,
         )
 
     @staticmethod

@@ -40,6 +40,7 @@ trained in this repository with scikit-learn.
 | 3 | **Tender Compliance Agent** | For long tenders: checks every eligibility criterion against the company profile, every specification row against the offered product, and every commercial and contractual clause against policy. Produces a clause-by-clause compliance matrix, risk flags, a bid-documents checklist and a **bid / no-bid recommendation**. |
 | 4 | **Competitive Strategy Agent** | Queries the competitor market API and normalises offers to rupees. Picks the price and bundle that maximise expected profit within policy, and applies the value-differentiation pivot when a competitor is below cost. |
 | 5 | **Currency & Tax Agent** | Converts to the client's currency (live FX with fallbacks and a hedging buffer) and applies jurisdiction tax: GST/IGST, destination VAT/GST/sales tax, export zero-rating and reverse charge. |
+| | *Award analysis* | Inside the strategy stage: the whole bid is placed against estimated rival totals under the tender's award rule — L1 (with the MSE 15% / 25% purchase preference), QCBS combined score, reverse-auction floor. Under L1, free bundles earn no evaluation credit and are not offered. |
 | 6 | **Proposal Drafting Agent** | Writes the proposal from retrieved knowledge-base evidence: cover letter, executive summary, compliance matrix, delivery plan and terms. Renders a **client quotation**, a **compliance statement**, a **bid report** and a **confidential pricing memo** as PDFs. |
 
 ### Long tenders (10–15 pages)
@@ -182,7 +183,11 @@ Configuration options are listed in [`.env.example`](.env.example).
    [`samples/`](samples/), covering domestic India (intra- and inter-state), UAE,
    United States, Germany, United Kingdom (PDF) and Singapore (DOCX). The text
    samples can also be loaded from the New request page.
-2. **Request → Pricing** — every line shows cost, best competitor, our price,
+2. **Request → Pricing** — the **award position** comes first: estimated
+   whole-bid totals of the main rivals against ours and our margin floor, the
+   total needed to become L1 (with one click to apply it), the MSE
+   purchase-preference option for registered small enterprises, or the QCBS
+   combined score. Below it, every line shows cost, best competitor, our price,
    margin, win probability and strategy. Open a line to see the full rationale,
    the price-position scale, the win/profit curve, alternatives considered and
    competitor offers. You can override price, bundle, product or quantity, or
@@ -196,10 +201,19 @@ Configuration options are listed in [`.env.example`](.env.example).
    in and the bid-documents checklist (ready / to prepare / to obtain) follow.
 4. **Requirements** — extracted terms, item-to-product matching with confidence,
    and each clause with its location, type and compliance response.
-5. **Quotation** — commercial schedule in the client's currency with taxes, cover
+5. **Report editor** (*Edit report* in the request header) — the bid report as
+   a live document. Click anywhere to type; drag sections in the outline, hide
+   them from exports, add blocks. Or tell the **editing assistant** what to
+   change in plain words: “rename risks to Key risks”, “move delivery above
+   risks”, “add a next step: …”, “replace '30 days' with '21 days'”, “shorten
+   the risks section”, “add the total price to the summary”, “mention our ISO
+   27001 certification in risks”, “refresh the pricing decisions”, “undo”.
+   Export to **PDF** or an editable **Word** document at any time; the edited
+   report also replaces the generated one under *Documents*.
+6. **Quotation** — commercial schedule in the client's currency with taxes, cover
    letter, delivery plan, inclusions and an embedded PDF preview. You can change
    the quote currency or FX buffer here.
-6. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
+7. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
    every manual change, with a live revenue, margin and below-floor preview:
    * **Line items:** inline price, quantity and service editing; include or
      exclude lines; pick a product for unmatched lines; adjust all prices by a
@@ -210,7 +224,7 @@ Configuration options are listed in [`.env.example`](.env.example).
 
    *Apply* sends everything as one re-price and records a note.
    *Reset to recommendations* clears all overrides.
-7. **Approve** — issues the final quotation and records the approval in the memo
+8. **Approve** — issues the final quotation and records the approval in the memo
    and the bid report.
 
 Every request produces these PDFs (under *Documents* in the request header):
@@ -235,7 +249,8 @@ Every request produces these PDFs (under *Documents* in the request header):
 | ![Bid report page 1](docs/screenshots/13-bid-report-p1.png) | ![Bid report page 2](docs/screenshots/13-bid-report-p2.png) |
 | ![Compliance review](docs/screenshots/14-compliance-review.png) | ![Compliance matrix](docs/screenshots/15-compliance-matrix.png) |
 | ![Clause decision](docs/screenshots/16-clause-decision.png) | ![No-bid recommendation](docs/screenshots/17-no-bid.png) |
-| ![Compliance statement](docs/screenshots/18-compliance-statement.png) | |
+| ![Compliance statement](docs/screenshots/18-compliance-statement.png) | ![Award position](docs/screenshots/19-award-position.png) |
+| ![Report editor](docs/screenshots/20-report-editor.png) | ![Overview insights](docs/screenshots/01-overview-insights.png) |
 
 ## How the intelligence works
 
@@ -310,7 +325,8 @@ backend/
     ml/            corpora, models, registry
     nlp/           analyser, gazetteer, extractors, line-item extraction,
                    layout analysis, section tree, tender facts and eligibility
-    pricing/       strategy engine, mandated-warranty rules
+    pricing/       strategy engine, whole-bid award analysis, mandated-warranty rules
+    report/        editable report model, editing assistant, PDF/Word export
     rag/           hybrid index, knowledge and catalogue stores
     services/      document ingestion, market client, PDF renderers (quotation,
                    memo, bid report, compliance statement)
@@ -336,6 +352,9 @@ is running. The main endpoints:
 | `GET` | `/api/rfps`, `/api/rfps/{id}` | List, and full detail (parsed data, pricing, proposal, stage logs, events) |
 | `POST` | `/api/rfps/{id}/reprice` | Apply reviewer overrides (line prices, services, quantities, products, exclusions, added items, client and terms corrections, currency) and re-run from costing |
 | `POST` | `/api/rfps/{id}/approve` · `reject` · `reopen` · `retry` | Workflow actions |
+| `GET` · `PUT` | `/api/rfps/{id}/report` | Editable report document |
+| `POST` | `/api/rfps/{id}/report/assistant` · `undo` · `redo` · `reset` | Editing assistant and history |
+| `GET` | `/api/rfps/{id}/report/export?format=pdf\|docx` | Export the edited report |
 | `POST` | `/api/rfps/{id}/compliance` | Reviewer decisions on clauses and eligibility criteria; re-runs from compliance |
 | `GET` | `/api/rfps/{id}/documents/{quotation\|memo\|report\|compliance}`, `/api/rfps/{id}/original` | PDFs, and the original upload |
 | `GET` | `/api/dashboard` | KPIs |
@@ -349,7 +368,7 @@ is running. The main endpoints:
 
 ```bash
 cd backend
-python -m pytest            # 57 tests: language core, parser, long tenders, compliance, finance, pricing, drafting, API workflow, sign-in, reviewer edits
+python -m pytest            # 66 tests: language core, parser, long tenders, compliance, award analysis, report editing, finance, pricing, drafting, API workflow, sign-in, reviewer edits
 cd ../frontend
 npm run typecheck
 ```

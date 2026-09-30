@@ -21,10 +21,11 @@ increment and is committed separately so the history reads as the build log.
 | # | Phase | Outcome |
 |---|-------|---------|
 | 10 | Long-tender understanding | Layout-aware PDF/DOCX parsing, section tree, key dates and data, evaluation method, eligibility criteria, items only from the schedule with linked specifications, Tender Compliance Agent, compliance statement PDF, Compliance tab with reviewer decisions |
-| 11 | Company data import | CSV / Excel / Tally import of catalogue, prices, stock, HSN and GST; versioned prices |
-| 12 | Competitor intelligence adapters | Pluggable sources (mock market, CSV of collected quotes, public award data, optional web extraction) with dated, sourced price observations |
-| 13 | Award-rule strategy | L1 and QCBS-aware pricing, MSE purchase preference and reverse-auction playbooks |
+| 11 | Award-rule strategy *(done)* | Whole-bid L1 / QCBS analysis, MSE purchase preference, reverse-auction floor, no bundle credit under L1; editable bid report with an editing assistant and PDF/Word export; decluttered dashboard with motion |
+| 12 | Company data import | CSV / Excel / Tally import of catalogue, prices, stock, HSN and GST; versioned prices |
+| 13 | Competitor intelligence adapters | Pluggable sources (mock market, CSV of collected quotes, public award data, optional web extraction) with dated, sourced price observations |
 | 14 | Learning loop | Labelled corrections from reviewer edits, retraining on real documents, held-out evaluation and calibration |
+| 15 | Full response pack | Technical response and forms filled from the knowledge base, bundled into one submission-ready pack |
 
 ## Design principles
 

@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { BarChart3, Boxes, FileStack, Globe, Landmark, LayoutDashboard, LogOut, Plus, Radar, Settings2 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { api } from "../../lib/api";
 import { initials, useAuth } from "../../lib/auth";
 
@@ -23,19 +24,28 @@ function NavItem({ to, icon, children, count, end }: { to: string; icon: ReactNo
       end={end}
       className={({ isActive }) =>
         clsx(
-          "group flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium transition-colors",
-          isActive ? "bg-white text-ink shadow-[var(--shadow-card)] ring-1 ring-line" : "text-[#4b5260] hover:bg-black/[0.035] hover:text-ink",
+          "group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium transition-colors",
+          isActive ? "text-ink" : "text-[#4b5260] hover:bg-black/[0.035] hover:text-ink",
         )
       }
     >
-      <span className="text-[#6b7280] group-[.active]:text-ink [&>svg]:size-4">{icon}</span>
-      <span className="flex-1">{children}</span>
-      {!!count && <span className="rounded-full bg-amber-100 px-1.5 text-[11px] font-semibold text-amber-800 tnum">{count}</span>}
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <motion.span layoutId="nav-pill" transition={{ type: "spring", stiffness: 420, damping: 34 }}
+              className="absolute inset-0 rounded-lg bg-white shadow-[var(--shadow-card)] ring-1 ring-line" />
+          )}
+          <span className={clsx("relative transition-transform duration-300 group-hover:scale-110 [&>svg]:size-4", isActive ? "text-ink" : "text-[#6b7280]")}>{icon}</span>
+          <span className="relative flex-1">{children}</span>
+          {!!count && <span className="relative rounded-full bg-amber-100 px-1.5 text-[11px] font-semibold text-amber-800 tnum">{count}</span>}
+        </>
+      )}
     </NavLink>
   );
 }
 
 export function Shell() {
+  const location = useLocation();
   const { data } = useQuery({ queryKey: ["rfps", "review-count"], queryFn: () => api.rfps({ status: "review" }), refetchInterval: 10_000 });
   return (
     <div className="flex min-h-screen">
@@ -71,7 +81,12 @@ export function Shell() {
         <UserMenu />
       </aside>
       <main className="min-w-0 flex-1">
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={location.pathname.split("/").slice(0, 4).join("/")} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

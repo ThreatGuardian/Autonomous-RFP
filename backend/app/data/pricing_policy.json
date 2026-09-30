@@ -9,6 +9,10 @@
  "min_offer_reliability": 0.6,
  "match_band_pct": 2.0,
  "min_target_win_probability": 0.2,
+ "msme_purchase_preference_band_pct": 15,
+ "msme_purchase_preference_share_pct": 25,
+ "l1_undercut_pct": 0.5,
+ "assumed_competitor_technical_score": 75,
  "bundle_kinds": ["warranty", "service", "support"],
  "currency_decimals": {"JPY": 0, "KWD": 3, "BHD": 3, "OMR": 3, "IDR": 0}
 }

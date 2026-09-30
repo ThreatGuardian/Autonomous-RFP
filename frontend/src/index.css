@@ -13,6 +13,7 @@
   --color-subtle: #9aa1ad;
   --color-accent: #c98a1b;
   --color-accent-soft: #fbf3e4;
+  --font-serif: "Source Serif 4 Variable", Georgia, serif;
   --color-link: #2451d6;
 
   --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 1px rgb(16 24 40 / 0.02);
@@ -63,3 +64,19 @@
   .animate-float-a, .animate-float-b, .gold-text, .animate-rise { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* ---------------------------------------------------------------- report editor */
+@keyframes flash-gold { 0% { background-color: rgb(201 138 27 / 0.22) } 100% { background-color: transparent } }
+.flash { animation: flash-gold 1.8s cubic-bezier(.22,1,.36,1) }
+[contenteditable]:focus { outline: none }
+.editable { border-radius: 6px; transition: background-color .2s, box-shadow .2s; }
+.editable:hover { background-color: rgb(201 138 27 / 0.05) }
+.editable:focus { background-color: #fff; box-shadow: 0 0 0 1.5px rgb(201 138 27 / 0.55), 0 6px 20px -8px rgb(201 138 27 / 0.35) }
+.editable:empty::before { content: attr(data-placeholder); color: #b3b9c4 }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .35 } 30% { transform: translateY(-3px); opacity: 1 } }
+.typing-dot { animation: typing 1.1s infinite }
+
+/* ---------------------------------------------------------------- refined iconography & surfaces */
+svg.lucide { stroke-width: 1.75 }
+.card { transition: box-shadow .25s ease, transform .25s ease }
+.table-base tbody tr { transition: background-color .15s ease }

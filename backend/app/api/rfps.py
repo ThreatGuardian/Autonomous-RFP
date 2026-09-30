@@ -378,6 +378,12 @@ def delete(rfp_id: int) -> None:
 def document(rfp_id: int, kind: str, db: Session = Depends(get_db)):
     r = _get(db, rfp_id)
     docs = (r.proposal or {}).get("documents") or {}
+    if kind == "report" and (r.report_doc or {}).get("edited"):
+        # The reviewer's edited report replaces the generated one.
+        from app.api.report import export_report
+
+        path = export_report(r, "pdf")
+        return FileResponse(path, media_type="application/pdf", filename=path.name, content_disposition_type="inline")
     if kind not in ("quotation", "memo", "report", "compliance") or kind not in docs:
         raise HTTPException(status_code=404, detail="Document not available")
     try:

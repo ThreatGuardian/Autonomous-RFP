@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.agents.orchestrator import get_orchestrator, shutdown_orchestrator
-from app.api import auth, reference, rfps
+from app.api import auth, reference, report, rfps
 from app.config import get_settings
 from app.db.seed import seed_all
 from app.market.service import market_app
@@ -69,6 +69,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(rfps.router)
+    app.include_router(report.router)
     app.include_router(reference.router)
     app.mount("/market-api", market_app)
 

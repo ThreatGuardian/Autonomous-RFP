@@ -341,7 +341,49 @@ client-facing annexure: eligibility with documents, the matrix grouped by the
 tender's sections with page references, the statement of deviations ("Nil"
 when there are none) and the declaration.
 
-## 9. Reviewer adjustments and sign-in
+## 9. Award-rule strategy and the editable report
+
+### 9.1 Whole-bid award analysis (`app/pricing/award.py`)
+
+* **Rival totals.** For every competitor, the sum of its offers across the
+  schedule; where it does not carry an item, the market median for that item.
+  Only rivals quoting at least half the schedule by value are kept.
+* **L1.** Rank, gap to L1, and the smallest uniform reduction (bounded by
+  every line's margin floor, found by bisection) that undercuts L1 by 0.5%.
+  For a registered MSE within 15% of L1, the purchase-preference option —
+  match L1 for 25% of the quantities — is priced at L1 with its margin. Line
+  pricing under L1 ignores warranty, lead-time and bundle effects in the win
+  model, and offers no free bundle: evaluation scores price only.
+* **QCBS.** Combined = w_t × T + w_f × 100 × (lowest ÷ ours). Our technical
+  score T is estimated as 55 + 40 × (mandatory clauses met ratio) − 3 per
+  deviation (clamped 40–95); rivals are assumed at a policy value (75). The
+  highest winning total is found by bisection.
+* **Reverse auction.** Opening at the recommended total, walk-away at the
+  floor total.
+
+### 9.2 Editable report (`app/report/`)
+
+The report is a document of sections and typed blocks (lead, paragraph,
+bullets, KPIs, bars, table, callout, note) generated from the pipeline
+messages and stored on the request with a 40-step undo/redo history and the
+chat log. Untouched reports follow each re-draft; edited ones are flagged as
+stale when prices change, and the assistant can refresh any generated section.
+`export.py` renders the same model to PDF (bid-report design) and Word.
+
+### 9.3 Editing assistant (`app/report/assistant.py`)
+
+No language model. Instructions go through an ordered grammar of edit
+patterns (rename, set title, hide/show, delete section, move to top/end or
+relative, add section, replace text, delete matching bullets or sentences,
+add paragraph or bullet, shorten, refresh, insert a figure or a
+knowledge-base fact, undo/redo, help, list). Section names are resolved by
+synonyms and token overlap. Shortening is extractive (sentence centrality).
+Facts come from the pipeline's figures or from knowledge-base retrieval.
+When no pattern matches, a character n-gram TF-IDF + logistic-regression
+intent model, trained on generated command phrasings, identifies what the
+user meant and the reply shows the exact phrasing that will work.
+
+## 10. Reviewer adjustments and sign-in
 
 * **Overrides** are stored on the request, and the approval events record them.
   Line overrides cover price, service, quantity, SKU and exclusion.
@@ -357,16 +399,16 @@ when there are none) and the declaration.
   * federated sign-in for Google and SSO, which accepts the identity returned
     by the provider step.
 
-## 10. Data model
+## 11. Data model
 
 `users`, `products`, `price_tiers`, `value_adds`, `customers`, `deal_history`,
 `tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message, including
-`compliance`),
+`compliance` and the editable `report_doc`),
 `stage_runs`, `approval_events`. The seeder is idempotent, so edits made
 through the Catalogue screen survive restarts. New nullable columns are added
 to existing databases automatically at start-up.
 
-## 11. Mock competitor market
+## 12. Mock competitor market
 
 `app/market/service.py` is a separate FastAPI app with `X-Api-Key`
 authentication and its own data file.

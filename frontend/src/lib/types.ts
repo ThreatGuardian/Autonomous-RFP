@@ -124,7 +124,17 @@ export interface CompetitiveAnalysis {
   base_currency: string; market_endpoint: string | null; market_latency_ms: number | null; market_available: boolean;
   lines: PricedLine[]; revenue: number; cost: number; bundle_cost: number; margin: number; margin_pct: number;
   expected_profit: number; win_probability: number; strategy_counts: Record<string, number>; below_cost_competitors: number;
-  summary: string; warnings: string[];
+  summary: string; warnings: string[]; award?: AwardAnalysis | null;
+}
+export interface AwardAnalysis {
+  rule: "L1" | "QCBS" | "Weighted"; our_total: number; cost_total: number; floor_total: number;
+  competitors: { id: string; name: string; total: number; coverage_pct: number }[];
+  lowest_competitor: string | null; lowest_total: number | null; rank: number | null; gap_pct: number | null;
+  target_total: number | null; target_feasible: boolean; target_prices: Record<string, number>;
+  msme_band_pct: number | null; msme_match: boolean; technical_score: number | null; competitor_technical_score: number | null;
+  combined_score: number | null; best_competitor_combined: number | null; reverse_auction: boolean; walk_away_total: number | null;
+  options: { label: string; total: number; margin: number; margin_pct: number; feasible: boolean; outcome: string }[];
+  recommendation: string; reasons: string[];
 }
 export interface TaxLine { name: string; rate_pct: number; amount: number }
 export interface Localisation {

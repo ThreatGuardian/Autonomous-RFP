@@ -1,4 +1,5 @@
 import "@fontsource-variable/inter";
+import "@fontsource-variable/source-serif-4";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
@@ -17,6 +18,7 @@ import NewRequest from "./pages/NewRequest";
 import Overview from "./pages/Overview";
 import Requests from "./pages/Requests";
 import RequestDetail from "./pages/request/RequestDetail";
+import ReportEditor from "./pages/report/ReportEditor";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 2000, retry: 1, refetchOnWindowFocus: false } } });
 
@@ -40,6 +42,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="finance" element={<Finance />} />
               <Route path="models" element={<Models />} />
             </Route>
+            <Route path="app/requests/:id/report" element={<RequireAuth><ReportEditor /></RequireAuth>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>

@@ -324,6 +324,41 @@ class PricedLine(BaseModel):
     flags: list[str] = Field(default_factory=list)
 
 
+class AwardOption(BaseModel):
+    label: str
+    total: float
+    margin: float
+    margin_pct: float
+    feasible: bool
+    outcome: str
+
+
+class AwardAnalysis(BaseModel):
+    rule: Literal["L1", "QCBS", "Weighted"]
+    our_total: float
+    cost_total: float
+    floor_total: float
+    competitors: list[dict[str, Any]] = Field(default_factory=list)
+    lowest_competitor: str | None = None
+    lowest_total: float | None = None
+    rank: int | None = None
+    gap_pct: float | None = None
+    target_total: float | None = None
+    target_feasible: bool = False
+    target_prices: dict[str, float] = Field(default_factory=dict)
+    msme_band_pct: float | None = None
+    msme_match: bool = False
+    technical_score: float | None = None
+    competitor_technical_score: float | None = None
+    combined_score: float | None = None
+    best_competitor_combined: float | None = None
+    reverse_auction: bool = False
+    walk_away_total: float | None = None
+    options: list[AwardOption] = Field(default_factory=list)
+    recommendation: str
+    reasons: list[str] = Field(default_factory=list)
+
+
 class CompetitiveAnalysis(BaseModel):
     base_currency: str
     market_endpoint: str | None
@@ -341,6 +376,7 @@ class CompetitiveAnalysis(BaseModel):
     below_cost_competitors: int
     summary: str
     warnings: list[str] = Field(default_factory=list)
+    award: AwardAnalysis | None = None
 
 
 # --------------------------------------------------------------------------- localisation

@@ -184,6 +184,7 @@ class Rfp(Base):
     pricing: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     compliance: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     proposal: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    report_doc: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     overrides: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
     total_base: Mapped[float | None] = mapped_column(Float, nullable=True)

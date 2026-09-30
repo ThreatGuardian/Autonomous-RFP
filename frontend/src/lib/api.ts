@@ -55,6 +55,32 @@ export const auth = {
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),
 };
 
+export interface ReportBlock {
+  id: string; type: "lead" | "paragraph" | "bullets" | "kpis" | "bars" | "table" | "callout" | "note";
+  text?: string; tone?: "good" | "warn" | "bad" | "neutral"; items?: any[]; header?: string[]; rows?: string[][];
+}
+export interface ReportSection { id: string; key: string; title: string; hidden: boolean; blocks: ReportBlock[] }
+export interface ChatMessage { role: "user" | "assistant"; text: string; at: string; intent?: string; confidence?: number; changes?: { section: string | null; block: string | null; action: string }[] }
+export interface ReportDocument {
+  title: string; subtitle: string; quote_number: string; proposal_version: number; sections: ReportSection[];
+  edited: boolean; stale: boolean; updated_at: string; chat: ChatMessage[]; can_undo: boolean; can_redo: boolean;
+}
+export interface AssistantReply {
+  reply: string; changed: boolean; changes: { section: string | null; block: string | null; action: string }[];
+  intent: string; confidence: number; suggestions: string[]; document: ReportDocument;
+}
+
+export const report = {
+  get: (id: number) => request<ReportDocument>(`/api/rfps/${id}/report`),
+  save: (id: number, body: { title: string; sections: ReportSection[] }) =>
+    request<ReportDocument>(`/api/rfps/${id}/report`, { method: "PUT", body: JSON.stringify(body) }),
+  ask: (id: number, message: string) => post<AssistantReply>(`/api/rfps/${id}/report/assistant`, { message }),
+  undo: (id: number) => post<ReportDocument>(`/api/rfps/${id}/report/undo`),
+  redo: (id: number) => post<ReportDocument>(`/api/rfps/${id}/report/redo`),
+  reset: (id: number) => post<ReportDocument>(`/api/rfps/${id}/report/reset`),
+  exportUrl: (id: number, format: "pdf" | "docx") => `/api/rfps/${id}/report/export?format=${format}`,
+};
+
 export const api = {
   dashboard: () => request<Dashboard>("/api/dashboard"),
   rfps: (params: { status?: string; q?: string } = {}) => {
