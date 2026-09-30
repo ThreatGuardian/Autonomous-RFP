@@ -5,8 +5,10 @@ import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../../components/layout/Shell";
 import { Spinner } from "../../components/ui";
-import { auth } from "../../lib/api";
+import { auth as apiAuth } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
+import { auth as fbAuth } from "../../lib/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, OAuthProvider } from "firebase/auth";
 
 export function GoogleMark({ className }: { className?: string }) {
   return (
@@ -88,9 +90,20 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
   const signup = mode === "signup";
 
   const submit = useMutation({
-    mutationFn: () => signup
-      ? auth.register({ name: form.name, username: form.username, email: form.email || undefined, password: form.password })
-      : auth.login(form.username, form.password),
+    mutationFn: async () => {
+      let fbUser;
+      if (signup) {
+        const email = form.email || `${form.username}@example.com`;
+        const cred = await createUserWithEmailAndPassword(fbAuth, email, form.password);
+        fbUser = cred.user;
+      } else {
+        const email = form.username.includes('@') ? form.username : `${form.username}@example.com`;
+        const cred = await signInWithEmailAndPassword(fbAuth, email, form.password);
+        fbUser = cred.user;
+      }
+      const token = await fbUser.getIdToken();
+      return apiAuth.firebaseLogin(token);
+    },
     onSuccess: (u) => {
       qc.setQueryData(["me"], u);
       navigate(next, { replace: true });
@@ -98,8 +111,37 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
     onError: (e: Error) => setError(e.message),
   });
 
+  const goGoogle = async () => {
+    try {
+      const cred = await signInWithPopup(fbAuth, new GoogleAuthProvider());
+      const token = await cred.user.getIdToken();
+      const u = await apiAuth.firebaseLogin(token);
+      qc.setQueryData(["me"], u);
+      navigate(next, { replace: true });
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
+  const goSSO = async () => {
+    try {
+      const provider = new OAuthProvider('saml.tenderdesk');
+      const cred = await signInWithPopup(fbAuth, provider);
+      const token = await cred.user.getIdToken();
+      const u = await apiAuth.firebaseLogin(token);
+      qc.setQueryData(["me"], u);
+      navigate(next, { replace: true });
+    } catch (e: any) {
+      // If SAML is not configured, fallback to the mock provider signin
+      if (e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/invalid-provider-id') {
+         navigate(`/login/sso?next=${encodeURIComponent(next)}`);
+      } else {
+         setError(e.message);
+      }
+    }
+  };
+
   if (!loading && user) return <Navigate to={next} replace />;
-  const go = (provider: "google" | "sso") => navigate(`/login/${provider}?next=${encodeURIComponent(next)}`);
   const onSubmit = (e: FormEvent) => { e.preventDefault(); setError(null); submit.mutate(); };
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
@@ -118,8 +160,8 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
           </p>
 
           <div className="animate-rise mt-8 space-y-2.5" style={{ animationDelay: ".1s" }}>
-            <Provider icon={<GoogleMark className="size-[18px]" />} onClick={() => go("google")}>Continue with Google</Provider>
-            <Provider icon={<Building2 className="size-[18px] text-ink-soft" />} onClick={() => go("sso")}>Continue with SSO</Provider>
+            <Provider icon={<GoogleMark className="size-[18px]" />} onClick={goGoogle}>Continue with Google</Provider>
+            <Provider icon={<Building2 className="size-[18px] text-ink-soft" />} onClick={goSSO}>Continue with SSO</Provider>
           </div>
 
           <div className="my-6 flex items-center gap-3 text-[11.5px] uppercase tracking-[0.1em] text-subtle">
