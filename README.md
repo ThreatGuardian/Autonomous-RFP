@@ -450,7 +450,8 @@ npm run typecheck
 ## Build phases
 
 The project was built in phases, each committed separately. See
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+[`docs/ROADMAP.md`](docs/ROADMAP.md). The full requirements specification is in
+[`docs/SRS.md`](docs/SRS.md).
 
 ---
 
