@@ -40,6 +40,7 @@ export function StrategyBadge({ strategy }: { strategy: string }) {
 export const STAGE_LABEL: Record<string, string> = {
   intake: "Intake & parsing",
   costing: "Internal costing",
+  compliance: "Tender compliance",
   strategy: "Market & strategy",
   localisation: "Currency & tax",
   drafting: "Proposal drafting",
@@ -50,7 +51,7 @@ export function StageTracker({ order, stages, onSelect, active }: { order: strin
   const latest = new Map<string, StageRun>();
   stages.forEach((s) => latest.set(s.stage, s));
   return (
-    <ol className="grid grid-cols-5 gap-0 overflow-hidden rounded-xl border border-line bg-white">
+    <ol className="grid gap-0 overflow-hidden rounded-xl border border-line bg-white" style={{ gridTemplateColumns: `repeat(${order.length}, minmax(0, 1fr))` }}>
       {order.map((key, i) => {
         const run = latest.get(key);
         const state = run?.status ?? "pending";
@@ -59,10 +60,10 @@ export function StageTracker({ order, stages, onSelect, active }: { order: strin
             <button
               disabled={!run}
               onClick={() => onSelect?.(key)}
-              className={clsx("flex w-full items-start gap-2.5 px-4 py-3 text-left transition-colors disabled:cursor-default",
+              className={clsx("flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors disabled:cursor-default",
                 run && "hover:bg-[#fafbfc]", active === key && "bg-[#fafbfc]")}
             >
-              <span className={clsx("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full",
+              <span className={clsx("grid size-5 shrink-0 place-items-center rounded-full",
                 state === "completed" && "bg-emerald-600 text-white", state === "failed" && "bg-rose-600 text-white",
                 state === "running" && "bg-blue-50 text-blue-700", state === "pending" && "bg-[#eef0f3] text-subtle")}>
                 {state === "completed" ? <Check className="size-3" strokeWidth={3} /> : state === "failed" ? <X className="size-3" strokeWidth={3} />

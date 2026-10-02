@@ -63,6 +63,7 @@ export const titleCase = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c
 export const CATEGORY_LABEL: Record<string, string> = {
   laptop: "Notebooks", desktop: "Desktops", workstation: "Workstations", monitor: "Monitors", network_switch: "Switching",
   wireless: "Wireless", firewall: "Security", router: "Routing", server: "Servers", storage: "Storage", storage_media: "Drives",
-  power: "Power", rack: "Racks", cabling: "Cabling", peripheral: "Peripherals", printer: "Printers", av: "Collaboration",
+  power: "Power", rack: "Racks", cabling: "Cabling", peripheral: "Peripherals", printer: "Printers", av: "Projectors & AV",
+  audio: "Headsets & audio", component: "Components",
   software: "Software", service: "Services",
 };

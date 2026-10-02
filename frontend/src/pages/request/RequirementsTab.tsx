@@ -1,15 +1,45 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
+import { Check } from "lucide-react";
 import { CountryTag, WarningList } from "../../components/domain";
 import { Badge, Card, KeyValue } from "../../components/ui";
-import type { RfpDetail } from "../../lib/types";
+import { api } from "../../lib/api";
+import type { Requirement, RfpDetail } from "../../lib/types";
 import { date, titleCase } from "../../lib/format";
 
 const TYPE_LABEL: Record<string, string> = {
   delivery: "Delivery", payment: "Commercial", warranty_support: "Warranty & support", compliance: "Compliance",
-  evaluation: "Evaluation", submission: "Submission", scope: "Context",
+  evaluation: "Evaluation", submission: "Submission", scope: "Context", technical: "Technical", eligibility: "Eligibility",
+  line_item: "Line item",
 };
-const STATUS_TONE: Record<string, "green" | "amber" | "red" | "neutral"> = {
-  Complies: "green", "Complies with note": "amber", "Clarification required": "red", Noted: "neutral",
+// Types the clause model can learn; a reviewer's correction becomes a training label.
+const LEARNABLE = ["scope", "line_item", "delivery", "payment", "warranty_support", "compliance", "evaluation", "submission"];
+
+function TypeCell({ rfpId, r }: { rfpId: number; r: Requirement }) {
+  const qc = useQueryClient();
+  const save = useMutation({
+    mutationFn: (type: string) => api.labelRequirement(rfpId, r.id, type),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["rfp", rfpId] }),
+  });
+  if (!LEARNABLE.includes(r.type)) return <span className="text-[12.5px]">{TYPE_LABEL[r.type] ?? r.type}</span>;
+  return (
+    <div>
+      <select value={r.type} disabled={save.isPending} onChange={(e) => save.mutate(e.target.value)}
+        title="Correct the type — the model learns from it"
+        className={clsx("-ml-1 max-w-full cursor-pointer rounded-md border border-transparent bg-transparent px-1 py-0.5 text-[12.5px] outline-none transition-colors hover:border-line hover:bg-white focus:border-line",
+          r.type === "scope" ? "text-muted" : "text-ink")}>
+        {LEARNABLE.map((t) => <option key={t} value={t}>{TYPE_LABEL[t] ?? "Line item"}</option>)}
+      </select>
+      <div className="text-[11px] text-muted tnum">
+        {r.reviewed ? <span className="inline-flex items-center gap-1 text-emerald-700"><Check className="size-3" /> Corrected by reviewer</span>
+          : `${Math.round(r.confidence * 100)}% confidence`}
+      </div>
+    </div>
+  );
+}
+
+const STATUS_TONE: Record<string, "green" | "amber" | "red" | "neutral" | "blue"> = {
+  Complies: "green", "Complies with note": "amber", "Clarification required": "blue", Deviation: "red", Noted: "neutral",
 };
 
 export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
@@ -17,7 +47,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
   if (!p) return null;
   const c = p.client;
   const t = p.terms;
-  const compliance = new Map((rfp.proposal?.compliance ?? []).map((r) => [r.ref, r]));
+  const compliance = new Map((rfp.proposal?.compliance ?? []).map((r) => [r.req_id ?? r.ref, r]));
 
   return (
     <div className="space-y-5">
@@ -78,7 +108,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
         </table>
       </Card>
 
-      <Card title="Requirements and our response" subtitle="Every clause classified by type and answered in the quotation's compliance section" bodyClassName="p-0">
+      <Card title="Requirements and our response" subtitle="Every clause classified by type and answered in the quotation's compliance section. Correct a type and the classifier learns from it." bodyClassName="p-0">
         <table className="table-base">
           <thead><tr><th className="w-12">Ref</th><th>Requirement</th><th className="w-[150px]">Type</th><th className="w-[170px]">Status</th><th>Response</th></tr></thead>
           <tbody>
@@ -86,10 +116,9 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
               const row = compliance.get(r.id);
               return (
                 <tr key={r.id}>
-                  <td className="font-mono text-[11.5px] text-muted">{r.id}</td>
+                  <td className="font-mono text-[11.5px] text-muted">{r.clause ?? r.id}{r.page && p.document?.long_form ? <div className="font-sans text-[11px] text-subtle">p. {r.page}</div> : null}</td>
                   <td className="max-w-[380px] text-ink-soft">{r.text}</td>
-                  <td><span className={clsx("text-[12.5px]", r.type === "scope" ? "text-muted" : "text-ink")}>{TYPE_LABEL[r.type] ?? r.type}</span>
-                    <div className="text-[11px] text-muted tnum">{Math.round(r.confidence * 100)}% confidence</div></td>
+                  <td><TypeCell rfpId={rfp.id} r={r} /></td>
                   <td>{row ? <Badge tone={STATUS_TONE[row.status]}>{row.status}</Badge> : <span className="text-muted">—</span>}</td>
                   <td className="max-w-[360px]">
                     {row ? <><div>{row.response}</div>{row.evidence[0] && <div className="mt-1 text-[11.5px] text-muted">“{row.evidence[0].text}” <span className="text-subtle">— {row.evidence[0].section}</span></div>}</> : <span className="text-muted">Background</span>}

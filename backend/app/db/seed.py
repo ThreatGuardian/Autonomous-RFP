@@ -15,8 +15,8 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.config import DATA_DIR
-from app.db.models import Customer, DealHistory, PriceTier, Product, TaxRule, ValueAdd
+from app.config import data_file
+from app.db.models import Customer, DealHistory, PriceTier, PriceVersion, Product, TaxRule, ValueAdd
 from app.db.session import create_schema, session_scope
 
 SEGMENTS = ["enterprise", "smb", "public", "education", "healthcare"]
@@ -30,7 +30,7 @@ SEGMENT_PRICE_SENSITIVITY = {"public": 1.35, "education": 1.2, "smb": 1.0, "heal
 
 
 def load_json(name: str) -> Any:
-    with open(DATA_DIR / name, encoding="utf-8") as fh:
+    with open(data_file(name), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -118,6 +118,15 @@ def seed_history(session: Session) -> None:
         session.add_all(generate_deal_history())
 
 
+def seed_price_versions(session: Session) -> None:
+    """Opening price version for every product, so later imports have a baseline."""
+    if _empty(session, PriceVersion):
+        start = datetime(2026, 4, 1, tzinfo=timezone.utc)
+        for p in session.scalars(select(Product)):
+            session.add(PriceVersion(sku=p.sku, unit_cost=p.unit_cost, list_price=p.list_price, stock_qty=p.stock_qty,
+                                     effective_from=start, source="Opening catalogue"))
+
+
 def seed_all() -> None:
     create_schema()
     with session_scope() as session:
@@ -125,6 +134,12 @@ def seed_all() -> None:
         seed_customers(session)
         seed_tax_rules(session)
         seed_history(session)
+    with session_scope() as session:
+        seed_price_versions(session)
+    from app.intel.sources import seed_observations
+
+    with session_scope() as session:
+        seed_observations(session)
 
 
 if __name__ == "__main__":  # pragma: no cover

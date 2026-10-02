@@ -46,6 +46,9 @@ class Prediction:
     distribution: dict[str, float]
 
 
+REAL_WEIGHT = 5
+
+
 class TextClassifier:
     """Shared behaviour for the two TF-IDF + logistic-regression text models."""
 
@@ -83,9 +86,14 @@ class ClauseClassifier(TextClassifier):
 
     name = "clause-classifier"
 
-    def train(self) -> "ClauseClassifier":
+    def train(self, extra: Sequence[tuple[str, str]] = ()) -> "ClauseClassifier":
         x_train, y_train = clause_corpus(held_out=False)
         x_test, y_test = clause_corpus(per_label=120, held_out=True)
+        # Reviewer-labelled sentences from real documents count several times over
+        # a synthetic sentence: they are scarce but they are the target distribution.
+        for text, label in extra:
+            x_train += [text] * REAL_WEIGHT
+            y_train += [label] * REAL_WEIGHT
         self.pipeline.fit(x_train, y_train)
         pred = self.pipeline.predict(x_test)
         self.metrics = {
@@ -94,6 +102,7 @@ class ClauseClassifier(TextClassifier):
             "holdout_accuracy": round(float(accuracy_score(y_test, pred)), 4),
             "holdout_macro_f1": round(float(f1_score(y_test, pred, average="macro")), 4),
             "evaluation": "unseen template families",
+            "real_labels": len(extra),
         }
         self.trained_at = _now()
         return self
@@ -104,8 +113,11 @@ class CategoryClassifier(TextClassifier):
 
     name = "category-classifier"
 
-    def train(self, catalog: list[dict]) -> "CategoryClassifier":
+    def train(self, catalog: list[dict], extra: Sequence[tuple[str, str]] = ()) -> "CategoryClassifier":
         texts, labels = category_corpus(catalog)
+        for text, label in extra:
+            texts += [text] * REAL_WEIGHT
+            labels += [label] * REAL_WEIGHT
         x_train, x_test, y_train, y_test = train_test_split(texts, labels, test_size=0.2, random_state=3, stratify=labels)
         self.pipeline.fit(x_train, y_train)
         pred = self.pipeline.predict(x_test)
@@ -115,6 +127,7 @@ class CategoryClassifier(TextClassifier):
             "holdout_accuracy": round(float(accuracy_score(y_test, pred)), 4),
             "holdout_macro_f1": round(float(f1_score(y_test, pred, average="macro")), 4),
             "evaluation": "stratified 80/20 split",
+            "real_labels": len(extra),
         }
         # Refit on everything for serving.
         self.pipeline.fit(texts, labels)
@@ -166,7 +179,10 @@ class WinProbabilityModel:
         self.metrics: dict[str, Any] = {}
         self.trained_at: str | None = None
 
-    def train(self, deals: Sequence[dict[str, Any]]) -> "WinProbabilityModel":
+    def train(self, deals: Sequence[dict[str, Any]], real_weight: int = 10) -> "WinProbabilityModel":
+        real = [d for d in deals if d.get("source") == "outcome"]
+        # Recorded outcomes of this company's own bids outweigh simulated history.
+        deals = [d for d in deals if d.get("source") != "outcome"] + real * real_weight
         rows = [
             BidFeatures(
                 price_ratio=d["price_ratio"],
@@ -190,6 +206,7 @@ class WinProbabilityModel:
             "holdout_brier": round(float(brier_score_loss(y_te, p)), 4),
             "holdout_log_loss": round(float(log_loss(y_te, p)), 4),
             "base_win_rate": round(float(y.mean()), 4),
+            "real_outcomes": len(real),
         }
         self.pipeline.fit(x, y)
         self.trained_at = _now()

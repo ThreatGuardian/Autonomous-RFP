@@ -1,0 +1,647 @@
+{
+ "_comment": "Mock competitor market for Data Care Corp. Owned by the market service; the pricing engine only sees it through the API.",
+ "competitors": [
+  {
+   "id": "amazon_business",
+   "name": "Amazon Business",
+   "hq": "Bengaluru, IN",
+   "currency": "INR",
+   "positioning": "Online marketplace (B2B)",
+   "channel": "marketplace",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.86,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    3,
+    7
+   ],
+   "brands": "*",
+   "category_factor": {
+    "peripheral": 0.9,
+    "audio": 0.86,
+    "component": 0.95,
+    "storage_media": 0.92,
+    "laptop": 0.97,
+    "desktop": 1.02,
+    "monitor": 0.95,
+    "*": 0.98
+   },
+   "coverage": 0.93,
+   "volatility": 0.035,
+   "notes": "GST invoice and bulk pricing on business accounts; no on-site installation; OEM carry-in warranty."
+  },
+  {
+   "id": "flipkart_wholesale",
+   "name": "Flipkart Wholesale",
+   "hq": "Bengaluru, IN",
+   "currency": "INR",
+   "positioning": "Online wholesale marketplace",
+   "channel": "marketplace",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.8,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    4,
+    10
+   ],
+   "brands": "*",
+   "category_factor": {
+    "peripheral": 0.88,
+    "audio": 0.85,
+    "laptop": 0.96,
+    "monitor": 0.94,
+    "component": 0.97,
+    "desktop": 1.04,
+    "*": 0.99
+   },
+   "coverage": 0.82,
+   "volatility": 0.045,
+   "notes": "Deep discounts during sale events; limited stock for 50+ unit orders; no tender documentation support."
+  },
+  {
+   "id": "hp_world",
+   "name": "HP World (factory outlet)",
+   "hq": "Pune, IN",
+   "currency": "INR",
+   "positioning": "HP brand store",
+   "channel": "brand store",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.93,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    5,
+    12
+   ],
+   "brands": [
+    "HP"
+   ],
+   "category_factor": {
+    "laptop": 0.98,
+    "desktop": 0.99,
+    "*": 1.0
+   },
+   "coverage": 1.0,
+   "volatility": 0.02,
+   "bundle": "Free HP carry case and 1-year care pack upgrade",
+   "notes": "Offers only HP products; education pricing on ProBook and Pro Tower lines."
+  },
+  {
+   "id": "apple_store",
+   "name": "Apple authorised store",
+   "hq": "Pune, IN",
+   "currency": "INR",
+   "positioning": "Apple authorised reseller",
+   "channel": "brand store",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.97,
+   "default_warranty_months": 12,
+   "lead_time_days": [
+    4,
+    10
+   ],
+   "brands": [
+    "Apple"
+   ],
+   "category_factor": {
+    "*": 1.02
+   },
+   "coverage": 1.0,
+   "volatility": 0.01,
+   "notes": "Apple products only; education pricing for institutions."
+  },
+  {
+   "id": "dell_store",
+   "name": "Dell Exclusive Store",
+   "hq": "Pune, IN",
+   "currency": "INR",
+   "positioning": "Dell brand store",
+   "channel": "brand store",
+   "serves": [
+    "IN"
+   ],
+   "reliability": 0.92,
+   "default_warranty_months": 36,
+   "lead_time_days": [
+    6,
+    14
+   ],
+   "brands": [
+    "Dell"
+   ],
+   "category_factor": {
+    "desktop": 0.97,
+    "laptop": 0.98,
+    "monitor": 0.96,
+    "*": 1.0
+   },
+   "coverage": 1.0,
+   "volatility": 0.02,
+   "bundle": "Free on-site installation",
+   "notes": "Dell products only; 3-year on-site warranty on OptiPlex and Latitude."
+  }
+ ],
+ "promotions": [
+  {
+   "competitor": "amazon_business",
+   "mpn": "LG-981-000014-H390",
+   "street_factor": 0.78,
+   "label": "Business bulk deal"
+  },
+  {
+   "competitor": "flipkart_wholesale",
+   "mpn": "LG-910-001605-B100",
+   "street_factor": 0.74,
+   "label": "Sale event price"
+  },
+  {
+   "competitor": "flipkart_wholesale",
+   "mpn": "LG-24MP400-B",
+   "street_factor": 0.86,
+   "label": "Festive sale"
+  },
+  {
+   "competitor": "amazon_business",
+   "mpn": "ZT-G40600H-10M",
+   "street_factor": 0.9,
+   "label": "Lightning deal"
+  },
+  {
+   "competitor": "hp_world",
+   "mpn": "HP-9H1P7PA-280G9",
+   "street_factor": 0.92,
+   "label": "Education programme"
+  },
+  {
+   "competitor": "dell_store",
+   "mpn": "DL-E2425H",
+   "street_factor": 0.88,
+   "label": "Bundle with OptiPlex"
+  },
+  {
+   "competitor": "apple_store",
+   "mpn": "AP-MC8H4HN-A",
+   "street_factor": 0.9,
+   "label": "Education pricing"
+  }
+ ],
+ "products": {
+  "HP-9Z9X3PA-250G10": {
+   "category": "laptop",
+   "brand": "HP",
+   "description": "HP 250 G10 Notebook (Core i5)",
+   "street_price_usd": 627.45
+  },
+  "HP-A1RR7PA-440G11": {
+   "category": "laptop",
+   "brand": "HP",
+   "description": "HP ProBook 440 G11 (Core Ultra 5)",
+   "street_price_usd": 807.04
+  },
+  "DL-V3530-I5-16-512": {
+   "category": "laptop",
+   "brand": "Dell",
+   "description": "Dell Vostro 3530 (Core i5)",
+   "street_price_usd": 644.29
+  },
+  "DL-L3550-I7-16-512": {
+   "category": "laptop",
+   "brand": "Dell",
+   "description": "Dell Latitude 3550 (Core i7)",
+   "street_price_usd": 952.96
+  },
+  "LN-21JK-E14G6": {
+   "category": "laptop",
+   "brand": "Lenovo",
+   "description": "Lenovo ThinkPad E14 Gen 6 (Core i5)",
+   "street_price_usd": 768.88
+  },
+  "LN-83ER-IPS3": {
+   "category": "laptop",
+   "brand": "Lenovo",
+   "description": "Lenovo IdeaPad Slim 3 (Core i5)",
+   "street_price_usd": 589.29
+  },
+  "AP-MC8H4HN-A": {
+   "category": "laptop",
+   "brand": "Apple",
+   "description": "Apple MacBook Air 13-inch (M3, 16 GB)",
+   "street_price_usd": 1233.57
+  },
+  "AS-X1504VA-VIVO15": {
+   "category": "laptop",
+   "brand": "Asus",
+   "description": "Asus Vivobook 15 (Core i5)",
+   "street_price_usd": 560.1
+  },
+  "AC-NHQPJSI-A715": {
+   "category": "laptop",
+   "brand": "Acer",
+   "description": "Acer Aspire 7 (Core i5, RTX 3050)",
+   "street_price_usd": 762.14
+  },
+  "HP-9H1P7PA-280G9": {
+   "category": "desktop",
+   "brand": "HP",
+   "description": "HP Pro Tower 280 G9 (Core i5, 16 GB)",
+   "street_price_usd": 605.0
+  },
+  "HP-A3EQ8PA-400G9": {
+   "category": "desktop",
+   "brand": "HP",
+   "description": "HP ProDesk 400 G9 SFF (Core i7)",
+   "street_price_usd": 851.94
+  },
+  "DL-OP7020T-I5-16": {
+   "category": "desktop",
+   "brand": "Dell",
+   "description": "Dell OptiPlex 7020 Tower (Core i5, 16 GB)",
+   "street_price_usd": 694.8
+  },
+  "DL-V3030-I5-8": {
+   "category": "desktop",
+   "brand": "Dell",
+   "description": "Dell Vostro 3030 Tower (Core i5, 8 GB)",
+   "street_price_usd": 526.43
+  },
+  "LN-12JB-NEO50T": {
+   "category": "desktop",
+   "brand": "Lenovo",
+   "description": "Lenovo ThinkCentre neo 50t Gen 5 (Core i5)",
+   "street_price_usd": 621.84
+  },
+  "LN-12U3-M70T5": {
+   "category": "desktop",
+   "brand": "Lenovo",
+   "description": "Lenovo ThinkCentre M70t Gen 5 (Core i7)",
+   "street_price_usd": 881.12
+  },
+  "AC-DTVZ4SI-S2690G": {
+   "category": "desktop",
+   "brand": "Acer",
+   "description": "Acer Veriton S2690G (Core i5)",
+   "street_price_usd": 548.88
+  },
+  "AP-MU9D3HN-MINI": {
+   "category": "desktop",
+   "brand": "Apple",
+   "description": "Apple Mac mini (M4, 16 GB)",
+   "street_price_usd": 672.35
+  },
+  "AP-MWUC3HN-IMAC": {
+   "category": "desktop",
+   "brand": "Apple",
+   "description": "Apple iMac 24-inch (M4)",
+   "street_price_usd": 1514.18
+  },
+  "HP-Z2G9-I7-A2000": {
+   "category": "workstation",
+   "brand": "HP",
+   "description": "HP Z2 G9 Tower Workstation (RTX A2000)",
+   "street_price_usd": 1930.61
+  },
+  "DL-P3680-I7-4060": {
+   "category": "workstation",
+   "brand": "Dell",
+   "description": "Dell Precision 3680 Tower (RTX 4000 Ada)",
+   "street_price_usd": 2907.14
+  },
+  "DL-E2425H": {
+   "category": "monitor",
+   "brand": "Dell",
+   "description": "Dell E2425H 24-inch FHD Monitor",
+   "street_price_usd": 111.12
+  },
+  "HP-64W34AA-P24G5": {
+   "category": "monitor",
+   "brand": "HP",
+   "description": "HP P24 G5 23.8-inch FHD Monitor",
+   "street_price_usd": 122.35
+  },
+  "LG-24MP400-B": {
+   "category": "monitor",
+   "brand": "LG",
+   "description": "LG 24MP400 24-inch IPS Monitor",
+   "street_price_usd": 96.53
+  },
+  "SM-LS24C310EA": {
+   "category": "monitor",
+   "brand": "Samsung",
+   "description": "Samsung Essential S3 24-inch IPS Monitor",
+   "street_price_usd": 99.9
+  },
+  "BQ-GW2790": {
+   "category": "monitor",
+   "brand": "BenQ",
+   "description": "BenQ GW2790 27-inch Eye-care Monitor",
+   "street_price_usd": 144.8
+  },
+  "LN-63DFKAR-E24": {
+   "category": "monitor",
+   "brand": "Lenovo",
+   "description": "Lenovo ThinkVision E24-30 Monitor",
+   "street_price_usd": 127.96
+  },
+  "LG-920-009437-K120": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech K120 USB Keyboard",
+   "street_price_usd": 7.49
+  },
+  "DL-KB216-BK": {
+   "category": "peripheral",
+   "brand": "Dell",
+   "description": "Dell KB216 Multimedia USB Keyboard",
+   "street_price_usd": 8.51
+  },
+  "HP-664R5AA-150": {
+   "category": "peripheral",
+   "brand": "HP",
+   "description": "HP 150 Wired Keyboard",
+   "street_price_usd": 7.76
+  },
+  "ZB-K20-KEYBOARD": {
+   "category": "peripheral",
+   "brand": "Zebronics",
+   "description": "Zebronics Zeb-K20 USB Keyboard",
+   "street_price_usd": 4.3
+  },
+  "LG-910-001605-B100": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech B100 USB Optical Mouse",
+   "street_price_usd": 4.25
+  },
+  "DL-MS116-BK": {
+   "category": "peripheral",
+   "brand": "Dell",
+   "description": "Dell MS116 USB Optical Mouse",
+   "street_price_usd": 4.63
+  },
+  "HP-265A9AA-M100": {
+   "category": "peripheral",
+   "brand": "HP",
+   "description": "HP M100 USB Optical Mouse",
+   "street_price_usd": 4.85
+  },
+  "LG-910-005672-M331": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech M331 Silent Wireless Mouse",
+   "street_price_usd": 13.95
+  },
+  "LG-920-004437-MK270": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech MK270 Wireless Keyboard and Mouse Combo",
+   "street_price_usd": 19.33
+  },
+  "LG-960-001063-C270": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech C270 HD Webcam",
+   "street_price_usd": 19.33
+  },
+  "LG-960-001396-C920": {
+   "category": "peripheral",
+   "brand": "Logitech",
+   "description": "Logitech C920 HD Pro Webcam",
+   "street_price_usd": 75.34
+  },
+  "HP-53X27AA-W300": {
+   "category": "peripheral",
+   "brand": "HP",
+   "description": "HP W300 1080p Webcam",
+   "street_price_usd": 32.3
+  },
+  "ZB-CRISPCAM-FHD": {
+   "category": "peripheral",
+   "brand": "Zebronics",
+   "description": "Zebronics Zeb-Crisp Pro FHD Webcam",
+   "street_price_usd": 18.3
+  },
+  "LG-981-000014-H390": {
+   "category": "audio",
+   "brand": "Logitech",
+   "description": "Logitech H390 USB Headset with Noise-cancelling Mic",
+   "street_price_usd": 24.2
+  },
+  "LG-981-000593-H111": {
+   "category": "audio",
+   "brand": "Logitech",
+   "description": "Logitech H111 3.5 mm Stereo Headset",
+   "street_price_usd": 8.96
+  },
+  "JB-23189-999-889-E30": {
+   "category": "audio",
+   "brand": "Jabra",
+   "description": "Jabra Evolve2 30 SE USB Stereo Headset",
+   "street_price_usd": 80.14
+  },
+  "SN-WHCH520-B": {
+   "category": "audio",
+   "brand": "Sony",
+   "description": "Sony WH-CH520 Wireless On-ear Headphones",
+   "street_price_usd": 47.34
+  },
+  "JBL-T510BT-BLK": {
+   "category": "audio",
+   "brand": "JBL",
+   "description": "JBL Tune 510BT Wireless Headphones",
+   "street_price_usd": 36.89
+  },
+  "SN-MDRZX110-B": {
+   "category": "audio",
+   "brand": "Sony",
+   "description": "Sony MDR-ZX110 Wired Over-ear Headphones",
+   "street_price_usd": 10.53
+  },
+  "HP-428K7AA-G2": {
+   "category": "audio",
+   "brand": "HP",
+   "description": "HP G2 USB Stereo Headset",
+   "street_price_usd": 22.67
+  },
+  "ZB-THUNDER-HP": {
+   "category": "audio",
+   "brand": "Zebronics",
+   "description": "Zebronics Zeb-Thunder Wireless Headphones",
+   "street_price_usd": 10.53
+  },
+  "LG-980-000418-Z120": {
+   "category": "audio",
+   "brand": "Logitech",
+   "description": "Logitech Z120 USB Stereo Speakers",
+   "street_price_usd": 9.44
+  },
+  "ZT-G40600H-10M": {
+   "category": "component",
+   "brand": "Zotac",
+   "description": "ZOTAC GeForce RTX 4060 Twin Edge 8 GB",
+   "street_price_usd": 346.84
+  },
+  "MS-RTX4060TI-VENTUS": {
+   "category": "component",
+   "brand": "MSI",
+   "description": "MSI GeForce RTX 4060 Ti Ventus 2X 16 GB",
+   "street_price_usd": 537.65
+  },
+  "GB-N4070WF3OC-12GD": {
+   "category": "component",
+   "brand": "Gigabyte",
+   "description": "Gigabyte GeForce RTX 4070 Windforce 12 GB",
+   "street_price_usd": 694.8
+  },
+  "ZT-G30500H-10L": {
+   "category": "component",
+   "brand": "Zotac",
+   "description": "ZOTAC GeForce RTX 3050 6 GB",
+   "street_price_usd": 200.92
+  },
+  "IN-BX8071514400F": {
+   "category": "component",
+   "brand": "Intel",
+   "description": "Intel Core i5-14400F Processor (boxed)",
+   "street_price_usd": 189.69
+  },
+  "IN-BX8071514700K": {
+   "category": "component",
+   "brand": "Intel",
+   "description": "Intel Core i7-14700K Processor (boxed)",
+   "street_price_usd": 436.63
+  },
+  "AM-100-100001015BOX": {
+   "category": "component",
+   "brand": "AMD",
+   "description": "AMD Ryzen 5 7600 Processor (boxed)",
+   "street_price_usd": 218.88
+  },
+  "AM-100-100000591WOF": {
+   "category": "component",
+   "brand": "AMD",
+   "description": "AMD Ryzen 7 7700X Processor",
+   "street_price_usd": 335.61
+  },
+  "CR-CT16G48C40U5": {
+   "category": "component",
+   "brand": "Crucial",
+   "description": "Crucial 16 GB DDR5-4800 Desktop RAM",
+   "street_price_usd": 49.95
+  },
+  "KG-KVR32N22S8-8": {
+   "category": "component",
+   "brand": "Kingston",
+   "description": "Kingston 8 GB DDR4-3200 Desktop RAM",
+   "street_price_usd": 21.21
+  },
+  "GB-B760M-DS3H-DDR4": {
+   "category": "component",
+   "brand": "Gigabyte",
+   "description": "Gigabyte B760M DS3H DDR4 Motherboard",
+   "street_price_usd": 122.35
+  },
+  "MS-MAG-A650BN": {
+   "category": "component",
+   "brand": "MSI",
+   "description": "MSI MAG A650BN 650 W 80+ Bronze PSU",
+   "street_price_usd": 50.4
+  },
+  "SM-MZV9P1T0BW-990": {
+   "category": "storage_media",
+   "brand": "Samsung",
+   "description": "Samsung 990 PRO 1 TB NVMe SSD",
+   "street_price_usd": 110.0
+  },
+  "WD-WDS500G3B0C": {
+   "category": "storage_media",
+   "brand": "Western Digital",
+   "description": "WD Blue SN580 500 GB NVMe SSD",
+   "street_price_usd": 44.79
+  },
+  "SG-ST2000DM008": {
+   "category": "storage_media",
+   "brand": "Seagate",
+   "description": "Seagate BarraCuda 2 TB HDD",
+   "street_price_usd": 64.99
+  },
+  "SD-SDCZ73-064G": {
+   "category": "storage_media",
+   "brand": "SanDisk",
+   "description": "SanDisk Ultra Flair 64 GB USB 3.0 Pen Drive",
+   "street_price_usd": 6.62
+  },
+  "APC-BX600C-IN": {
+   "category": "power",
+   "brand": "APC",
+   "description": "APC Back-UPS BX600C-IN 600 VA",
+   "street_price_usd": 41.42
+  },
+  "APC-BX1100C-IN": {
+   "category": "power",
+   "brand": "APC",
+   "description": "APC Back-UPS BX1100C-IN 1100 VA",
+   "street_price_usd": 76.21
+  },
+  "APC-SRV3KI": {
+   "category": "power",
+   "brand": "APC",
+   "description": "APC Easy UPS SRV 3 kVA Online",
+   "street_price_usd": 690.31
+  },
+  "HP-4ZB78A-M211DW": {
+   "category": "printer",
+   "brand": "HP",
+   "description": "HP LaserJet Pro M211dw",
+   "street_price_usd": 185.2
+  },
+  "EP-C11CJ67501-L3250": {
+   "category": "printer",
+   "brand": "Epson",
+   "description": "Epson EcoTank L3250 All-in-One",
+   "street_price_usd": 152.65
+  },
+  "EP-V11HA85056-EBX51": {
+   "category": "av",
+   "brand": "Epson",
+   "description": "Epson EB-X51 XGA Projector",
+   "street_price_usd": 503.98
+  },
+  "BQ-MW560": {
+   "category": "av",
+   "brand": "BenQ",
+   "description": "BenQ MW560 WXGA Projector",
+   "street_price_usd": 477.04
+  },
+  "TP-TL-SG1024D": {
+   "category": "network_switch",
+   "brand": "TP-Link",
+   "description": "TP-Link TL-SG1024D 24-port Gigabit Switch",
+   "street_price_usd": 70.71
+  },
+  "TP-TL-SG3428": {
+   "category": "network_switch",
+   "brand": "TP-Link",
+   "description": "TP-Link JetStream TL-SG3428 24-port Managed Switch",
+   "street_price_usd": 197.55
+  },
+  "MS-KW9-00664-HB": {
+   "category": "software",
+   "brand": "Microsoft",
+   "description": "Microsoft Office Home & Business 2024",
+   "street_price_usd": 280.6
+  },
+  "QH-TS-1U-3Y": {
+   "category": "software",
+   "brand": "Quick Heal",
+   "description": "Quick Heal Total Security (3 years)",
+   "street_price_usd": 26.94
+  }
+ }
+}

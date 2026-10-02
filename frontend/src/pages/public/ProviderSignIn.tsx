@@ -62,7 +62,7 @@ export default function ProviderSignIn() {
             <form onSubmit={submit} className="mt-6 space-y-3">
               <label className="block"><span className="mb-1.5 block text-[12.5px] font-medium text-ink-soft">{google ? "Google account email" : "Work email"}</span>
                 <input className="input h-11 rounded-xl" type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder={google ? "you@gmail.com" : "you@meridiansystems.in"} /></label>
+                  placeholder={google ? "you@gmail.com" : "you@company.in"} /></label>
               {google && (
                 <label className="block"><span className="mb-1.5 block text-[12.5px] font-medium text-ink-soft">Name <span className="font-normal text-subtle">(optional)</span></span>
                   <input className="input h-11 rounded-xl" value={name} onChange={(e) => setName(e.target.value)} placeholder="As shown on your account" /></label>

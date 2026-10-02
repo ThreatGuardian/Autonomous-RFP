@@ -1,0 +1,219 @@
+{
+  "name": "Meridian Systems & Supply Pvt. Ltd.",
+  "short_name": "Meridian Systems",
+  "tagline": "IT infrastructure, delivered and supported.",
+  "address_lines": [
+    "Unit 402, Baner Business Bay",
+    "Baner Road, Pune 411045",
+    "Maharashtra, India"
+  ],
+  "country": "IN",
+  "region": "Maharashtra",
+  "tax_id_label": "GSTIN",
+  "tax_id": "27AAKCM4821F1Z6",
+  "base_currency": "INR",
+  "email": "bids@meridiansystems.in",
+  "phone": "+91 20 6720 4400",
+  "website": "www.meridiansystems.in",
+  "quote_validity_days": 30,
+  "bank": {
+    "name": "HDFC Bank, Baner Branch",
+    "account": "50200081234567",
+    "ifsc": "HDFC0001234",
+    "swift": "HDFCINBB"
+  },
+  "profile": {
+    "legal_name": "Meridian Systems & Supply Private Limited",
+    "constitution": "Private limited company (Companies Act, 2013)",
+    "incorporated_on": "2011-06-14",
+    "cin": "U72900PN2011PTC139842",
+    "pan": "AAKCM4821F",
+    "gstin": "27AAKCM4821F1Z6",
+    "msme": {
+      "udyam_number": "UDYAM-MH-26-0048213",
+      "category": "Small",
+      "valid": true,
+      "note": "Small enterprise under the revised MSME thresholds (investment up to Rs. 25 crore, turnover up to Rs. 100 crore)."
+    },
+    "turnover_inr": {
+      "2022-23": 612000000,
+      "2023-24": 684000000,
+      "2024-25": 749000000,
+      "2025-26": 826000000
+    },
+    "turnover_segments_pct": {
+      "it hardware supply": 81,
+      "ict system integration": 64,
+      "services": 19
+    },
+    "net_worth_inr": 214000000,
+    "net_worth_as_of": "2026-03-31",
+    "employees": 64,
+    "certified_engineers": 22,
+    "certifications": [
+      {
+        "name": "ISO 9001:2015",
+        "standard": "ISO 9001",
+        "scope": "Supply, integration and support of IT infrastructure",
+        "valid_until": "2027-08-31"
+      },
+      {
+        "name": "ISO/IEC 27001:2022",
+        "standard": "ISO 27001",
+        "scope": "Information security management",
+        "valid_until": "2028-02-28"
+      },
+      {
+        "name": "ISO 14001:2015",
+        "standard": "ISO 14001",
+        "scope": "Environmental management",
+        "valid_until": "2027-08-31"
+      }
+    ],
+    "oem_authorisations": [
+      "Dell",
+      "HP",
+      "Lenovo",
+      "Cisco",
+      "Cisco Meraki",
+      "Fortinet",
+      "Microsoft",
+      "APC",
+      "Synology",
+      "Aruba",
+      "Ubiquiti",
+      "Samsung",
+      "LG",
+      "Seagate",
+      "Logitech",
+      "Jabra",
+      "Poly",
+      "CommScope",
+      "Netrack",
+      "Veeam",
+      "Sophos",
+      "TP-Link",
+      "Meridian Services"
+    ],
+    "offices": [
+      {
+        "city": "Pune",
+        "state": "Maharashtra",
+        "type": "Head office and integration centre"
+      },
+      {
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "type": "Branch office"
+      },
+      {
+        "city": "Nagpur",
+        "state": "Maharashtra",
+        "type": "Service centre"
+      },
+      {
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "type": "Branch office"
+      },
+      {
+        "city": "Hyderabad",
+        "state": "Telangana",
+        "type": "Service centre"
+      }
+    ],
+    "support": {
+      "helpdesk_hours": "08:00-20:00 IST, Monday to Saturday",
+      "helpdesk_24x7": false,
+      "onsite_response_hours": 4,
+      "onsite_response_scope": "within 150 km of an office",
+      "remote_response_hours": 4,
+      "resolution_hours": 24
+    },
+    "blacklisted": false,
+    "credentials": [
+      {
+        "client": "Engineering college, Pune",
+        "sector": "education",
+        "scope": "620 laboratory desktops and 140 faculty notebooks, staged and imaged",
+        "value_inr": 54600000,
+        "completed_on": "2025-06-20",
+        "devices": {
+          "desktop": 620,
+          "laptop": 140
+        }
+      },
+      {
+        "client": "State university, Maharashtra",
+        "sector": "education",
+        "scope": "Faculty notebook refresh and campus Wi-Fi",
+        "value_inr": 40500000,
+        "completed_on": "2024-12-18",
+        "devices": {
+          "laptop": 380,
+          "wireless": 210
+        }
+      },
+      {
+        "client": "300-bed hospital group, Karnataka",
+        "sector": "healthcare",
+        "scope": "Segmented network, 180 Wi-Fi 6 access points, redundant firewalls",
+        "value_inr": 31200000,
+        "completed_on": "2024-11-08",
+        "devices": {
+          "wireless": 180,
+          "network_switch": 42,
+          "firewall": 2
+        }
+      },
+      {
+        "client": "District court complex, Maharashtra",
+        "sector": "government",
+        "scope": "Desktops, printers, UPS and structured cabling",
+        "value_inr": 23800000,
+        "completed_on": "2023-02-24",
+        "devices": {
+          "desktop": 260,
+          "printer": 40,
+          "power": 60
+        }
+      },
+      {
+        "client": "Municipal corporation ward offices, Maharashtra",
+        "sector": "government",
+        "scope": "IT infrastructure for 9 ward offices",
+        "value_inr": 17400000,
+        "completed_on": "2022-08-30",
+        "devices": {
+          "desktop": 150,
+          "network_switch": 18
+        }
+      },
+      {
+        "client": "Freight forwarder, Dubai",
+        "sector": "enterprise",
+        "scope": "Notebooks, docks and video-conferencing rooms, DDP",
+        "value_inr": 19000000,
+        "completed_on": "2024-03-15",
+        "devices": {
+          "laptop": 160
+        }
+      },
+      {
+        "client": "Logistics park, Chakan",
+        "sector": "enterprise",
+        "scope": "Campus Wi-Fi and network",
+        "value_inr": 8800000,
+        "completed_on": "2020-10-05",
+        "devices": {
+          "wireless": 95
+        }
+      }
+    ],
+    "local_content": {
+      "class": "Class-II local supplier",
+      "note": "Imported OEM hardware with local integration, staging and warranty services; local content 28-45% depending on the item."
+    }
+  },
+  "quote_prefix": "MSS"
+}

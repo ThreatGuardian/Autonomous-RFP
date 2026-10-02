@@ -14,6 +14,7 @@ import pytest
 _VAR = Path(tempfile.gettempdir()) / "tenderdesk-tests"
 _VAR.mkdir(exist_ok=True)
 os.environ["TD_VAR_DIR"] = str(_VAR)
+os.environ["TD_COMPANY"] = "meridian"
 os.environ["TD_FX_MODE"] = "offline"
 os.environ["TD_REQUIRE_AUTH"] = "0"
 (_VAR / "tenderdesk.sqlite3").unlink(missing_ok=True)

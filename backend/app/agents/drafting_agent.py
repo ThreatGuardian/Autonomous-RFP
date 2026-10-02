@@ -24,7 +24,8 @@ CATEGORY_LABELS = {
     "network_switch": "network switches", "wireless": "wireless access points", "firewall": "firewalls",
     "router": "routers", "server": "servers", "storage": "storage systems", "storage_media": "drives",
     "power": "power protection", "rack": "racks", "cabling": "structured cabling", "peripheral": "peripherals",
-    "printer": "printers", "av": "collaboration systems", "software": "software licences", "service": "professional services",
+    "printer": "printers", "av": "projectors and collaboration systems",
+    "audio": "headsets and headphones", "component": "graphics cards and components", "software": "software licences", "service": "professional services",
 }
 SIGNATORY = {"name": "Aarav Kulkarni", "title": "Bid Manager", "email": "bids@meridiansystems.in"}
 CERT_TOKENS = re.compile(r"(iso\s*/?\s*(?:iec\s*)?\d{4,5}|gdpr|dpdp|soc ?2|energy star|epeat|bis|rohs|ce marking|ukca)", re.I)
@@ -63,7 +64,8 @@ class ProposalDraftingAgent(Agent):
         version = int(ctx.overrides.get("_version", 1)) if ctx.overrides else 1
         issued = date.today()
         valid_until = issued + timedelta(days=company["quote_validity_days"])
-        quote_number = f"MSS-Q-{issued.year}-{ctx.rfp_id:04d}"
+        prefix = ctx.company.get("quote_prefix") or "".join(w[0] for w in ctx.company["short_name"].split()).upper()
+        quote_number = f"{prefix}-Q-{issued.year}-{ctx.rfp_id:04d}"
         money = lambda v: fmt(v, loc.currency, loc.decimals)  # noqa: E731
 
         categories: dict[str, int] = {}
@@ -107,8 +109,16 @@ class ProposalDraftingAgent(Agent):
         cover.append("We would welcome the opportunity to walk you through this proposal and look forward to working with you.")
         log.info("Cover letter composed", paragraphs=len(cover), grounded_passages=len(profile) + len(case))
 
-        # ---- compliance matrix
-        compliance = self._compliance(parsed, strat, loc, retrieve)
+        # ---- compliance matrix (from the Tender Compliance Agent when it ran)
+        report = ctx.messages.get("compliance")
+        if report is not None:
+            compliance = [
+                ComplianceRow(ref=i.clause or i.id, requirement=i.text, type=i.category, status=i.status, response=i.response,
+                              evidence=i.evidence, req_id=i.id)
+                for i in report.items
+            ]
+        else:
+            compliance = self._compliance(parsed, strat, loc, retrieve)
         counts: dict[str, int] = {}
         for row in compliance:
             counts[row.status] = counts.get(row.status, 0) + 1
@@ -183,7 +193,7 @@ class ProposalDraftingAgent(Agent):
             quote_number=quote_number, version=version, issue_date=issued.isoformat(), valid_until=valid_until.isoformat(),
             salutation=salutation, cover_letter=cover, executive_summary=exec_summary, highlights=highlights,
             compliance=compliance, compliance_counts=counts, delivery_plan=plan, milestones=milestones,
-            inclusions=inclusions, terms=terms, signatory=SIGNATORY, retrieval_log=retrieval_log,
+            inclusions=inclusions, terms=terms, signatory=ctx.company.get("signatory", SIGNATORY), retrieval_log=retrieval_log,
         )
         if self._renderer is not None:
             proposal.documents = self._renderer(ctx, proposal)

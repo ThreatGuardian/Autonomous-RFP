@@ -13,6 +13,11 @@ from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(__file__).resolve().parent / "data"
+COMPANIES_DIR = DATA_DIR / "companies"
+# Files that describe one company (its profile, catalogue, customers, competitors and
+# knowledge base). Everything else in DATA_DIR (tax rules, countries, FX, pricing
+# policy) is shared.
+COMPANY_FILES = {"company.json", "catalog.json", "customers.json", "market.json", "value_adds.json", "price_tiers.json"}
 
 
 def _env(name: str, default: str) -> str:
@@ -21,7 +26,9 @@ def _env(name: str, default: str) -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    var_dir: Path = field(default_factory=lambda: Path(_env("VAR_DIR", str(BACKEND_ROOT / "var"))))
+    # Which company's data set the install runs as (a folder under data/companies).
+    company: str = field(default_factory=lambda: _env("COMPANY", "datacare"))
+    var_dir: Path = field(default_factory=lambda: Path(_env("VAR_DIR", str(BACKEND_ROOT / "var" / _env("COMPANY", "datacare")))))
     database_url: str = field(default_factory=lambda: _env("DATABASE_URL", ""))
 
     # Mock competitor market service. When empty the in-process mock is used.
@@ -48,6 +55,14 @@ class Settings:
         return self.database_url or f"sqlite:///{self.var_dir / 'tenderdesk.sqlite3'}"
 
     @property
+    def company_dir(self) -> Path:
+        return COMPANIES_DIR / self.company
+
+    @property
+    def knowledge_dir(self) -> Path:
+        return self.company_dir / "knowledge"
+
+    @property
     def model_dir(self) -> Path:
         return self.var_dir / "models"
 
@@ -58,6 +73,13 @@ class Settings:
     def ensure_dirs(self) -> None:
         for path in (self.var_dir, self.model_dir, self.document_dir):
             path.mkdir(parents=True, exist_ok=True)
+
+
+def data_file(name: str) -> Path:
+    """Resolve a data file, preferring the active company's copy."""
+    if name in COMPANY_FILES:
+        return get_settings().company_dir / name
+    return DATA_DIR / name
 
 
 @lru_cache

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { X } from "lucide-react";
-import { type ButtonHTMLAttributes, type ReactNode, useEffect } from "react";
+import { motion } from "motion/react";
+import { type ButtonHTMLAttributes, type ReactNode, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 
 // ----------------------------------------------------------------------------- Button
@@ -22,7 +23,7 @@ export function Button({
       {...rest}
       disabled={rest.disabled || loading}
       className={clsx(
-        "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium whitespace-nowrap transition-[color,background-color,box-shadow,transform] duration-150 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
         size === "sm" ? "h-7 px-2.5 text-[12px]" : "h-9 px-3.5 text-[13px]",
         variants[variant],
         className,
@@ -98,17 +99,24 @@ export function StatGrid({ children, cols = 4 }: { children: ReactNode; cols?: n
 // ----------------------------------------------------------------------------- Tabs
 
 export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { value: T; label: ReactNode; count?: number }[] }) {
+  const ids = useId();
   return (
-    <div className="flex items-center gap-1 border-b border-line">
+    <div role="tablist" className="flex items-center gap-1 border-b border-line">
       {items.map((it) => (
         <button
           key={it.value}
+          role="tab"
+          aria-selected={value === it.value}
           onClick={() => onChange(it.value)}
           className={clsx(
             "relative -mb-px inline-flex h-10 items-center gap-2 px-3 text-[13px] font-medium transition-colors",
-            value === it.value ? "text-ink after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-ink" : "text-muted hover:text-ink",
+            value === it.value ? "text-ink" : "text-muted hover:text-ink",
           )}
         >
+          {value === it.value && (
+            <motion.span layoutId={`tab-${ids}`} transition={{ type: "spring", stiffness: 480, damping: 36 }}
+              className="absolute inset-x-2 bottom-0 h-[2px] rounded-full bg-ink" />
+          )}
           {it.label}
           {it.count !== undefined && (
             <span className={clsx("rounded-full px-1.5 text-[11px] tnum", value === it.value ? "bg-ink text-white" : "bg-[#eef0f3] text-muted")}>{it.count}</span>
@@ -120,12 +128,17 @@ export function Tabs<T extends string>({ value, onChange, items }: { value: T; o
 }
 
 export function Segmented<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { value: T; label: ReactNode }[] }) {
+  const ids = useId();
   return (
     <div className="inline-flex rounded-lg border border-line-strong bg-[#f3f4f6] p-0.5">
       {items.map((it) => (
         <button key={it.value} onClick={() => onChange(it.value)}
-          className={clsx("h-7 rounded-md px-2.5 text-[12px] font-medium transition", value === it.value ? "bg-white text-ink shadow-[var(--shadow-card)]" : "text-muted hover:text-ink")}>
-          {it.label}
+          className={clsx("relative h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors", value === it.value ? "text-ink" : "text-muted hover:text-ink")}>
+          {value === it.value && (
+            <motion.span layoutId={`seg-${ids}`} transition={{ type: "spring", stiffness: 480, damping: 36 }}
+              className="absolute inset-0 rounded-md bg-white shadow-[var(--shadow-card)]" />
+          )}
+          <span className="relative">{it.label}</span>
         </button>
       ))}
     </div>

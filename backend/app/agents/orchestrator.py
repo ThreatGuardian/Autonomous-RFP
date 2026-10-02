@@ -26,9 +26,12 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from app.agents.base import Agent, PipelineContext, StageLog
+from app.agents.compliance_agent import ComplianceAgent
 from app.agents.drafting_agent import ProposalDraftingAgent
 from app.agents.localisation_agent import LocalisationAgent
-from app.agents.messages import CompetitiveAnalysis, InternalPricing, Localisation, ParsedRfp, Proposal
+from app.agents.messages import (
+    CompetitiveAnalysis, ComplianceReport, InternalPricing, Localisation, ParsedRfp, Proposal,
+)
 from app.agents.parser_agent import RfpParserAgent
 from app.agents.pricing_agent import InternalPricingAgent
 from app.agents.strategy_agent import CompetitiveStrategyAgent
@@ -37,15 +40,17 @@ from app.db.models import ApprovalEvent, Rfp, StageRun
 from app.db.seed import load_json
 from app.db.session import session_scope
 from app.services.pdf_renderer import document_dir, render_memo, render_quotation
+from app.services.compliance_renderer import render_compliance
 from app.services.report_renderer import render_report
 
 log = logging.getLogger("tenderdesk.pipeline")
 
-STAGES = ["intake", "costing", "strategy", "localisation", "drafting"]
+STAGES = ["intake", "costing", "compliance", "strategy", "localisation", "drafting"]
 MESSAGE_TYPES: dict[str, type[BaseModel]] = {
-    "parsed": ParsedRfp, "costing": InternalPricing, "strategy": CompetitiveAnalysis,
+    "parsed": ParsedRfp, "costing": InternalPricing, "compliance": ComplianceReport, "strategy": CompetitiveAnalysis,
     "localisation": Localisation, "proposal": Proposal,
 }
+PRICING_KEYS = ("costing", "strategy", "localisation")
 
 
 def _now() -> datetime:
@@ -53,7 +58,7 @@ def _now() -> datetime:
 
 
 def build_agents() -> list[Agent]:
-    return [RfpParserAgent(), InternalPricingAgent(), CompetitiveStrategyAgent(), LocalisationAgent(),
+    return [RfpParserAgent(), InternalPricingAgent(), ComplianceAgent(), CompetitiveStrategyAgent(), LocalisationAgent(),
             ProposalDraftingAgent(renderer=render_documents)]
 
 
@@ -67,8 +72,13 @@ def render_documents(ctx: PipelineContext, proposal: Proposal, approved: bool = 
     memo = render_memo(folder / f"{stem}-pricing-memo.pdf", company=ctx.company, parsed=m["parsed"], strat=m["strategy"],
                        loc=m["localisation"], proposal=proposal, approval=approval)
     report = render_report(folder / f"{stem}-bid-report.pdf", company=ctx.company, parsed=m["parsed"], strat=m["strategy"],
-                           loc=m["localisation"], proposal=proposal, approval=approval)
-    return {"quotation": q.name, "memo": memo.name, "report": report.name}
+                           loc=m["localisation"], proposal=proposal, approval=approval, compliance=m.get("compliance"))
+    docs = {"quotation": q.name, "memo": memo.name, "report": report.name}
+    if m.get("compliance") is not None:
+        statement = render_compliance(folder / f"{stem}-compliance-statement.pdf", company=ctx.company, parsed=m["parsed"],
+                                      report=m["compliance"], proposal=proposal, approved=approved)
+        docs["compliance"] = statement.name
+    return docs
 
 
 # --------------------------------------------------------------------------- persistence helpers
@@ -79,9 +89,11 @@ def _load_messages(rfp: Rfp) -> dict[str, BaseModel]:
     if rfp.parsed:
         out["parsed"] = ParsedRfp.model_validate(rfp.parsed)
     pricing = rfp.pricing or {}
-    for key in ("costing", "strategy", "localisation"):
+    for key in PRICING_KEYS:
         if pricing.get(key):
             out[key] = MESSAGE_TYPES[key].model_validate(pricing[key])
+    if rfp.compliance:
+        out["compliance"] = ComplianceReport.model_validate(rfp.compliance)
     if rfp.proposal:
         out["proposal"] = Proposal.model_validate(rfp.proposal)
     return out
@@ -96,7 +108,9 @@ def _store_message(rfp: Rfp, key: str, message: BaseModel) -> None:
         rfp.client_country = message.client.country  # type: ignore[attr-defined]
         rfp.currency = message.currency.code  # type: ignore[attr-defined]
         rfp.due_date = message.due_date  # type: ignore[attr-defined]
-    elif key in ("costing", "strategy", "localisation"):
+    elif key == "compliance":
+        rfp.compliance = data
+    elif key in PRICING_KEYS:
         rfp.pricing = {**(rfp.pricing or {}), key: data}
         if key == "strategy":
             rfp.margin_pct = message.margin_pct  # type: ignore[attr-defined]
@@ -166,8 +180,10 @@ def _clear_from(rfp: Rfp, stage: str) -> None:
     idx = STAGES.index(stage)
     if idx <= 0:
         rfp.parsed = None
-    keep = {k: v for k, v in (rfp.pricing or {}).items() if STAGES.index(k) < idx}
+    keep = {k: v for k, v in (rfp.pricing or {}).items() if k in STAGES and STAGES.index(k) < idx}
     rfp.pricing = keep or None
+    if idx <= STAGES.index("compliance"):
+        rfp.compliance = None
     rfp.proposal = None
 
 
@@ -228,7 +244,8 @@ class Orchestrator:
             rfp.status = "processing"
             _clear_from(rfp, from_stage)
             ctx = PipelineContext(rfp.id, rfp.reference, rfp.raw_text, company, overrides=dict(rfp.overrides or {}),
-                                  messages=_load_messages(rfp))
+                                  messages=_load_messages(rfp), source_filename=rfp.source_filename,
+                                  source_path=source_path(rfp.reference, rfp.source_filename))
             if from_stage != "intake" and "parsed" in ctx.messages:
                 edited = apply_review_edits(ctx.messages["parsed"], ctx.overrides)  # type: ignore[arg-type]
                 ctx.messages["parsed"] = edited
@@ -290,6 +307,16 @@ class Orchestrator:
             proposal.documents = docs
             rfp.proposal = proposal.model_dump(mode="json")
             return docs
+
+
+def source_path(reference: str, filename: str | None) -> Path | None:
+    """Where the original upload is kept (``source.pdf`` / ``source.docx`` beside the generated documents)."""
+    if not filename or "." not in filename:
+        return None
+    suffix = filename.rsplit(".", 1)[-1].lower()
+    if suffix not in ("pdf", "docx"):
+        return None
+    return document_dir(reference) / f"source.{suffix}"
 
 
 def document_path(reference: str, filename: str) -> Path:

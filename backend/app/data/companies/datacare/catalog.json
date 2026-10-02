@@ -1,0 +1,2289 @@
+[
+ {
+  "sku": "DCC-LT-101",
+  "mpn": "HP-9Z9X3PA-250G10",
+  "name": "HP 250 G10 Notebook (Core i5)",
+  "brand": "HP",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1335U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "os": "Windows 11 Pro",
+   "battery_hours": 7,
+   "display": "15.6 inch Full HD anti-glare",
+   "resolution": "1920x1080"
+  },
+  "keywords": [
+   "notebook",
+   "laptop",
+   "15.6 inch",
+   "core i5",
+   "student laptop"
+  ],
+  "unit": "unit",
+  "unit_cost": 44930.0,
+  "list_price": 55900,
+  "min_margin_pct": 6,
+  "stock_qty": 120,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch notebook, Core i5 13th Gen, 16 GB RAM, 512 GB SSD, Windows 11 Pro.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-102",
+  "mpn": "HP-A1RR7PA-440G11",
+  "name": "HP ProBook 440 G11 (Core Ultra 5)",
+  "brand": "HP",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core Ultra 5 125U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "notebook",
+   "business laptop",
+   "14 inch",
+   "faculty laptop"
+  ],
+  "unit": "unit",
+  "unit_cost": 57810.0,
+  "list_price": 71900,
+  "min_margin_pct": 6,
+  "stock_qty": 85,
+  "lead_time_days": 5,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "14-inch business notebook with Core Ultra 5, 16 GB RAM and 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-103",
+  "mpn": "DL-V3530-I5-16-512",
+  "name": "Dell Vostro 3530 (Core i5)",
+  "brand": "Dell",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1334U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "os": "Windows 11 Pro",
+   "battery_hours": 6,
+   "display": "15.6 inch Full HD anti-glare",
+   "resolution": "1920x1080"
+  },
+  "keywords": [
+   "notebook",
+   "laptop",
+   "15.6 inch",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 46250.0,
+  "list_price": 57400,
+  "min_margin_pct": 6,
+  "stock_qty": 140,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch Vostro notebook, Core i5 13th Gen, 16 GB RAM, 512 GB SSD, Windows 11 Pro.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-104",
+  "mpn": "DL-L3550-I7-16-512",
+  "name": "Dell Latitude 3550 (Core i7)",
+  "brand": "Dell",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i7-1355U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "notebook",
+   "business laptop",
+   "core i7",
+   "latitude"
+  ],
+  "unit": "unit",
+  "unit_cost": 68430.0,
+  "list_price": 84900,
+  "min_margin_pct": 6,
+  "stock_qty": 40,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch Latitude with Core i7, 16 GB RAM, 512 GB SSD and 3-year warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-105",
+  "mpn": "LN-21JK-E14G6",
+  "name": "Lenovo ThinkPad E14 Gen 6 (Core i5)",
+  "brand": "Lenovo",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-13420H",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 14,
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "thinkpad",
+   "notebook",
+   "14 inch",
+   "business laptop"
+  ],
+  "unit": "unit",
+  "unit_cost": 55080.0,
+  "list_price": 68500,
+  "min_margin_pct": 6,
+  "stock_qty": 70,
+  "lead_time_days": 6,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "14-inch ThinkPad with Core i5, 16 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-106",
+  "mpn": "LN-83ER-IPS3",
+  "name": "Lenovo IdeaPad Slim 3 (Core i5)",
+  "brand": "Lenovo",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-12450H",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "os": "Windows 11 Home"
+  },
+  "keywords": [
+   "ideapad",
+   "notebook",
+   "student laptop",
+   "15.6 inch"
+  ],
+  "unit": "unit",
+  "unit_cost": 42210.0,
+  "list_price": 52500,
+  "min_margin_pct": 6,
+  "stock_qty": 160,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch consumer notebook with Core i5 12th Gen, 16 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-107",
+  "mpn": "AP-MC8H4HN-A",
+  "name": "Apple MacBook Air 13-inch (M3, 16 GB)",
+  "brand": "Apple",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Apple M3",
+   "ram_gb": 16,
+   "storage_gb": 256,
+   "storage_type": "SSD",
+   "screen_in": 13.6,
+   "os": "macOS"
+  },
+  "keywords": [
+   "macbook",
+   "mac",
+   "apple laptop",
+   "13 inch"
+  ],
+  "unit": "unit",
+  "unit_cost": 90710.0,
+  "list_price": 109900,
+  "min_margin_pct": 6,
+  "stock_qty": 30,
+  "lead_time_days": 5,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "13.6-inch MacBook Air with Apple M3, 16 GB unified memory and 256 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-108",
+  "mpn": "AS-X1504VA-VIVO15",
+  "name": "Asus Vivobook 15 (Core i5)",
+  "brand": "Asus",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-1335U",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "os": "Windows 11 Home",
+   "battery_hours": 6,
+   "display": "15.6 inch Full HD anti-glare",
+   "resolution": "1920x1080"
+  },
+  "keywords": [
+   "vivobook",
+   "notebook",
+   "laptop",
+   "15.6 inch"
+  ],
+  "unit": "unit",
+  "unit_cost": 40230.0,
+  "list_price": 49900,
+  "min_margin_pct": 6,
+  "stock_qty": 110,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch Vivobook, Core i5, 16 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-LT-109",
+  "mpn": "AC-NHQPJSI-A715",
+  "name": "Acer Aspire 7 (Core i5, RTX 3050)",
+  "brand": "Acer",
+  "category": "laptop",
+  "specs": {
+   "cpu": "Intel Core i5-12450H",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "screen_in": 15.6,
+   "gpu": "RTX 3050 6GB",
+   "os": "Windows 11 Home"
+  },
+  "keywords": [
+   "gaming laptop",
+   "graphics laptop",
+   "rtx laptop"
+  ],
+  "unit": "unit",
+  "unit_cost": 54710.0,
+  "list_price": 67900,
+  "min_margin_pct": 6,
+  "stock_qty": 45,
+  "lead_time_days": 6,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "15.6-inch laptop with discrete RTX 3050 graphics for design and entry ML work.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-201",
+  "mpn": "HP-9H1P7PA-280G9",
+  "name": "HP Pro Tower 280 G9 (Core i5, 16 GB)",
+  "brand": "HP",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-14500",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro",
+   "usb_ports": 8,
+   "ports": "4x USB 3.2, 4x USB 2.0, HDMI, VGA, DisplayPort",
+   "network": "Gigabit Ethernet",
+   "max_ram_gb": 64,
+   "certification": "BEE star rating, ENERGY STAR"
+  },
+  "keywords": [
+   "desktop",
+   "pc",
+   "tower",
+   "lab computer",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 42860.0,
+  "list_price": 53900,
+  "min_margin_pct": 7,
+  "stock_qty": 210,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Tower desktop with Core i5 14th Gen, 16 GB DDR4, 512 GB NVMe SSD, Windows 11 Pro, 3-year warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-202",
+  "mpn": "HP-A3EQ8PA-400G9",
+  "name": "HP ProDesk 400 G9 SFF (Core i7)",
+  "brand": "HP",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i7-14700",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "small form factor",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "desktop",
+   "sff",
+   "small form factor",
+   "core i7"
+  ],
+  "unit": "unit",
+  "unit_cost": 60910.0,
+  "list_price": 75900,
+  "min_margin_pct": 7,
+  "stock_qty": 60,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Small-form-factor desktop with Core i7 14th Gen, 16 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-203",
+  "mpn": "DL-OP7020T-I5-16",
+  "name": "Dell OptiPlex 7020 Tower (Core i5, 16 GB)",
+  "brand": "Dell",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-14500",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro",
+   "usb_ports": 8,
+   "ports": "5x USB 3.2, 3x USB 2.0, HDMI, DisplayPort",
+   "network": "Gigabit Ethernet",
+   "max_ram_gb": 64,
+   "certification": "ENERGY STAR, EPEAT"
+  },
+  "keywords": [
+   "optiplex",
+   "desktop",
+   "tower",
+   "pc",
+   "core i5"
+  ],
+  "unit": "unit",
+  "unit_cost": 49260.0,
+  "list_price": 61900,
+  "min_margin_pct": 7,
+  "stock_qty": 150,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "OptiPlex tower with Core i5 14th Gen, 16 GB DDR5, 512 GB SSD and 3-year on-site warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-204",
+  "mpn": "DL-V3030-I5-8",
+  "name": "Dell Vostro 3030 Tower (Core i5, 8 GB)",
+  "brand": "Dell",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-14400",
+   "ram_gb": 8,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro",
+   "usb_ports": 6,
+   "ports": "4x USB 3.2, 2x USB 2.0, HDMI, VGA",
+   "network": "Gigabit Ethernet"
+  },
+  "keywords": [
+   "vostro",
+   "desktop",
+   "tower",
+   "pc"
+  ],
+  "unit": "unit",
+  "unit_cost": 37410.0,
+  "list_price": 46900,
+  "min_margin_pct": 7,
+  "stock_qty": 180,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Entry business tower, Core i5 14th Gen, 8 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-205",
+  "mpn": "LN-12JB-NEO50T",
+  "name": "Lenovo ThinkCentre neo 50t Gen 5 (Core i5)",
+  "brand": "Lenovo",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-14400",
+   "ram_gb": 16,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro",
+   "usb_ports": 8,
+   "ports": "4x USB 3.2, 4x USB 2.0, HDMI, VGA, DisplayPort",
+   "network": "Gigabit Ethernet",
+   "max_ram_gb": 64,
+   "certification": "ENERGY STAR"
+  },
+  "keywords": [
+   "thinkcentre",
+   "desktop",
+   "tower",
+   "pc"
+  ],
+  "unit": "unit",
+  "unit_cost": 44370.0,
+  "list_price": 55400,
+  "min_margin_pct": 7,
+  "stock_qty": 130,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "ThinkCentre tower, Core i5 14th Gen, 16 GB RAM, 512 GB SSD, 3-year warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-206",
+  "mpn": "LN-12U3-M70T5",
+  "name": "Lenovo ThinkCentre M70t Gen 5 (Core i7)",
+  "brand": "Lenovo",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i7-14700",
+   "ram_gb": 16,
+   "storage_gb": 1000,
+   "storage_type": "SSD",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "thinkcentre",
+   "desktop",
+   "core i7",
+   "tower"
+  ],
+  "unit": "unit",
+  "unit_cost": 62890.0,
+  "list_price": 78500,
+  "min_margin_pct": 7,
+  "stock_qty": 50,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Core i7 tower with 16 GB RAM and 1 TB SSD for engineering labs.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-207",
+  "mpn": "AC-DTVZ4SI-S2690G",
+  "name": "Acer Veriton S2690G (Core i5)",
+  "brand": "Acer",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Intel Core i5-12400",
+   "ram_gb": 8,
+   "storage_gb": 512,
+   "storage_type": "SSD",
+   "form_factor": "small form factor",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "veriton",
+   "desktop",
+   "sff"
+  ],
+  "unit": "unit",
+  "unit_cost": 39010.0,
+  "list_price": 48900,
+  "min_margin_pct": 7,
+  "stock_qty": 95,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Compact business desktop, Core i5 12th Gen, 8 GB RAM, 512 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-208",
+  "mpn": "AP-MU9D3HN-MINI",
+  "name": "Apple Mac mini (M4, 16 GB)",
+  "brand": "Apple",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Apple M4",
+   "ram_gb": 16,
+   "storage_gb": 256,
+   "storage_type": "SSD",
+   "form_factor": "mini",
+   "os": "macOS"
+  },
+  "keywords": [
+   "mac mini",
+   "mac",
+   "apple desktop"
+  ],
+  "unit": "unit",
+  "unit_cost": 49630.0,
+  "list_price": 59900,
+  "min_margin_pct": 7,
+  "stock_qty": 25,
+  "lead_time_days": 6,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Mac mini with Apple M4, 16 GB unified memory, 256 GB SSD.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-DT-209",
+  "mpn": "AP-MWUC3HN-IMAC",
+  "name": "Apple iMac 24-inch (M4)",
+  "brand": "Apple",
+  "category": "desktop",
+  "specs": {
+   "cpu": "Apple M4",
+   "ram_gb": 16,
+   "storage_gb": 256,
+   "storage_type": "SSD",
+   "screen_in": 24,
+   "form_factor": "all in one",
+   "os": "macOS"
+  },
+  "keywords": [
+   "imac",
+   "all in one",
+   "aio",
+   "apple desktop"
+  ],
+  "unit": "unit",
+  "unit_cost": 110920.0,
+  "list_price": 134900,
+  "min_margin_pct": 7,
+  "stock_qty": 12,
+  "lead_time_days": 8,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "24-inch 4.5K all-in-one with Apple M4.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-WS-251",
+  "mpn": "HP-Z2G9-I7-A2000",
+  "name": "HP Z2 G9 Tower Workstation (RTX A2000)",
+  "brand": "HP",
+  "category": "workstation",
+  "specs": {
+   "cpu": "Intel Core i7-14700",
+   "ram_gb": 32,
+   "storage_gb": 1000,
+   "storage_type": "SSD",
+   "gpu": "NVIDIA RTX A2000 12GB",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "workstation",
+   "cad workstation",
+   "gpu workstation"
+  ],
+  "unit": "unit",
+  "unit_cost": 139120.0,
+  "list_price": 172000,
+  "min_margin_pct": 8,
+  "stock_qty": 12,
+  "lead_time_days": 12,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Entry workstation with Core i7, 32 GB RAM, 1 TB SSD and RTX A2000 12 GB.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-WS-252",
+  "mpn": "DL-P3680-I7-4060",
+  "name": "Dell Precision 3680 Tower (RTX 4000 Ada)",
+  "brand": "Dell",
+  "category": "workstation",
+  "specs": {
+   "cpu": "Intel Core i7-14700",
+   "ram_gb": 32,
+   "storage_gb": 1000,
+   "storage_type": "SSD",
+   "gpu": "NVIDIA RTX 4000 Ada 20GB",
+   "form_factor": "tower",
+   "os": "Windows 11 Pro"
+  },
+  "keywords": [
+   "workstation",
+   "precision",
+   "ai workstation",
+   "rendering workstation"
+  ],
+  "unit": "unit",
+  "unit_cost": 210560.0,
+  "list_price": 259000,
+  "min_margin_pct": 8,
+  "stock_qty": 6,
+  "lead_time_days": 14,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Precision tower with RTX 4000 Ada 20 GB for AI and rendering labs.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-MN-401",
+  "mpn": "DL-E2425H",
+  "name": "Dell E2425H 24-inch FHD Monitor",
+  "brand": "Dell",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 23.8,
+   "resolution": "1920x1080",
+   "panel": "VA",
+   "ports": "VGA, DisplayPort",
+   "surface": "anti-glare",
+   "certification": "BEE star rating, ENERGY STAR"
+  },
+  "keywords": [
+   "monitor",
+   "24 inch",
+   "fhd",
+   "display",
+   "led monitor"
+  ],
+  "unit": "unit",
+  "unit_cost": 7900.0,
+  "list_price": 9900,
+  "min_margin_pct": 7,
+  "stock_qty": 260,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "23.8-inch Full HD monitor with VGA and DisplayPort, 3-year warranty.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-MN-402",
+  "mpn": "HP-64W34AA-P24G5",
+  "name": "HP P24 G5 23.8-inch FHD Monitor",
+  "brand": "HP",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 23.8,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DisplayPort, VGA",
+   "surface": "anti-glare",
+   "certification": "BEE star rating, ENERGY STAR"
+  },
+  "keywords": [
+   "monitor",
+   "24 inch",
+   "ips",
+   "fhd",
+   "display"
+  ],
+  "unit": "unit",
+  "unit_cost": 8550.0,
+  "list_price": 10900,
+  "min_margin_pct": 7,
+  "stock_qty": 220,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "23.8-inch IPS Full HD monitor with HDMI, DisplayPort and VGA.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-MN-403",
+  "mpn": "LG-24MP400-B",
+  "name": "LG 24MP400 24-inch IPS Monitor",
+  "brand": "LG",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 23.8,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, VGA",
+   "surface": "anti-glare",
+   "certification": "BEE star rating 3 star"
+  },
+  "keywords": [
+   "monitor",
+   "24 inch",
+   "ips",
+   "full hd",
+   "led monitor"
+  ],
+  "unit": "unit",
+  "unit_cost": 6770.0,
+  "list_price": 8600,
+  "min_margin_pct": 7,
+  "stock_qty": 300,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "23.8-inch IPS Full HD monitor with HDMI and VGA inputs.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-MN-404",
+  "mpn": "SM-LS24C310EA",
+  "name": "Samsung Essential S3 24-inch IPS Monitor",
+  "brand": "Samsung",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 24,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, VGA",
+   "surface": "anti-glare",
+   "certification": "BEE star rating"
+  },
+  "keywords": [
+   "monitor",
+   "24 inch",
+   "ips",
+   "fhd"
+  ],
+  "unit": "unit",
+  "unit_cost": 7140.0,
+  "list_price": 8900,
+  "min_margin_pct": 7,
+  "stock_qty": 240,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "24-inch IPS Full HD monitor, HDMI and VGA.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-MN-405",
+  "mpn": "BQ-GW2790",
+  "name": "BenQ GW2790 27-inch Eye-care Monitor",
+  "brand": "BenQ",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 27,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DisplayPort"
+  },
+  "keywords": [
+   "monitor",
+   "27 inch",
+   "eye care",
+   "display"
+  ],
+  "unit": "unit",
+  "unit_cost": 10250.0,
+  "list_price": 12900,
+  "min_margin_pct": 7,
+  "stock_qty": 90,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "27-inch IPS Full HD eye-care monitor.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-MN-406",
+  "mpn": "LN-63DFKAR-E24",
+  "name": "Lenovo ThinkVision E24-30 Monitor",
+  "brand": "Lenovo",
+  "category": "monitor",
+  "specs": {
+   "screen_in": 23.8,
+   "resolution": "1920x1080",
+   "panel": "IPS",
+   "ports": "HDMI, DisplayPort, VGA",
+   "surface": "anti-glare",
+   "certification": "ENERGY STAR"
+  },
+  "keywords": [
+   "thinkvision",
+   "monitor",
+   "24 inch",
+   "ips"
+  ],
+  "unit": "unit",
+  "unit_cost": 9020.0,
+  "list_price": 11400,
+  "min_margin_pct": 7,
+  "stock_qty": 120,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "23.8-inch IPS Full HD monitor with tilt and height adjustment.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-PR-501",
+  "mpn": "LG-920-009437-K120",
+  "name": "Logitech K120 USB Keyboard",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "layout": "full size 104 keys, US English layout with Rupee symbol",
+   "spill_resistant": true,
+   "design": "spill resistant, low profile keys"
+  },
+  "keywords": [
+   "keyboard",
+   "usb keyboard",
+   "wired keyboard",
+   "104 keys"
+  ],
+  "unit": "unit",
+  "unit_cost": 508.0,
+  "list_price": 695,
+  "min_margin_pct": 10,
+  "stock_qty": 1800,
+  "lead_time_days": 2,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Full-size USB wired keyboard, spill resistant, 3-year warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-502",
+  "mpn": "DL-KB216-BK",
+  "name": "Dell KB216 Multimedia USB Keyboard",
+  "brand": "Dell",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "layout": "full size 104 keys, US English layout with Rupee symbol",
+   "design": "low profile keys"
+  },
+  "keywords": [
+   "keyboard",
+   "usb keyboard",
+   "multimedia keyboard"
+  ],
+  "unit": "unit",
+  "unit_cost": 573.0,
+  "list_price": 790,
+  "min_margin_pct": 10,
+  "stock_qty": 900,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Full-size USB multimedia keyboard.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-503",
+  "mpn": "HP-664R5AA-150",
+  "name": "HP 150 Wired Keyboard",
+  "brand": "HP",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "layout": "full size 104 keys, US English layout",
+   "design": "spill resistant"
+  },
+  "keywords": [
+   "keyboard",
+   "wired keyboard",
+   "usb keyboard"
+  ],
+  "unit": "unit",
+  "unit_cost": 526.0,
+  "list_price": 720,
+  "min_margin_pct": 10,
+  "stock_qty": 1100,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Full-size USB wired keyboard.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-504",
+  "mpn": "ZB-K20-KEYBOARD",
+  "name": "Zebronics Zeb-K20 USB Keyboard",
+  "brand": "Zebronics",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "layout": "full size 104 keys"
+  },
+  "keywords": [
+   "keyboard",
+   "usb keyboard",
+   "budget keyboard"
+  ],
+  "unit": "unit",
+  "unit_cost": 273.0,
+  "list_price": 399,
+  "min_margin_pct": 10,
+  "stock_qty": 2500,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Budget full-size USB keyboard.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-511",
+  "mpn": "LG-910-001605-B100",
+  "name": "Logitech B100 USB Optical Mouse",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "dpi": 800,
+   "sensor": "optical",
+   "buttons": "3 buttons with scroll wheel",
+   "design": "ambidextrous"
+  },
+  "keywords": [
+   "mouse",
+   "usb mouse",
+   "optical mouse",
+   "wired mouse"
+  ],
+  "unit": "unit",
+  "unit_cost": 273.0,
+  "list_price": 395,
+  "min_margin_pct": 10,
+  "stock_qty": 2400,
+  "lead_time_days": 2,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Wired USB optical mouse, ambidextrous, 3-year warranty.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-512",
+  "mpn": "DL-MS116-BK",
+  "name": "Dell MS116 USB Optical Mouse",
+  "brand": "Dell",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "dpi": 1000,
+   "sensor": "optical",
+   "buttons": "3 buttons with scroll wheel",
+   "design": "ambidextrous"
+  },
+  "keywords": [
+   "mouse",
+   "usb mouse",
+   "optical mouse"
+  ],
+  "unit": "unit",
+  "unit_cost": 301.0,
+  "list_price": 430,
+  "min_margin_pct": 10,
+  "stock_qty": 1600,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Wired USB optical mouse, 1000 DPI.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-513",
+  "mpn": "HP-265A9AA-M100",
+  "name": "HP M100 USB Optical Mouse",
+  "brand": "HP",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "USB wired",
+   "dpi": 1600,
+   "sensor": "optical",
+   "buttons": "3 buttons with scroll wheel",
+   "design": "ambidextrous"
+  },
+  "keywords": [
+   "mouse",
+   "wired mouse",
+   "optical mouse"
+  ],
+  "unit": "unit",
+  "unit_cost": 310.0,
+  "list_price": 450,
+  "min_margin_pct": 10,
+  "stock_qty": 1200,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Wired USB optical mouse, up to 1600 DPI.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-514",
+  "mpn": "LG-910-005672-M331",
+  "name": "Logitech M331 Silent Wireless Mouse",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "wireless",
+   "dpi": 1000,
+   "sensor": "optical"
+  },
+  "keywords": [
+   "wireless mouse",
+   "silent mouse",
+   "mouse"
+  ],
+  "unit": "unit",
+  "unit_cost": 921.0,
+  "list_price": 1295,
+  "min_margin_pct": 10,
+  "stock_qty": 700,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Silent wireless mouse with USB receiver.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-515",
+  "mpn": "LG-920-004437-MK270",
+  "name": "Logitech MK270 Wireless Keyboard and Mouse Combo",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "connectivity": "wireless",
+   "layout": "full size"
+  },
+  "keywords": [
+   "keyboard mouse combo",
+   "wireless combo",
+   "keyboard",
+   "mouse"
+  ],
+  "unit": "unit",
+  "unit_cost": 1270.0,
+  "list_price": 1795,
+  "min_margin_pct": 10,
+  "stock_qty": 800,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Wireless keyboard and mouse combo.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-PR-521",
+  "mpn": "LG-960-001063-C270",
+  "name": "Logitech C270 HD Webcam",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "resolution": "1280x720",
+   "microphone": true,
+   "fps": 30,
+   "mounting": "universal monitor clip",
+   "interface": "USB plug and play"
+  },
+  "keywords": [
+   "webcam",
+   "hd webcam",
+   "camera",
+   "720p"
+  ],
+  "unit": "unit",
+  "unit_cost": 1270.0,
+  "list_price": 1795,
+  "min_margin_pct": 10,
+  "stock_qty": 900,
+  "lead_time_days": 2,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "720p HD webcam with built-in microphone.",
+  "hsn": "8525"
+ },
+ {
+  "sku": "DCC-PR-522",
+  "mpn": "LG-960-001396-C920",
+  "name": "Logitech C920 HD Pro Webcam",
+  "brand": "Logitech",
+  "category": "peripheral",
+  "specs": {
+   "resolution": "1920x1080",
+   "microphone": true,
+   "fps": 30,
+   "mounting": "universal monitor clip, tripod thread",
+   "interface": "USB plug and play"
+  },
+  "keywords": [
+   "webcam",
+   "full hd webcam",
+   "1080p",
+   "camera",
+   "video conferencing"
+  ],
+  "unit": "unit",
+  "unit_cost": 5260.0,
+  "list_price": 6995,
+  "min_margin_pct": 10,
+  "stock_qty": 350,
+  "lead_time_days": 2,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "1080p Full HD webcam with stereo microphones.",
+  "hsn": "8525"
+ },
+ {
+  "sku": "DCC-PR-523",
+  "mpn": "HP-53X27AA-W300",
+  "name": "HP W300 1080p Webcam",
+  "brand": "HP",
+  "category": "peripheral",
+  "specs": {
+   "resolution": "1920x1080",
+   "microphone": true,
+   "fps": 30,
+   "mounting": "universal monitor clip",
+   "interface": "USB plug and play"
+  },
+  "keywords": [
+   "webcam",
+   "1080p",
+   "full hd webcam",
+   "camera"
+  ],
+  "unit": "unit",
+  "unit_cost": 2210.0,
+  "list_price": 2999,
+  "min_margin_pct": 10,
+  "stock_qty": 400,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "1080p Full HD webcam with built-in microphone.",
+  "hsn": "8525"
+ },
+ {
+  "sku": "DCC-PR-524",
+  "mpn": "ZB-CRISPCAM-FHD",
+  "name": "Zebronics Zeb-Crisp Pro FHD Webcam",
+  "brand": "Zebronics",
+  "category": "peripheral",
+  "specs": {
+   "resolution": "1920x1080",
+   "microphone": true,
+   "fps": 30,
+   "mounting": "universal monitor clip",
+   "interface": "USB plug and play"
+  },
+  "keywords": [
+   "webcam",
+   "1080p",
+   "camera",
+   "budget webcam"
+  ],
+  "unit": "unit",
+  "unit_cost": 1180.0,
+  "list_price": 1699,
+  "min_margin_pct": 10,
+  "stock_qty": 600,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Budget 1080p webcam with microphone.",
+  "hsn": "8525"
+ },
+ {
+  "sku": "DCC-AU-601",
+  "mpn": "LG-981-000014-H390",
+  "name": "Logitech H390 USB Headset with Noise-cancelling Mic",
+  "brand": "Logitech",
+  "category": "audio",
+  "specs": {
+   "connectivity": "USB wired",
+   "type": "stereo over-ear headset",
+   "microphone": "noise-cancelling boom",
+   "controls": "in-line volume and mute controls",
+   "cable_m": 1.9,
+   "fit": "stereo over-ear USB headset"
+  },
+  "keywords": [
+   "headset",
+   "usb headset",
+   "headphones with mic",
+   "language lab headset",
+   "noise cancelling mic"
+  ],
+  "unit": "unit",
+  "unit_cost": 1670.0,
+  "list_price": 2295,
+  "min_margin_pct": 10,
+  "stock_qty": 1200,
+  "lead_time_days": 2,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "USB stereo headset with padded ear cups and noise-cancelling boom microphone.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-602",
+  "mpn": "LG-981-000593-H111",
+  "name": "Logitech H111 3.5 mm Stereo Headset",
+  "brand": "Logitech",
+  "category": "audio",
+  "specs": {
+   "connectivity": "3.5 mm",
+   "type": "stereo headset",
+   "microphone": "boom"
+  },
+  "keywords": [
+   "headset",
+   "3.5mm headset",
+   "headphones with mic"
+  ],
+  "unit": "unit",
+  "unit_cost": 602.0,
+  "list_price": 850,
+  "min_margin_pct": 10,
+  "stock_qty": 1500,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Stereo headset with single 3.5 mm plug and rotating mic.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-603",
+  "mpn": "JB-23189-999-889-E30",
+  "name": "Jabra Evolve2 30 SE USB Stereo Headset",
+  "brand": "Jabra",
+  "category": "audio",
+  "specs": {
+   "connectivity": "USB-A",
+   "type": "stereo headset",
+   "microphone": "2-mic noise cancelling",
+   "controls": "in-line volume, mute and call controls",
+   "cable_m": 1.2,
+   "fit": "stereo on-ear"
+  },
+  "keywords": [
+   "headset",
+   "call centre headset",
+   "usb headset",
+   "professional headset"
+  ],
+  "unit": "unit",
+  "unit_cost": 5730.0,
+  "list_price": 7600,
+  "min_margin_pct": 10,
+  "stock_qty": 260,
+  "lead_time_days": 4,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "Professional USB stereo headset with two-microphone noise cancellation.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-604",
+  "mpn": "SN-WHCH520-B",
+  "name": "Sony WH-CH520 Wireless On-ear Headphones",
+  "brand": "Sony",
+  "category": "audio",
+  "specs": {
+   "connectivity": "Bluetooth 5.2",
+   "type": "on-ear headphones",
+   "microphone": "built-in"
+  },
+  "keywords": [
+   "headphones",
+   "wireless headphones",
+   "bluetooth headphones",
+   "on ear"
+  ],
+  "unit": "unit",
+  "unit_cost": 3240.0,
+  "list_price": 4490,
+  "min_margin_pct": 10,
+  "stock_qty": 420,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Bluetooth on-ear headphones, 50-hour battery.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-605",
+  "mpn": "JBL-T510BT-BLK",
+  "name": "JBL Tune 510BT Wireless Headphones",
+  "brand": "JBL",
+  "category": "audio",
+  "specs": {
+   "connectivity": "Bluetooth 5.0",
+   "type": "on-ear headphones",
+   "microphone": "built-in"
+  },
+  "keywords": [
+   "headphones",
+   "wireless headphones",
+   "bluetooth headphones"
+  ],
+  "unit": "unit",
+  "unit_cost": 2580.0,
+  "list_price": 3499,
+  "min_margin_pct": 10,
+  "stock_qty": 520,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Bluetooth on-ear headphones with pure-bass sound.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-606",
+  "mpn": "SN-MDRZX110-B",
+  "name": "Sony MDR-ZX110 Wired Over-ear Headphones",
+  "brand": "Sony",
+  "category": "audio",
+  "specs": {
+   "connectivity": "3.5 mm",
+   "type": "over-ear headphones",
+   "microphone": "none",
+   "driver_mm": 30,
+   "connector": "3.5 mm stereo jack",
+   "fit": "wired over-ear stereo headphones"
+  },
+  "keywords": [
+   "headphones",
+   "wired headphones",
+   "over ear headphones",
+   "multimedia headphones"
+  ],
+  "unit": "unit",
+  "unit_cost": 733.0,
+  "list_price": 999,
+  "min_margin_pct": 10,
+  "stock_qty": 900,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Wired over-ear headphones with 30 mm drivers.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-607",
+  "mpn": "HP-428K7AA-G2",
+  "name": "HP G2 USB Stereo Headset",
+  "brand": "HP",
+  "category": "audio",
+  "specs": {
+   "connectivity": "USB wired",
+   "type": "stereo headset",
+   "microphone": "boom",
+   "controls": "in-line volume and mute controls",
+   "cable_m": 1.8,
+   "fit": "stereo over-ear"
+  },
+  "keywords": [
+   "headset",
+   "usb headset",
+   "headphones with mic"
+  ],
+  "unit": "unit",
+  "unit_cost": 1550.0,
+  "list_price": 2150,
+  "min_margin_pct": 10,
+  "stock_qty": 380,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "USB stereo headset with adjustable boom microphone.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-608",
+  "mpn": "ZB-THUNDER-HP",
+  "name": "Zebronics Zeb-Thunder Wireless Headphones",
+  "brand": "Zebronics",
+  "category": "audio",
+  "specs": {
+   "connectivity": "Bluetooth 5.0",
+   "type": "over-ear headphones",
+   "microphone": "built-in"
+  },
+  "keywords": [
+   "headphones",
+   "wireless headphones",
+   "budget headphones"
+  ],
+  "unit": "unit",
+  "unit_cost": 649.0,
+  "list_price": 999,
+  "min_margin_pct": 10,
+  "stock_qty": 1100,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Budget Bluetooth over-ear headphones.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-AU-609",
+  "mpn": "LG-980-000418-Z120",
+  "name": "Logitech Z120 USB Stereo Speakers",
+  "brand": "Logitech",
+  "category": "audio",
+  "specs": {
+   "connectivity": "USB powered",
+   "type": "stereo speakers"
+  },
+  "keywords": [
+   "speakers",
+   "desktop speakers",
+   "usb speakers"
+  ],
+  "unit": "unit",
+  "unit_cost": 602.0,
+  "list_price": 895,
+  "min_margin_pct": 10,
+  "stock_qty": 600,
+  "lead_time_days": 2,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Compact USB-powered stereo speakers.",
+  "hsn": "8518"
+ },
+ {
+  "sku": "DCC-CP-701",
+  "mpn": "ZT-G40600H-10M",
+  "name": "ZOTAC GeForce RTX 4060 Twin Edge 8 GB",
+  "brand": "Zotac",
+  "category": "component",
+  "specs": {
+   "gpu": "NVIDIA GeForce RTX 4060",
+   "vram_gb": 8,
+   "memory_type": "GDDR6",
+   "interface": "PCI Express 4.0 x8",
+   "tdp_w": 115,
+   "support": "CUDA and cuDNN supported",
+   "min_psu_w": 550
+  },
+  "keywords": [
+   "graphics card",
+   "gpu",
+   "rtx 4060",
+   "nvidia graphics card",
+   "video card"
+  ],
+  "unit": "unit",
+  "unit_cost": 24820.0,
+  "list_price": 30900,
+  "min_margin_pct": 5,
+  "stock_qty": 90,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "NVIDIA GeForce RTX 4060 graphics card, 8 GB GDDR6.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-702",
+  "mpn": "MS-RTX4060TI-VENTUS",
+  "name": "MSI GeForce RTX 4060 Ti Ventus 2X 16 GB",
+  "brand": "MSI",
+  "category": "component",
+  "specs": {
+   "gpu": "NVIDIA GeForce RTX 4060 Ti",
+   "vram_gb": 16,
+   "memory_type": "GDDR6",
+   "interface": "PCI Express 4.0 x8",
+   "tdp_w": 165,
+   "support": "CUDA and cuDNN supported",
+   "min_psu_w": 550
+  },
+  "keywords": [
+   "graphics card",
+   "gpu",
+   "rtx 4060 ti",
+   "16gb graphics card",
+   "ai gpu"
+  ],
+  "unit": "unit",
+  "unit_cost": 39290.0,
+  "list_price": 47900,
+  "min_margin_pct": 5,
+  "stock_qty": 40,
+  "lead_time_days": 6,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "NVIDIA GeForce RTX 4060 Ti graphics card, 16 GB GDDR6.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-703",
+  "mpn": "GB-N4070WF3OC-12GD",
+  "name": "Gigabyte GeForce RTX 4070 Windforce 12 GB",
+  "brand": "Gigabyte",
+  "category": "component",
+  "specs": {
+   "gpu": "NVIDIA GeForce RTX 4070",
+   "vram_gb": 12,
+   "memory_type": "GDDR6X",
+   "interface": "PCI Express 4.0 x16",
+   "tdp_w": 200,
+   "support": "CUDA and cuDNN supported",
+   "min_psu_w": 650
+  },
+  "keywords": [
+   "graphics card",
+   "gpu",
+   "rtx 4070",
+   "nvidia"
+  ],
+  "unit": "unit",
+  "unit_cost": 50950.0,
+  "list_price": 61900,
+  "min_margin_pct": 5,
+  "stock_qty": 25,
+  "lead_time_days": 7,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "NVIDIA GeForce RTX 4070 graphics card, 12 GB GDDR6X.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-704",
+  "mpn": "ZT-G30500H-10L",
+  "name": "ZOTAC GeForce RTX 3050 6 GB",
+  "brand": "Zotac",
+  "category": "component",
+  "specs": {
+   "gpu": "NVIDIA GeForce RTX 3050",
+   "vram_gb": 6,
+   "memory_type": "GDDR6",
+   "interface": "PCIe 4.0 x8",
+   "tdp_w": 70
+  },
+  "keywords": [
+   "graphics card",
+   "gpu",
+   "rtx 3050",
+   "entry graphics card"
+  ],
+  "unit": "unit",
+  "unit_cost": 14290.0,
+  "list_price": 17900,
+  "min_margin_pct": 5,
+  "stock_qty": 70,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "NVIDIA GeForce RTX 3050 graphics card, 6 GB GDDR6.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-711",
+  "mpn": "IN-BX8071514400F",
+  "name": "Intel Core i5-14400F Processor (boxed)",
+  "brand": "Intel",
+  "category": "component",
+  "specs": {
+   "cpu": "Intel Core i5-14400F",
+   "cores": 10,
+   "socket": "LGA1700"
+  },
+  "keywords": [
+   "processor",
+   "cpu chip",
+   "intel core i5 processor",
+   "boxed processor"
+  ],
+  "unit": "unit",
+  "unit_cost": 13350.0,
+  "list_price": 16900,
+  "min_margin_pct": 5,
+  "stock_qty": 150,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "10-core Intel Core i5 14th Gen desktop processor, boxed with cooler.",
+  "hsn": "8542"
+ },
+ {
+  "sku": "DCC-CP-712",
+  "mpn": "IN-BX8071514700K",
+  "name": "Intel Core i7-14700K Processor (boxed)",
+  "brand": "Intel",
+  "category": "component",
+  "specs": {
+   "cpu": "Intel Core i7-14700K",
+   "cores": 20,
+   "socket": "LGA1700"
+  },
+  "keywords": [
+   "processor",
+   "intel core i7 processor",
+   "cpu chip"
+  ],
+  "unit": "unit",
+  "unit_cost": 31770.0,
+  "list_price": 38900,
+  "min_margin_pct": 5,
+  "stock_qty": 60,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "20-core Intel Core i7 14th Gen unlocked desktop processor.",
+  "hsn": "8542"
+ },
+ {
+  "sku": "DCC-CP-713",
+  "mpn": "AM-100-100001015BOX",
+  "name": "AMD Ryzen 5 7600 Processor (boxed)",
+  "brand": "AMD",
+  "category": "component",
+  "specs": {
+   "cpu": "AMD Ryzen 5 7600",
+   "cores": 6,
+   "socket": "AM5"
+  },
+  "keywords": [
+   "processor",
+   "ryzen 5",
+   "amd processor"
+  ],
+  "unit": "unit",
+  "unit_cost": 15420.0,
+  "list_price": 19500,
+  "min_margin_pct": 5,
+  "stock_qty": 80,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "6-core AMD Ryzen 5 7000-series desktop processor with Wraith cooler.",
+  "hsn": "8542"
+ },
+ {
+  "sku": "DCC-CP-714",
+  "mpn": "AM-100-100000591WOF",
+  "name": "AMD Ryzen 7 7700X Processor",
+  "brand": "AMD",
+  "category": "component",
+  "specs": {
+   "cpu": "AMD Ryzen 7 7700X",
+   "cores": 8,
+   "socket": "AM5"
+  },
+  "keywords": [
+   "processor",
+   "ryzen 7",
+   "amd processor"
+  ],
+  "unit": "unit",
+  "unit_cost": 24350.0,
+  "list_price": 29900,
+  "min_margin_pct": 5,
+  "stock_qty": 45,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "8-core AMD Ryzen 7 7000-series desktop processor.",
+  "hsn": "8542"
+ },
+ {
+  "sku": "DCC-CP-721",
+  "mpn": "CR-CT16G48C40U5",
+  "name": "Crucial 16 GB DDR5-4800 Desktop RAM",
+  "brand": "Crucial",
+  "category": "component",
+  "specs": {
+   "ram_gb": 16,
+   "memory_type": "DDR5",
+   "speed_mhz": 4800
+  },
+  "keywords": [
+   "ram",
+   "memory module",
+   "ddr5 ram",
+   "16gb ram",
+   "memory upgrade"
+  ],
+  "unit": "unit",
+  "unit_cost": 3430.0,
+  "list_price": 4450,
+  "min_margin_pct": 5,
+  "stock_qty": 500,
+  "lead_time_days": 2,
+  "warranty_months": 120,
+  "tax_category": "goods_standard",
+  "description": "16 GB DDR5-4800 UDIMM desktop memory module.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-722",
+  "mpn": "KG-KVR32N22S8-8",
+  "name": "Kingston 8 GB DDR4-3200 Desktop RAM",
+  "brand": "Kingston",
+  "category": "component",
+  "specs": {
+   "ram_gb": 8,
+   "memory_type": "DDR4",
+   "speed_mhz": 3200
+  },
+  "keywords": [
+   "ram",
+   "memory module",
+   "ddr4 ram",
+   "8gb ram",
+   "memory upgrade"
+  ],
+  "unit": "unit",
+  "unit_cost": 1390.0,
+  "list_price": 1890,
+  "min_margin_pct": 5,
+  "stock_qty": 700,
+  "lead_time_days": 2,
+  "warranty_months": 120,
+  "tax_category": "goods_standard",
+  "description": "8 GB DDR4-3200 UDIMM desktop memory module.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-731",
+  "mpn": "GB-B760M-DS3H-DDR4",
+  "name": "Gigabyte B760M DS3H DDR4 Motherboard",
+  "brand": "Gigabyte",
+  "category": "component",
+  "specs": {
+   "socket": "LGA1700",
+   "chipset": "B760",
+   "form_factor": "micro atx"
+  },
+  "keywords": [
+   "motherboard",
+   "mainboard",
+   "b760 motherboard"
+  ],
+  "unit": "unit",
+  "unit_cost": 8650.0,
+  "list_price": 10900,
+  "min_margin_pct": 5,
+  "stock_qty": 70,
+  "lead_time_days": 4,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "Micro-ATX LGA1700 motherboard with DDR4 support.",
+  "hsn": "8473"
+ },
+ {
+  "sku": "DCC-CP-741",
+  "mpn": "MS-MAG-A650BN",
+  "name": "MSI MAG A650BN 650 W 80+ Bronze PSU",
+  "brand": "MSI",
+  "category": "component",
+  "specs": {
+   "power_w": 650,
+   "efficiency": "80 PLUS Bronze"
+  },
+  "keywords": [
+   "power supply",
+   "psu",
+   "smps",
+   "650w psu"
+  ],
+  "unit": "unit",
+  "unit_cost": 3480.0,
+  "list_price": 4490,
+  "min_margin_pct": 5,
+  "stock_qty": 160,
+  "lead_time_days": 3,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "650 W 80 PLUS Bronze power supply unit.",
+  "hsn": "8504"
+ },
+ {
+  "sku": "DCC-ST-801",
+  "mpn": "SM-MZV9P1T0BW-990",
+  "name": "Samsung 990 PRO 1 TB NVMe SSD",
+  "brand": "Samsung",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 1000,
+   "type": "SSD",
+   "interface": "NVMe PCIe 4.0"
+  },
+  "keywords": [
+   "ssd",
+   "nvme ssd",
+   "1tb ssd",
+   "solid state drive",
+   "m.2 ssd"
+  ],
+  "unit": "unit",
+  "unit_cost": 7710.0,
+  "list_price": 9800,
+  "min_margin_pct": 6,
+  "stock_qty": 300,
+  "lead_time_days": 2,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "1 TB NVMe PCIe 4.0 M.2 SSD.",
+  "hsn": "8523"
+ },
+ {
+  "sku": "DCC-ST-802",
+  "mpn": "WD-WDS500G3B0C",
+  "name": "WD Blue SN580 500 GB NVMe SSD",
+  "brand": "Western Digital",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 500,
+   "type": "SSD",
+   "interface": "NVMe PCIe 4.0"
+  },
+  "keywords": [
+   "ssd",
+   "nvme ssd",
+   "500gb ssd",
+   "m.2 ssd"
+  ],
+  "unit": "unit",
+  "unit_cost": 3060.0,
+  "list_price": 3990,
+  "min_margin_pct": 6,
+  "stock_qty": 450,
+  "lead_time_days": 2,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "500 GB NVMe M.2 SSD.",
+  "hsn": "8523"
+ },
+ {
+  "sku": "DCC-ST-803",
+  "mpn": "SG-ST2000DM008",
+  "name": "Seagate BarraCuda 2 TB HDD",
+  "brand": "Seagate",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 2000,
+   "type": "HDD",
+   "rpm": 7200
+  },
+  "keywords": [
+   "hard disk",
+   "hdd",
+   "2tb hard drive",
+   "internal hard drive"
+  ],
+  "unit": "unit",
+  "unit_cost": 4460.0,
+  "list_price": 5790,
+  "min_margin_pct": 6,
+  "stock_qty": 260,
+  "lead_time_days": 3,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "2 TB 3.5-inch SATA hard disk, 7200 rpm.",
+  "hsn": "8471"
+ },
+ {
+  "sku": "DCC-ST-804",
+  "mpn": "SD-SDCZ73-064G",
+  "name": "SanDisk Ultra Flair 64 GB USB 3.0 Pen Drive",
+  "brand": "SanDisk",
+  "category": "storage_media",
+  "specs": {
+   "capacity_gb": 64,
+   "type": "USB flash drive",
+   "interface": "USB 3.0"
+  },
+  "keywords": [
+   "pen drive",
+   "usb flash drive",
+   "64gb pendrive"
+  ],
+  "unit": "unit",
+  "unit_cost": 395.0,
+  "list_price": 590,
+  "min_margin_pct": 6,
+  "stock_qty": 3000,
+  "lead_time_days": 1,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "64 GB USB 3.0 pen drive.",
+  "hsn": "8523"
+ },
+ {
+  "sku": "DCC-PW-901",
+  "mpn": "APC-BX600C-IN",
+  "name": "APC Back-UPS BX600C-IN 600 VA",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "capacity_va": 600,
+   "topology": "line-interactive",
+   "form_factor": "tower",
+   "outlets": 3,
+   "sockets": "3 Indian sockets",
+   "backup_minutes": 12
+  },
+  "keywords": [
+   "ups",
+   "600va ups",
+   "desktop ups",
+   "power backup"
+  ],
+  "unit": "unit",
+  "unit_cost": 2800.0,
+  "list_price": 3690,
+  "min_margin_pct": 8,
+  "stock_qty": 700,
+  "lead_time_days": 2,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "600 VA line-interactive UPS for a desktop computer, 2-year warranty.",
+  "hsn": "8504"
+ },
+ {
+  "sku": "DCC-PW-902",
+  "mpn": "APC-BX1100C-IN",
+  "name": "APC Back-UPS BX1100C-IN 1100 VA",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "capacity_va": 1100,
+   "topology": "line-interactive",
+   "form_factor": "tower",
+   "outlets": 4,
+   "sockets": "4 Indian sockets",
+   "backup_minutes": 15
+  },
+  "keywords": [
+   "ups",
+   "1kva ups",
+   "1100va ups",
+   "power backup"
+  ],
+  "unit": "unit",
+  "unit_cost": 5260.0,
+  "list_price": 6790,
+  "min_margin_pct": 8,
+  "stock_qty": 300,
+  "lead_time_days": 3,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "1100 VA line-interactive UPS.",
+  "hsn": "8504"
+ },
+ {
+  "sku": "DCC-PW-903",
+  "mpn": "APC-SRV3KI",
+  "name": "APC Easy UPS SRV 3 kVA Online",
+  "brand": "APC",
+  "category": "power",
+  "specs": {
+   "capacity_va": 3000,
+   "topology": "online double-conversion",
+   "form_factor": "tower"
+  },
+  "keywords": [
+   "online ups",
+   "3kva ups",
+   "lab ups",
+   "power backup"
+  ],
+  "unit": "unit",
+  "unit_cost": 48880.0,
+  "list_price": 61500,
+  "min_margin_pct": 8,
+  "stock_qty": 20,
+  "lead_time_days": 7,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "3 kVA online double-conversion UPS for laboratory circuits.",
+  "hsn": "8504"
+ },
+ {
+  "sku": "DCC-PT-951",
+  "mpn": "HP-4ZB78A-M211DW",
+  "name": "HP LaserJet Pro M211dw",
+  "brand": "HP",
+  "category": "printer",
+  "specs": {
+   "ppm": 29,
+   "type": "mono laser",
+   "duplex": true,
+   "network": "Wi-Fi, LAN"
+  },
+  "keywords": [
+   "printer",
+   "laser printer",
+   "network printer"
+  ],
+  "unit": "unit",
+  "unit_cost": 13070.0,
+  "list_price": 16500,
+  "min_margin_pct": 8,
+  "stock_qty": 80,
+  "lead_time_days": 4,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Mono laser printer, 29 ppm, duplex, Wi-Fi and LAN.",
+  "hsn": "8443"
+ },
+ {
+  "sku": "DCC-PT-952",
+  "mpn": "EP-C11CJ67501-L3250",
+  "name": "Epson EcoTank L3250 All-in-One",
+  "brand": "Epson",
+  "category": "printer",
+  "specs": {
+   "ppm": 10,
+   "type": "colour ink tank",
+   "duplex": false,
+   "network": "Wi-Fi"
+  },
+  "keywords": [
+   "printer",
+   "ink tank printer",
+   "multifunction printer",
+   "colour printer"
+  ],
+  "unit": "unit",
+  "unit_cost": 10900.0,
+  "list_price": 13600,
+  "min_margin_pct": 8,
+  "stock_qty": 110,
+  "lead_time_days": 3,
+  "warranty_months": 12,
+  "tax_category": "goods_standard",
+  "description": "Colour ink-tank print, scan and copy.",
+  "hsn": "8443"
+ },
+ {
+  "sku": "DCC-AV-961",
+  "mpn": "EP-V11HA85056-EBX51",
+  "name": "Epson EB-X51 XGA Projector",
+  "brand": "Epson",
+  "category": "av",
+  "specs": {
+   "lumens": 3800,
+   "resolution": "1024x768"
+  },
+  "keywords": [
+   "projector",
+   "classroom projector",
+   "lcd projector"
+  ],
+  "unit": "unit",
+  "unit_cost": 36100.0,
+  "list_price": 44900,
+  "min_margin_pct": 8,
+  "stock_qty": 35,
+  "lead_time_days": 5,
+  "warranty_months": 24,
+  "tax_category": "goods_standard",
+  "description": "3,800-lumen XGA 3LCD classroom projector.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-AV-962",
+  "mpn": "BQ-MW560",
+  "name": "BenQ MW560 WXGA Projector",
+  "brand": "BenQ",
+  "category": "av",
+  "specs": {
+   "lumens": 4000,
+   "resolution": "1280x800"
+  },
+  "keywords": [
+   "projector",
+   "dlp projector",
+   "classroom projector"
+  ],
+  "unit": "unit",
+  "unit_cost": 34030.0,
+  "list_price": 42500,
+  "min_margin_pct": 8,
+  "stock_qty": 30,
+  "lead_time_days": 5,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "4,000-lumen WXGA DLP projector.",
+  "hsn": "8528"
+ },
+ {
+  "sku": "DCC-NW-971",
+  "mpn": "TP-TL-SG1024D",
+  "name": "TP-Link TL-SG1024D 24-port Gigabit Switch",
+  "brand": "TP-Link",
+  "category": "network_switch",
+  "specs": {
+   "ports": 24,
+   "poe": false,
+   "managed": false
+  },
+  "keywords": [
+   "switch",
+   "24 port switch",
+   "gigabit switch",
+   "unmanaged switch"
+  ],
+  "unit": "unit",
+  "unit_cost": 4890.0,
+  "list_price": 6300,
+  "min_margin_pct": 8,
+  "stock_qty": 140,
+  "lead_time_days": 3,
+  "warranty_months": 36,
+  "tax_category": "goods_standard",
+  "description": "24-port unmanaged gigabit desktop/rack switch.",
+  "hsn": "8517"
+ },
+ {
+  "sku": "DCC-NW-972",
+  "mpn": "TP-TL-SG3428",
+  "name": "TP-Link JetStream TL-SG3428 24-port Managed Switch",
+  "brand": "TP-Link",
+  "category": "network_switch",
+  "specs": {
+   "ports": 24,
+   "poe": false,
+   "managed": true,
+   "uplinks": "4x 1G SFP"
+  },
+  "keywords": [
+   "managed switch",
+   "l2 switch",
+   "24 port switch"
+  ],
+  "unit": "unit",
+  "unit_cost": 13910.0,
+  "list_price": 17600,
+  "min_margin_pct": 8,
+  "stock_qty": 40,
+  "lead_time_days": 5,
+  "warranty_months": 60,
+  "tax_category": "goods_standard",
+  "description": "24-port gigabit L2+ managed switch with 4 SFP slots.",
+  "hsn": "8517"
+ },
+ {
+  "sku": "DCC-SW-981",
+  "mpn": "MS-KW9-00664-HB",
+  "name": "Microsoft Office Home & Business 2024",
+  "brand": "Microsoft",
+  "category": "software",
+  "specs": {
+   "licence": "perpetual, per device"
+  },
+  "keywords": [
+   "ms office",
+   "office licence",
+   "microsoft office"
+  ],
+  "unit": "unit",
+  "unit_cost": 21800,
+  "list_price": 24999,
+  "min_margin_pct": 6,
+  "stock_qty": 200,
+  "lead_time_days": 1,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Perpetual Office licence for one PC or Mac.",
+  "hsn": "8523"
+ },
+ {
+  "sku": "DCC-SW-982",
+  "mpn": "QH-TS-1U-3Y",
+  "name": "Quick Heal Total Security (3 years)",
+  "brand": "Quick Heal",
+  "category": "software",
+  "specs": {
+   "term_months": 36,
+   "licence": "per device"
+  },
+  "keywords": [
+   "antivirus",
+   "endpoint protection",
+   "total security"
+  ],
+  "unit": "unit",
+  "unit_cost": 1650,
+  "list_price": 2400,
+  "min_margin_pct": 6,
+  "stock_qty": 1000,
+  "lead_time_days": 1,
+  "warranty_months": 0,
+  "tax_category": "software",
+  "description": "Antivirus and internet security, one device for three years.",
+  "hsn": "8523"
+ },
+ {
+  "sku": "DCC-SV-991",
+  "mpn": "DCC-SVC-INSTALL",
+  "name": "On-site Installation, Imaging and Asset Tagging",
+  "brand": "Data Care Services",
+  "category": "service",
+  "specs": {
+   "scope": "per device"
+  },
+  "keywords": [
+   "installation",
+   "setup",
+   "imaging",
+   "commissioning",
+   "asset tagging"
+  ],
+  "unit": "unit",
+  "unit_cost": 350,
+  "list_price": 900,
+  "min_margin_pct": 20,
+  "stock_qty": 99999,
+  "lead_time_days": 3,
+  "warranty_months": 0,
+  "tax_category": "services",
+  "description": "Unpacking, installation, OS imaging, asset tagging and hand-over per device.",
+  "hsn": "9987"
+ },
+ {
+  "sku": "DCC-SV-992",
+  "mpn": "DCC-SVC-AMC",
+  "name": "Comprehensive AMC (per device per year)",
+  "brand": "Data Care Services",
+  "category": "service",
+  "specs": {
+   "scope": "per device per year"
+  },
+  "keywords": [
+   "amc",
+   "annual maintenance",
+   "maintenance contract"
+  ],
+  "unit": "unit",
+  "unit_cost": 1100,
+  "list_price": 2200,
+  "min_margin_pct": 20,
+  "stock_qty": 99999,
+  "lead_time_days": 1,
+  "warranty_months": 0,
+  "tax_category": "services",
+  "description": "Comprehensive annual maintenance including parts and on-site visits.",
+  "hsn": "9987"
+ }
+]

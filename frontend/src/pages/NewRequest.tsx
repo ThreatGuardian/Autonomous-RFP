@@ -20,6 +20,15 @@ export default function NewRequest() {
   const qc = useQueryClient();
   const samples = useQuery({ queryKey: ["samples"], queryFn: api.samples });
 
+  const sample = useMutation({
+    mutationFn: (filename: string) => api.processSample(filename),
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["rfps"] });
+      navigate(`/app/requests/${created[0].id}`);
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+
   const submit = useMutation({
     mutationFn: async () => {
       if (mode === "paste") return [await api.createRfp(text)];
@@ -93,10 +102,21 @@ export default function NewRequest() {
             <ul className="divide-y divide-line">
               {(samples.data ?? []).map((s) => (
                 <li key={s.filename}>
-                  <button className="w-full px-5 py-3 text-left hover:bg-[#fafbfc]" onClick={() => { setMode("paste"); setText(s.text); setError(null); }}>
-                    <div className="truncate text-[13px] font-medium">{s.title}</div>
-                    <div className="truncate text-[11.5px] text-muted">{s.filename}</div>
-                  </button>
+                  {s.kind === "file" ? (
+                    <button className="flex w-full items-start gap-3 px-5 py-3 text-left hover:bg-[#fafbfc] disabled:opacity-60" disabled={sample.isPending}
+                      onClick={() => { setError(null); sample.mutate(s.filename); }}>
+                      <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-md bg-accent-soft text-[9.5px] font-bold text-[#8a5a0b]">{s.format}</span>
+                      <span className="min-w-0">
+                        <span className="line-clamp-2 text-[13px] font-medium">{s.title}</span>
+                        <span className="block truncate text-[11.5px] text-muted">{s.pages} pages · full tender · processes immediately</span>
+                      </span>
+                    </button>
+                  ) : (
+                    <button className="w-full px-5 py-3 text-left hover:bg-[#fafbfc]" onClick={() => { setMode("paste"); setText(s.text); setError(null); }}>
+                      <div className="truncate text-[13px] font-medium">{s.title}</div>
+                      <div className="truncate text-[11.5px] text-muted">{s.filename}</div>
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -106,9 +126,10 @@ export default function NewRequest() {
               {[
                 ["Intake", "Client, location, currency, deadlines, terms and every requested item are extracted and matched to the catalogue."],
                 ["Costing", "Landed cost, margin floor, volume tier, stock and lead time are read from the pricing database."],
+                ["Compliance", "Long tenders are split into sections; eligibility, specifications and terms are checked clause by clause."],
                 ["Market & strategy", "Competitor prices are gathered and each line is priced to maximise expected profit within policy."],
                 ["Currency & tax", "The quote is converted to the client's currency and the correct regional tax treatment is applied."],
-                ["Drafting", "A branded quotation and an internal pricing memo are produced for your review."],
+                ["Drafting", "A branded quotation, pricing memo, bid report and compliance statement are produced for your review."],
               ].map(([t, d], i) => (
                 <li key={t} className="flex gap-3">
                   <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#eef0f3] text-[11px] font-semibold text-ink-soft">{i + 1}</span>

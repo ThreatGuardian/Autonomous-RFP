@@ -23,7 +23,7 @@ from reportlab.platypus import (
     BaseDocTemplate, CondPageBreak, Flowable, Frame, KeepTogether, PageTemplate, Paragraph, Spacer, Table, TableStyle,
 )
 
-from app.agents.messages import CompetitiveAnalysis, Localisation, ParsedRfp, PricedLine, Proposal
+from app.agents.messages import CompetitiveAnalysis, ComplianceReport, Localisation, ParsedRfp, PricedLine, Proposal
 from app.finance.money import fmt
 from app.services.pdf_renderer import FONT_DIR, NumberedCanvas, _register_fonts, esc
 
@@ -279,17 +279,30 @@ STRATEGY_NOTES = {
 }
 
 
-def _verdict(strat: CompetitiveAnalysis) -> tuple[str, str]:
+def _verdict(strat: CompetitiveAnalysis, compliance: ComplianceReport | None = None) -> tuple[str, str]:
+    if compliance is not None and compliance.recommendation == "Do not bid":
+        return "Do not bid", ("Pricing is workable, but the tender's eligibility criteria are not met as written; raise the gaps "
+                              "at the pre-bid meeting and submit only if they are relaxed.")
+    if compliance is not None and compliance.recommendation == "Bid with clarifications":
+        label, advice = _verdict(strat)
+        return label, advice.rstrip(".") + "; declare the deviations and seek clarifications before submitting."
     p, m = strat.win_probability, strat.margin_pct
+    award = strat.award
+    if award is not None and award.rule == "L1" and award.rank == 1:
+        return ("Strong bid" if m >= 5 else "Competitive bid",
+                f"Recommend submitting as priced; we are the lowest estimated bid, "
+                f"{fmt(award.lowest_total - award.our_total, strat.base_currency, 0)} below {award.lowest_competitor}.")
     if p >= 0.55 and m >= 10:
         return "Strong bid", "Recommend submitting as priced."
     if p >= 0.35:
-        return "Competitive bid", "Recommend submitting; value-led positioning carries the offer."
+        bundled = any(line.bundle for line in strat.lines)
+        return "Competitive bid", ("Recommend submitting; value-led positioning carries the offer." if bundled
+                                   else "Recommend submitting; prices sit at or just under the market.")
     return "Stretch bid", "Submit only if the relationship justifies it; several lines face aggressive pricing."
 
 
 def render_report(path: Path, *, company: dict, parsed: ParsedRfp, strat: CompetitiveAnalysis, loc: Localisation,
-                  proposal: Proposal, approval: dict | None = None) -> Path:
+                  proposal: Proposal, approval: dict | None = None, compliance: ComplianceReport | None = None) -> Path:
     st = _styles()
     page_w, page_h = A4
     margin = 22 * mm
@@ -341,11 +354,19 @@ def render_report(path: Path, *, company: dict, parsed: ParsedRfp, strat: Compet
     s += [Paragraph(esc(client), st["title"]), Spacer(1, 4), Paragraph(esc("  ·  ".join(meta)), st["meta"]), Spacer(1, 10)]
     s.append(Table([[""]], colWidths=[width], rowHeights=[1], style=[("LINEABOVE", (0, 0), (-1, -1), 0.6, CARD_LINE)]))
 
-    verdict, advice = _verdict(strat)
+    verdict, advice = _verdict(strat, compliance)
     s.append(Paragraph(spaced(f"{verdict} · {advice.split(';')[0].rstrip('.')}"), st["eyebrow"]))
-    s.append(Paragraph(
-        f"A {mc(loc.grand_total)} offer at {strat.margin_pct:.1f}% gross margin, with a "
-        f"{100 * strat.win_probability:.0f}% modelled chance of winning.", st["lead"]))
+    if compliance is not None and compliance.recommendation == "Do not bid":
+        gaps = [c.position.rstrip(".") for c in compliance.eligibility if c.status == "Does not meet"]
+        s.append(Paragraph(esc(f"Not eligible as the tender is written: {'; '.join(gaps[:2]).lower()}."), st["lead"]))
+        s.append(Paragraph(
+            f"If the criteria are relaxed, the offer stands at {mc(loc.grand_total)} with {strat.margin_pct:.1f}% gross margin "
+            f"and a {100 * strat.win_probability:.0f}% modelled chance of winning.", st["body"]))
+        s.append(Spacer(1, 4))
+    else:
+        s.append(Paragraph(
+            f"A {mc(loc.grand_total)} offer at {strat.margin_pct:.1f}% gross margin, with a "
+            f"{100 * strat.win_probability:.0f}% modelled chance of winning.", st["lead"]))
     vd = strat.strategy_counts.get("Value differentiation", 0)
     summary = (
         f"We have priced {len(strat.lines)} lines for {esc(client)}"
@@ -431,8 +452,39 @@ def render_report(path: Path, *, company: dict, parsed: ParsedRfp, strat: Compet
                            f"{' — comfortably inside the window.' if done <= parsed.terms.delivery_days else ' — phased delivery proposed.'}",
                            st["small"]))
 
-    # ---- requirements
-    if proposal.compliance:
+    # ---- tender compliance (long tenders) or requirement coverage (short requests)
+    tender = parsed.document
+    if compliance is not None and tender is not None and tender.long_form:
+        s.append(CondPageBreak(80 * mm))
+        s.append(Paragraph(spaced(f"Tender compliance · {compliance.recommendation}"), st["eyebrow"]))
+        s.append(Paragraph(esc(_tender_lead(compliance, tender)), st["lead"]))
+        devs = compliance.counts.get("Deviation", 0)
+        s.append(Tiles([
+            (compliance.eligibility_verdict if len(compliance.eligibility_verdict) < 14 else compliance.eligibility_verdict.split()[0],
+             "eligibility"),
+            (f"{compliance.mandatory_met}/{compliance.mandatory_total}", "mandatory clauses met"),
+            (str(devs), "deviations"),
+            (f"{tender.pages} pp", f"{len(tender.sections)} sections read"),
+        ], width, 46))
+        s.append(Spacer(1, 8))
+        if compliance.mandatory_total:
+            s.append(ScoreBar("Mandatory compliance", f"{compliance.mandatory_met} of {compliance.mandatory_total} clauses",
+                              compliance.mandatory_met / compliance.mandatory_total, width,
+                              f"{100 * compliance.mandatory_met / compliance.mandatory_total:.0f}%"))
+        if compliance.eligibility:
+            tone = {"Meets": GOOD, "Documents required": WARN, "Needs review": WARN, "Does not meet": BAD}
+            s.append(KeepTogether([Paragraph(spaced("Eligibility"), st["eyebrow"]), Dots(
+                [(f"<font name='Inter-SemiBold' color='#1E2A36'>{esc(e.label)}</font> — {esc(e.position)}", tone[e.status])
+                 for e in compliance.eligibility], width, st)]))
+        exceptions = [i for i in compliance.items if i.status in ("Deviation", "Clarification required")][:8]
+        if exceptions:
+            s.append(KeepTogether([Paragraph(spaced("Deviations and clarifications"), st["eyebrow"]), Dots(
+                [(f"<font name='Inter-SemiBold' color='#1E2A36'>{esc(i.clause or i.id)}</font> — {esc(i.response)}",
+                  BAD if i.status == "Deviation" else WARN) for i in exceptions], width, st)]))
+        if compliance.benefits:
+            s.append(KeepTogether([Paragraph(spaced("MSE benefits"), st["eyebrow"]),
+                                   Dots([(esc(b), GOOD) for b in compliance.benefits], width, st)]))
+    elif proposal.compliance:
         s.append(CondPageBreak(50 * mm))
         s.append(Paragraph(spaced("Requirement coverage"), st["eyebrow"]))
         counted = [r for r in proposal.compliance if r.status != "Noted"]
@@ -441,25 +493,38 @@ def render_report(path: Path, *, company: dict, parsed: ParsedRfp, strat: Compet
             s.append(ScoreBar("Requirements met", f"{met} of {len(counted)} stated requirements",
                               met / len(counted), width, f"{met}/{len(counted)}"))
             s.append(Spacer(1, 6))
-        tone = {"Complies": GOOD, "Complies with note": WARN, "Clarification required": BAD, "Noted": SLATE_LIGHT}
+        tone = {"Complies": GOOD, "Complies with note": WARN, "Clarification required": BAD, "Deviation": BAD, "Noted": SLATE_LIGHT}
         s.append(Dots([(f"<font name='Inter-SemiBold' color='#1E2A36'>{esc(r.status)}</font> — {esc(r.response)}",
-                        tone[r.status]) for r in proposal.compliance if r.status != "Noted"], width, st))
+                        tone[r.status]) for r in proposal.compliance if r.status != "Noted"][:14], width, st))
 
     # ---- risks and next steps
     s.append(CondPageBreak(50 * mm))
-    s.append(Paragraph(spaced("Risks to weigh"), st["eyebrow"]))
-    risks = _risks(parsed, strat, loc)
-    s.append(Dots([(esc(r), BAD if i < 2 else WARN) for i, r in enumerate(risks)] or
-                  [("No material risks identified.", GOOD)], width, st))
-    s.append(Paragraph(spaced("Next steps"), st["eyebrow"]))
-    steps = [
+    risks = [(f"<font name='Inter-SemiBold' color='#1E2A36'>{esc(r.title)}</font> — {esc(r.detail)}",
+              BAD if r.severity == "high" else WARN if r.severity == "medium" else SLATE)
+             for r in (compliance.risks if compliance else [])]
+    risks += [(esc(r), BAD if i < 2 else WARN) for i, r in enumerate(_risks(parsed, strat, loc))]
+    s.append(KeepTogether([Paragraph(spaced("Risks to weigh"), st["eyebrow"]),
+                           Dots(risks or [("No material risks identified.", GOOD)], width, st)]))
+    steps = []
+    if compliance is not None:
+        prebid = next((d for d in (tender.key_dates if tender else []) if d.key == "prebid"), None)
+        if prebid and compliance.recommendation != "Bid":
+            steps.append(f"Raise the deviations and eligibility questions at the pre-bid meeting on "
+                         f"{date.fromisoformat(prebid.date):%d %B %Y}.")
+        obtain = [c.name for c in compliance.checklist if c.status == "To obtain"]
+        prepare = [c for c in compliance.checklist if c.status == "To prepare"]
+        if obtain:
+            steps.append(f"Obtain {len(obtain)} document(s) from third parties, starting with: {esc(obtain[0])}.")
+        if prepare:
+            steps.append(f"Prepare {len(prepare)} bid forms and declarations listed in the compliance checklist.")
+    steps += [
         "Review the flagged lines in the pricing console and confirm or adjust the recommended prices.",
         "Confirm stock and lead times with distribution for any backordered items before approval.",
         "Approve the quotation to issue the final document without the draft marking.",
         f"Submit to {esc(parsed.client.contact_name or 'the client')} before "
         f"{date.fromisoformat(parsed.due_date):%d %B %Y}." if parsed.due_date else "Submit to the client.",
     ]
-    s.append(Dots([(t, GOLD) for t in steps], width, st))
+    s.append(KeepTogether([Paragraph(spaced("Next steps"), st["eyebrow"]), Dots([(t, GOLD) for t in steps], width, st)]))
     if approval:
         s.append(Spacer(1, 8))
         s.append(Paragraph(f"Approved by {esc(approval.get('actor', ''))} on {esc(approval.get('at', ''))}.", st["body"]))
@@ -473,6 +538,15 @@ def render_report(path: Path, *, company: dict, parsed: ParsedRfp, strat: Compet
 
     doc.build(s, canvasmaker=NumberedCanvas)
     return path
+
+
+def _tender_lead(report: ComplianceReport, tender) -> str:
+    if report.recommendation == "Do not bid":
+        return "Not eligible as the tender stands: " + (report.reasons[0].split(" — ")[-1] if report.reasons else "see below.")
+    devs = report.counts.get("Deviation", 0)
+    article = "an" if str(tender.pages).startswith(("8", "11", "18")) else "a"
+    return (f"{report.mandatory_met} of {report.mandatory_total} mandatory clauses met across {article} {tender.pages}-page tender"
+            + (f", with {devs} deviation{'s' if devs != 1 else ''} to declare." if devs else ", with no deviations."))
 
 
 def _key_lines(strat: CompetitiveAnalysis) -> list[PricedLine]:

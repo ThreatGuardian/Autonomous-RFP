@@ -354,18 +354,28 @@ def render_quotation(path: Path, *, company: dict, parsed: ParsedRfp, strat: Com
     if proposal.compliance:
         story.append(CondPageBreak(60 * mm))
         story.append(Paragraph("Requirement compliance", st["h2"]))
-        colour = {"Complies": GOOD, "Complies with note": WARN, "Clarification required": BAD, "Noted": MUTED}
+        colour = {"Complies": GOOD, "Complies with note": WARN, "Clarification required": BAD, "Deviation": BAD, "Noted": MUTED}
+        shown = [r for r in proposal.compliance if r.status != "Noted"]
+        limit = 18
+        if len(shown) > limit:
+            # Long tenders: the quotation carries the exceptions; the full statement is a separate document.
+            order = {"Deviation": 0, "Clarification required": 1, "Complies with note": 2, "Complies": 3}
+            shown = sorted(shown, key=lambda r: order.get(r.status, 4))[:limit]
+            story.append(Paragraph(
+                f"The {len(proposal.compliance)} clauses of the tender are answered in the enclosed compliance statement. "
+                "Deviations, clarifications and qualified responses are summarised below.", st["body"]))
+            story.append(Spacer(1, 2 * mm))
         rows = [[Paragraph(h, st["th"]) for h in ("Ref", "Requirement", "Status", "Response")]]
-        for r in proposal.compliance:
+        for r in shown:
             resp = esc(r.response)
             for e in r.evidence[:1]:
                 resp += f"<br/><font color='#64748B' size='6.8'>“{esc(e.text)}” — {esc(e.section)}</font>"
             rows.append([
-                Paragraph(r.ref, st["cell_muted"]), Paragraph(esc(r.requirement), st["cell"]),
+                Paragraph(esc(r.ref), st["cell_muted"]), Paragraph(esc(r.requirement), st["cell"]),
                 Paragraph(f"<font name='Inter-SemiBold' color='{colour[r.status].hexval()}'>{esc(r.status)}</font>", st["cell"]),
                 Paragraph(resp, st["cell"]),
             ])
-        story.append(_table(rows, [11 * mm, (content_w - 41 * mm) * 0.45, 30 * mm, (content_w - 41 * mm) * 0.55]))
+        story.append(_table(rows, [15 * mm, (content_w - 45 * mm) * 0.45, 30 * mm, (content_w - 45 * mm) * 0.55]))
 
     # Delivery plan
     story.append(CondPageBreak(55 * mm))

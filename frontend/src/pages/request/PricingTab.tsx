@@ -1,16 +1,19 @@
 import clsx from "clsx";
-import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { StrategyBadge, WarningList } from "../../components/domain";
 import { Badge, Button, Card, Meter, Stat, StatGrid } from "../../components/ui";
 import type { RfpDetail } from "../../lib/types";
 import { money, pct, prob } from "../../lib/format";
+import { AnimatedNumber } from "../../components/motion";
+import { AwardCard } from "./AwardCard";
 import { LineSheet } from "./LineSheet";
 import { Workbench } from "./Workbench";
 
 export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
   const [bench, setBench] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const strat = rfp.pricing?.strategy;
   const costing = rfp.pricing?.costing;
   if (!strat) return null;
@@ -20,22 +23,26 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
 
   return (
     <div className="space-y-5">
-      <StatGrid cols={6}>
-        <Stat label="Net revenue" value={money(strat.revenue, base, { compact: true })} hint={`${strat.lines.length} priced lines`} />
-        <Stat label="Gross margin" value={pct(strat.margin_pct)} hint={money(strat.margin, base, { compact: true })} />
-        <Stat label="Bundled services" value={money(strat.bundle_cost, base, { compact: true })} hint="Our cost of inclusions" />
-        <Stat label="Expected profit" value={money(strat.expected_profit, base, { compact: true })} hint="Margin × win probability" />
-        <Stat label="Win probability" value={prob(strat.win_probability)} hint="Revenue-weighted" />
-        <Stat label="Below-cost rivals" value={strat.below_cost_competitors} hint="Lines where matching loses money" />
+      <StatGrid cols={4}>
+        <Stat label="Net revenue" value={<AnimatedNumber value={strat.revenue} format={(v) => money(v, base, { compact: true })} />} hint={`${strat.lines.length} priced lines`} />
+        <Stat label="Gross margin" value={<AnimatedNumber value={strat.margin_pct} format={(v) => pct(v)} />} hint={`${money(strat.margin, base, { compact: true })}${strat.bundle_cost ? ` after ${money(strat.bundle_cost, base, { compact: true })} of services` : ""}`} />
+        <Stat label="Win probability" value={<AnimatedNumber value={strat.win_probability * 100} format={(v) => `${Math.round(v)}%`} />} hint={`${strat.below_cost_competitors} line(s) with below-cost rivals`} />
+        <Stat label="Expected profit" value={<AnimatedNumber value={strat.expected_profit} format={(v) => money(v, base, { compact: true })} />} hint="Margin × win probability" />
       </StatGrid>
 
-      <div className="rounded-xl border border-line bg-white px-5 py-3.5 text-[13px] leading-[1.6] text-ink-soft">
-        <span className="font-medium text-ink">Summary. </span>{strat.summary}
-        {strat.market_endpoint && <span className="text-muted"> Market data from {strat.market_endpoint} in {strat.market_latency_ms} ms.</span>}
-      </div>
-      <WarningList items={warnings} />
+      {strat.award && <AwardCard rfpId={rfp.id} award={strat.award} currency={base} editable={editable} />}
 
-      <Card title="Line pricing" subtitle={`Amounts in ${base} (base currency). Select a line for the full rationale and to adjust it.`} bodyClassName="p-0"
+      {warnings.length > 0 && (
+        <div>
+          <button onClick={() => setShowNotes(!showNotes)} className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-[#fffaf0] px-3 py-1 text-[12px] font-medium text-[#7a4a00] transition hover:bg-[#fff4df]">
+            <AlertTriangle className="size-3.5" /> {warnings.length} notice{warnings.length > 1 ? "s" : ""} on stock, warranty and matching
+            <ChevronDown className={clsx("size-3.5 transition-transform", showNotes && "rotate-180")} />
+          </button>
+          {showNotes && <div className="mt-2 animate-rise"><WarningList items={warnings} /></div>}
+        </div>
+      )}
+
+      <Card title="Line pricing" subtitle={strat.summary} bodyClassName="p-0"
         actions={editable && <Button variant="primary" icon={<SlidersHorizontal className="size-4" />} onClick={() => setBench(true)}>Adjust quotation</Button>}>
         <div className="overflow-x-auto">
           <table className="table-base">

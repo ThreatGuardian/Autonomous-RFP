@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import DealHistory, PriceTier, Product, Rfp, StageRun, TaxRule, ValueAdd
+from app.db.models import DealHistory, PriceTier, PriceVersion, Product, Rfp, StageRun, TaxRule, ValueAdd
 from app.db.seed import load_json
 from app.db.session import get_db
 from app.finance.currency import UnknownCurrency, fx
@@ -88,6 +88,8 @@ def _product(p: Product) -> dict[str, Any]:
         "min_margin_pct": p.min_margin_pct, "floor_price": p.floor_price, "stock_qty": p.stock_qty,
         "lead_time_days": p.lead_time_days, "warranty_months": p.warranty_months, "tax_category": p.tax_category,
         "active": p.active, "list_margin_pct": round(100 * (p.list_price - p.unit_cost) / p.list_price, 2),
+        "hsn": p.hsn, "gst_rate_pct": p.gst_rate_pct,
+        "price_updated_at": p.price_updated_at.isoformat() if p.price_updated_at else None,
     }
 
 
@@ -117,10 +119,15 @@ def patch_product(sku: str, body: ProductPatch, db: Session = Depends(get_db)) -
     p = db.scalar(select(Product).where(Product.sku == sku))
     if p is None:
         raise HTTPException(status_code=404, detail="Product not found")
+    before = (p.unit_cost, p.list_price, p.stock_qty)
     for k, v in body.model_dump(exclude_none=True).items():
         setattr(p, k, v)
     if p.list_price <= p.unit_cost:
         raise HTTPException(status_code=422, detail="List price must exceed unit cost")
+    if (p.unit_cost, p.list_price, p.stock_qty) != before:
+        p.price_updated_at = datetime.now(timezone.utc)
+        db.add(PriceVersion(sku=p.sku, unit_cost=p.unit_cost, list_price=p.list_price, stock_qty=p.stock_qty,
+                            effective_from=p.price_updated_at, source="Edited in catalogue"))
     db.flush()
     invalidate_catalogue()
     return _product(p)
@@ -161,8 +168,11 @@ def market_offers(sku: str, country: str = "IN", quantity: int = Query(default=1
         resp = MarketClient().batch_offers(country.upper(), [(p.mpn, quantity)])
     except MarketUnavailable as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    from app.intel.sources import market_view
+
+    merged, _ = market_view(db, [(p.mpn, quantity)], resp.offers, load_json("pricing_policy.json"))
     offers = []
-    for o in resp.offers.get(p.mpn, []):
+    for o in merged.get(p.mpn, []):
         try:
             base = fx.convert(o["unit_price"], o["currency"], "INR")
         except UnknownCurrency:

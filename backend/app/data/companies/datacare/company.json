@@ -1,0 +1,207 @@
+{
+ "name": "Data Care Corp Pvt. Ltd.",
+ "short_name": "Data Care Corp",
+ "tagline": "Computers, components and electronics, wholesale.",
+ "address_lines": [
+  "Plot 18, Sector 10, PCNTDA Industrial Area",
+  "Bhosari, Pune 411026",
+  "Maharashtra, India"
+ ],
+ "country": "IN",
+ "region": "Maharashtra",
+ "tax_id_label": "GSTIN",
+ "tax_id": "27AAFCD4417M1Z3",
+ "base_currency": "INR",
+ "email": "tenders@datacarecorp.in",
+ "phone": "+91 20 2712 4455",
+ "website": "www.datacarecorp.in",
+ "quote_validity_days": 45,
+ "quote_prefix": "DCC",
+ "bank": {
+  "name": "State Bank of India, Bhosari Industrial Estate",
+  "account": "38912004571",
+  "ifsc": "SBIN0007785",
+  "swift": "SBININBB"
+ },
+ "signatory": {
+  "name": "Rohan Deshmukh",
+  "title": "Head – Institutional Sales",
+  "email": "tenders@datacarecorp.in"
+ },
+ "profile": {
+  "legal_name": "Data Care Corp Private Limited",
+  "constitution": "Private limited company (Companies Act, 2013)",
+  "incorporated_on": "2009-02-11",
+  "cin": "U51909PN2009PTC133407",
+  "pan": "AAFCD4417M",
+  "gstin": "27AAFCD4417M1Z3",
+  "msme": {
+   "udyam_number": "UDYAM-MH-26-0017742",
+   "category": "Small",
+   "valid": true,
+   "note": "Small enterprise (trading) registered on Udyam; eligible for EMD exemption and MSE purchase preference."
+  },
+  "turnover_inr": {
+   "2022-23": 382000000,
+   "2023-24": 441000000,
+   "2024-25": 518000000,
+   "2025-26": 596000000
+  },
+  "turnover_segments_pct": {
+   "it hardware supply": 88,
+   "computer components": 31,
+   "consumer electronics": 12,
+   "services": 4
+  },
+  "net_worth_inr": 96000000,
+  "net_worth_as_of": "2026-03-31",
+  "employees": 58,
+  "certified_engineers": 9,
+  "certifications": [
+   {
+    "name": "ISO 9001:2015",
+    "standard": "ISO 9001",
+    "scope": "Wholesale trading, supply and after-sales service of computers, components and electronics",
+    "valid_until": "2028-01-31"
+   },
+   {
+    "name": "ISO 14001:2015",
+    "standard": "ISO 14001",
+    "scope": "Environmental management (e-waste handling)",
+    "valid_until": "2027-06-30"
+   }
+  ],
+  "oem_authorisations": [
+   "HP",
+   "Dell",
+   "Lenovo",
+   "Acer",
+   "Asus",
+   "Apple",
+   "Logitech",
+   "Zebronics",
+   "Sony",
+   "JBL",
+   "Jabra",
+   "Poly",
+   "Intel",
+   "AMD",
+   "NVIDIA",
+   "Zotac",
+   "MSI",
+   "Gigabyte",
+   "Samsung",
+   "LG",
+   "BenQ",
+   "Crucial",
+   "Kingston",
+   "Western Digital",
+   "Seagate",
+   "APC",
+   "TP-Link",
+   "Epson",
+   "Microsoft",
+   "Quick Heal"
+  ],
+  "offices": [
+   {
+    "city": "Pune",
+    "state": "Maharashtra",
+    "type": "Head office and central warehouse"
+   },
+   {
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "type": "Branch office (Lamington Road)"
+   },
+   {
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "type": "Service point"
+   }
+  ],
+  "support": {
+   "helpdesk_hours": "09:30-19:00 IST, Monday to Saturday",
+   "helpdesk_24x7": false,
+   "onsite_response_hours": 24,
+   "onsite_response_scope": "within Pune and PCMC limits",
+   "remote_response_hours": 4,
+   "resolution_hours": 72
+  },
+  "blacklisted": false,
+  "credentials": [
+   {
+    "client": "Engineering college, Pune",
+    "sector": "education",
+    "scope": "240 laboratory desktops with monitors, keyboards, mice and UPS",
+    "value_inr": 16800000,
+    "completed_on": "2025-07-18",
+    "devices": {
+     "desktop": 240,
+     "monitor": 240,
+     "peripheral": 480,
+     "power": 240
+    }
+   },
+   {
+    "client": "Deemed university, Pune",
+    "sector": "education",
+    "scope": "Language laboratory: 120 headsets, 120 desktops and webcams",
+    "value_inr": 9400000,
+    "completed_on": "2024-11-30",
+    "devices": {
+     "desktop": 120,
+     "audio": 120,
+     "peripheral": 120
+    }
+   },
+   {
+    "client": "Autonomous institute, Mumbai",
+    "sector": "education",
+    "scope": "AI/ML laboratory: 60 GPU upgrades and 60 workstation-class desktops",
+    "value_inr": 11700000,
+    "completed_on": "2025-02-14",
+    "devices": {
+     "component": 60,
+     "desktop": 60
+    }
+   },
+   {
+    "client": "Zilla Parishad schools, Pune district",
+    "sector": "government",
+    "scope": "Faculty laptops and projectors for 45 schools",
+    "value_inr": 13200000,
+    "completed_on": "2024-03-28",
+    "devices": {
+     "laptop": 180,
+     "av": 45
+    }
+   },
+   {
+    "client": "BPO operations centre, Hinjewadi",
+    "sector": "enterprise",
+    "scope": "Seat refresh: 400 headsets, keyboards and mice",
+    "value_inr": 4100000,
+    "completed_on": "2025-09-05",
+    "devices": {
+     "audio": 400,
+     "peripheral": 800
+    }
+   },
+   {
+    "client": "Polytechnic, Nashik",
+    "sector": "education",
+    "scope": "Computer lab refresh, 90 desktops",
+    "value_inr": 5600000,
+    "completed_on": "2023-06-22",
+    "devices": {
+     "desktop": 90
+    }
+   }
+  ],
+  "local_content": {
+   "class": "Class-II local supplier",
+   "note": "OEM hardware sourced through authorised Indian distributors; local content 22-35% (assembly, staging, logistics and warranty services in India)."
+  }
+ }
+}

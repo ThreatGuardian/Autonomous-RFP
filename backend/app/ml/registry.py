@@ -10,12 +10,36 @@ import joblib
 from sqlalchemy import select
 
 from app.config import get_settings
-from app.db.models import DealHistory
+from app.db.models import DealHistory, Product, TrainingLabel
 from app.db.seed import load_json
 from app.db.session import session_scope
 from app.ml.models import CategoryClassifier, ClauseClassifier, WinProbabilityModel
 
-MODEL_VERSION = "2"
+MODEL_VERSION = "3"
+RETRAIN_EVERY = 5  # new reviewer labels (or outcomes) that trigger a retrain
+
+
+def labels(model: str) -> list[tuple[str, str]]:
+    with session_scope() as s:
+        return [(t.text, t.label) for t in s.scalars(select(TrainingLabel).where(TrainingLabel.model == model)
+                                                       .order_by(TrainingLabel.id))]
+
+
+def _count(model: str) -> int:
+    from sqlalchemy import func
+
+    with session_scope() as s:
+        if model == "win":
+            return int(s.scalar(select(func.count()).select_from(DealHistory).where(DealHistory.source == "outcome")) or 0)
+        return int(s.scalar(select(func.count()).select_from(TrainingLabel).where(TrainingLabel.model == model)) or 0)
+
+
+def catalogue_rows() -> list[dict]:
+    """Active products from the database (includes imported items); JSON seed as fallback."""
+    with session_scope() as s:
+        rows = [{"name": p.name, "brand": p.brand, "category": p.category, "keywords": p.keywords or []}
+                for p in s.scalars(select(Product).where(Product.active.is_(True)))]
+    return rows or load_json("catalog.json")
 
 
 class ModelRegistry:
@@ -26,10 +50,25 @@ class ModelRegistry:
     def _path(self, name: str):
         return get_settings().model_dir / f"{name}.v{MODEL_VERSION}.joblib"
 
-    def _load_or_train(self, name: str, trainer) -> Any:
+    def forget(self, name: str) -> None:
+        with self._lock:
+            self._cache.pop(name, None)
+            self._path(name).unlink(missing_ok=True)
+
+    def _stale(self, name: str, model: Any, source: str) -> bool:
+        """True when enough new real labels have arrived since the model was trained."""
+        metrics = getattr(model, "metrics", {}) or {}
+        seen = metrics.get("real_outcomes" if source == "win" else "real_labels", 0)
+        now = _count(source)
+        return now - seen >= RETRAIN_EVERY or now < seen  # new labels arrived, or labels were removed
+
+    def _load_or_train(self, name: str, trainer, source: str | None = None) -> Any:
         with self._lock:
             if name in self._cache:
-                return self._cache[name]
+                if source and self._stale(name, self._cache[name], source):
+                    self.forget(name)
+                else:
+                    return self._cache[name]
             path = self._path(name)
             model = None
             if path.exists():
@@ -37,6 +76,8 @@ class ModelRegistry:
                     model = joblib.load(path)
                 except Exception:  # corrupt or incompatible artefact: retrain
                     model = None
+            if model is not None and source and self._stale(name, model, source):
+                model = None
             if model is None:
                 model = trainer()
                 joblib.dump(model, path)
@@ -46,10 +87,11 @@ class ModelRegistry:
     # ------------------------------------------------------------------ models
 
     def clause_classifier(self) -> ClauseClassifier:
-        return self._load_or_train("clause-classifier", lambda: ClauseClassifier().train())
+        return self._load_or_train("clause-classifier", lambda: ClauseClassifier().train(labels("clause")), "clause")
 
     def category_classifier(self) -> CategoryClassifier:
-        return self._load_or_train("category-classifier", lambda: CategoryClassifier().train(load_json("catalog.json")))
+        return self._load_or_train(
+            "category-classifier", lambda: CategoryClassifier().train(catalogue_rows(), labels("category")), "category")
 
     def win_model(self) -> WinProbabilityModel:
         def train() -> WinProbabilityModel:
@@ -63,6 +105,7 @@ class ModelRegistry:
                         "repeat_customer": d.repeat_customer,
                         "customer_segment": d.customer_segment,
                         "won": d.won,
+                        "source": d.source,
                     }
                     for d in s.scalars(select(DealHistory))
                 ]
@@ -70,13 +113,12 @@ class ModelRegistry:
                 raise RuntimeError("Not enough deal history to train the win-probability model")
             return WinProbabilityModel().train(deals)
 
-        return self._load_or_train("win-probability", train)
+        return self._load_or_train("win-probability", train, "win")
 
     def retrain(self) -> dict[str, Any]:
         with self._lock:
             for name in ("clause-classifier", "category-classifier", "win-probability"):
-                self._cache.pop(name, None)
-                self._path(name).unlink(missing_ok=True)
+                self.forget(name)
         return self.describe()
 
     def describe(self) -> dict[str, Any]:

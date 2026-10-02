@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, CheckCircle2, Download, FileText, RotateCcw, Trash2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { BarChart3, CheckCircle2, ChevronDown, Download, ExternalLink, FileArchive, FileCheck2, FileText, Flag, PenLine, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CountryTag, StageTracker, StatusBadge } from "../../components/domain";
 import { Page, PageHeader } from "../../components/layout/Shell";
-import { Button, Card, Dialog, Empty, Field, Skeleton, Spinner, Tabs } from "../../components/ui";
+import { Badge, Button, Card, Dialog, Empty, Field, Segmented, Skeleton, Spinner, Tabs } from "../../components/ui";
 import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
 import type { RfpDetail } from "../../lib/types";
 import { date, daysUntil, money } from "../../lib/format";
 import { ActivityTab } from "./ActivityTab";
+import { ComplianceTab } from "./ComplianceTab";
 import { PricingTab } from "./PricingTab";
 import { QuotationTab } from "./QuotationTab";
 import { RequirementsTab } from "./RequirementsTab";
 
-type Tab = "pricing" | "requirements" | "quotation" | "activity" | "source";
+type Tab = "pricing" | "compliance" | "requirements" | "quotation" | "activity" | "source";
 
 export default function RequestDetail() {
   const id = Number(useParams().id);
@@ -80,9 +81,9 @@ export default function RequestDetail() {
         }
         actions={
           <>
-            {docs.quotation && <a href={api.documentUrl(id, "quotation")} target="_blank" rel="noreferrer"><Button icon={<Download className="size-4" />}>Quotation</Button></a>}
-            {docs.memo && <a href={api.documentUrl(id, "memo")} target="_blank" rel="noreferrer"><Button icon={<FileText className="size-4" />}>Pricing memo</Button></a>}
-            {docs.report && <a href={api.documentUrl(id, "report")} target="_blank" rel="noreferrer"><Button icon={<BarChart3 className="size-4" />}>Bid report</Button></a>}
+            {docs.report && <Link to={`/app/requests/${id}/report`}><Button icon={<PenLine className="size-4" />}>Edit report</Button></Link>}
+            <DocumentsMenu id={id} docs={docs} compliance={!!rfp.parsed?.document?.long_form} pack={ready} />
+            {ready && (rfp.status === "approved" || rfp.status === "review") && <OutcomeControl id={id} actor={actor} currency={loc?.currency ?? "INR"} />}
             {rfp.status === "review" && !busy && <>
               <Button variant="danger" icon={<XCircle className="size-4" />} onClick={() => setDialog("reject")}>Decline</Button>
               <Button variant="success" icon={<CheckCircle2 className="size-4" />} onClick={() => setDialog("approve")}>Approve quotation</Button>
@@ -123,6 +124,7 @@ export default function RequestDetail() {
             <div className="flex items-center justify-between">
               <Tabs value={tab} onChange={setTab} items={[
                 { value: "pricing", label: "Pricing" },
+                ...(rfp.compliance ? [{ value: "compliance" as Tab, label: "Compliance", count: (rfp.compliance.counts["Deviation"] ?? 0) + (rfp.compliance.counts["Clarification required"] ?? 0) || undefined }] : []),
                 { value: "requirements", label: "Requirements", count: rfp.parsed?.requirements.filter((r) => r.type !== "scope").length },
                 { value: "quotation", label: "Quotation" },
                 { value: "activity", label: "Activity" },
@@ -131,11 +133,14 @@ export default function RequestDetail() {
               {busy && <span className="flex items-center gap-2 text-[12.5px] text-muted"><Spinner className="size-3.5" /> Re-pricing…</span>}
             </div>
             {tab === "pricing" && <PricingTab rfp={rfp} editable={editable} />}
+            {tab === "compliance" && <ComplianceTab rfp={rfp} editable={editable} />}
             {tab === "requirements" && <RequirementsTab rfp={rfp} />}
             {tab === "quotation" && <QuotationTab rfp={rfp} editable={editable} />}
             {tab === "activity" && <ActivityTab rfp={rfp} focus={stageFocus} />}
             {tab === "source" && (
-              <Card title={rfp.source_filename ?? "Pasted text"} subtitle={`${rfp.raw_text.length.toLocaleString()} characters`}>
+              <Card title={rfp.source_filename ?? "Pasted text"}
+                subtitle={`${rfp.raw_text.length.toLocaleString()} characters${rfp.parsed?.document ? ` · ${rfp.parsed.document.pages} ${rfp.parsed.document.pages_estimated ? "estimated " : ""}page(s)` : ""}`}
+                actions={rfp.has_original ? <a href={api.originalUrl(id)} target="_blank" rel="noreferrer"><Button size="sm" icon={<ExternalLink className="size-3.5" />}>Open original</Button></a> : undefined}>
                 <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-[1.65] text-ink-soft">{rfp.raw_text}</pre>
               </Card>
             )}
@@ -166,6 +171,105 @@ export default function RequestDetail() {
       <Dialog open={dialog === "delete"} onClose={() => setDialog(null)} title="Delete request"
         footer={<><Button onClick={() => setDialog(null)}>Cancel</Button><Button variant="danger" loading={act.isPending} onClick={() => act.mutate("delete")}>Delete</Button></>}>
         <p className="text-[13px] text-ink-soft">This permanently removes {rfp.reference}, its pricing history and review record.</p>
+      </Dialog>
+    </>
+  );
+}
+
+const DOCUMENTS = [
+  { kind: "quotation", label: "Quotation", hint: "Client-facing offer with line items and taxes", icon: Download },
+  { kind: "compliance", label: "Compliance statement", hint: "Clause-by-clause answers and deviations", icon: FileCheck2 },
+  { kind: "report", label: "Bid report", hint: "Recommendation, win odds and risks", icon: BarChart3 },
+  { kind: "memo", label: "Pricing memo", hint: "Internal: costs, margins and rationale", icon: FileText },
+] as const;
+
+function DocumentsMenu({ id, docs, compliance, pack }: { id: number; docs: Record<string, string | undefined>; compliance: boolean; pack: boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+  const available = DOCUMENTS.filter((d) => docs[d.kind] && (d.kind !== "compliance" || compliance));
+  if (!available.length) return null;
+  return (
+    <div ref={ref} className="relative">
+      <Button icon={<Download className="size-4" />} onClick={() => setOpen(!open)}>
+        Documents <ChevronDown className={`size-3.5 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+      </Button>
+      {open && (
+        <div className="animate-fade-in absolute right-0 top-full z-30 mt-2 w-[300px] overflow-hidden rounded-xl border border-line bg-white py-1 shadow-[var(--shadow-pop)]">
+          {available.map((d) => (
+            <a key={d.kind} href={api.documentUrl(id, d.kind)} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}
+              className="flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#f6f7f9]">
+              <d.icon className="mt-0.5 size-4 shrink-0 text-ink-soft" />
+              <span className="min-w-0">
+                <span className="block text-[13px] font-medium text-ink">{d.label}</span>
+                <span className="block text-[11.5px] text-muted">{d.hint}</span>
+              </span>
+            </a>
+          ))}
+          {pack && (
+            <a href={api.packUrl(id)} onClick={() => setOpen(false)}
+              className="flex items-start gap-3 border-t border-line px-3.5 py-2.5 hover:bg-[#f6f7f9]">
+              <FileArchive className="mt-0.5 size-4 shrink-0 text-ink-soft" />
+              <span className="min-w-0">
+                <span className="block text-[13px] font-medium text-ink">Submission pack (.zip)</span>
+                <span className="block text-[11.5px] text-muted">Technical proposal, forms, compliance, financial bid and OEM letters</span>
+              </span>
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RESULT_LABEL = { won: "Won", lost: "Lost", cancelled: "Cancelled" } as const;
+
+function OutcomeControl({ id, actor, currency }: { id: number; actor: string; currency: string }) {
+  const qc = useQueryClient();
+  const { data } = useQuery({ queryKey: ["outcome", id], queryFn: () => api.outcome(id) });
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState<"won" | "lost" | "cancelled">("won");
+  const [total, setTotal] = useState("");
+  const [winner, setWinner] = useState("");
+  const [note, setNote] = useState("");
+  const save = useMutation({
+    mutationFn: () => api.setOutcome(id, { result, winning_total: total ? Number(total) : undefined, winner: winner || undefined, note: note || undefined, actor }),
+    onSuccess: () => { setOpen(false); qc.invalidateQueries({ queryKey: ["outcome", id] }); qc.invalidateQueries({ queryKey: ["rfp", id] }); },
+  });
+  const o = data?.outcome;
+  const start = () => {
+    setResult(o?.result ?? "won"); setTotal(o?.winning_total ? String(o.winning_total) : ""); setWinner(o?.winner ?? ""); setNote(o?.note ?? "");
+    setOpen(true);
+  };
+  return (
+    <>
+      {o ? (
+        <button onClick={start} title="Change the recorded outcome">
+          <Badge tone={o.result === "won" ? "green" : o.result === "lost" ? "red" : "neutral"} dot>
+            {RESULT_LABEL[o.result]}{o.result === "lost" && o.winner ? ` to ${o.winner}` : ""}
+          </Badge>
+        </button>
+      ) : (
+        <Button icon={<Flag className="size-4" />} onClick={start}>Record outcome</Button>
+      )}
+      <Dialog open={open} onClose={() => setOpen(false)} title="Bid outcome"
+        footer={<><Button onClick={() => setOpen(false)}>Cancel</Button><Button variant="primary" loading={save.isPending} onClick={() => save.mutate()}>Save outcome</Button></>}>
+        <div className="space-y-4">
+          <p className="text-[12.5px] leading-relaxed text-muted">Real outcomes teach the win-probability model how buyers in your market actually decide. The winning price is optional but makes the lesson sharper.</p>
+          <Segmented value={result} onChange={setResult} items={[{ value: "won", label: "Won" }, { value: "lost", label: "Lost" }, { value: "cancelled", label: "Cancelled" }]} />
+          {result === "lost" && (
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={`Winning total (${currency}, before tax)`}><input className="input tnum" type="number" min={0} value={total} onChange={(e) => setTotal(e.target.value)} /></Field>
+              <Field label="Winner"><input className="input" value={winner} onChange={(e) => setWinner(e.target.value)} placeholder="e.g. Shree Sai Computers" /></Field>
+            </div>
+          )}
+          <Field label="Note (optional)"><textarea className="input h-16 resize-none py-2" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
+          {save.isError && <div className="text-[12.5px] text-rose-700">{(save.error as Error).message}</div>}
+        </div>
       </Dialog>
     </>
   );

@@ -109,10 +109,10 @@ function HeroVisual() {
               ))}
             </div>
             <div className="mt-3 overflow-hidden rounded-lg border border-line">
-              <MiniRow name="Dell Latitude 5450 Business Laptop" sku="MSS-LT-101" price="₹82,900" strategy="Value differentiation" tone={GOLD_CHIP} p={65} />
-              <MiniRow name="Dell Pro 27 Monitor P2725H" sku="MSS-MN-402" price="₹20,500" strategy="Value differentiation" tone={GOLD_CHIP} p={78} />
-              <MiniRow name="Microsoft 365 Business Standard" sku="MSS-SW-121" price="₹11,700" strategy="Competitive match" tone="bg-[#eef3ff] text-[#2146b8] ring-[#d9e3ff]" p={68} />
-              <MiniRow name="Poly Studio X30 Video Bar" sku="MSS-PR-116" price="₹2,19,000" strategy="Margin capture" tone="bg-[#ecf8f1] text-[#136c3f] ring-[#cdebd9]" p={87} />
+              <MiniRow name="HP Pro Tower 280 G9 (Core i5, 16 GB)" sku="DCC-DT-201" price="₹46,583" strategy="Value differentiation" tone={GOLD_CHIP} p={65} />
+              <MiniRow name="Logitech H390 USB Headset" sku="DCC-AU-601" price="₹1,837" strategy="Value differentiation" tone={GOLD_CHIP} p={78} />
+              <MiniRow name="ZOTAC GeForce RTX 4060 8 GB" sku="DCC-CP-701" price="₹26,224" strategy="Competitive match" tone="bg-[#eef3ff] text-[#2146b8] ring-[#d9e3ff]" p={68} />
+              <MiniRow name="LG 24MP400 24-inch IPS Monitor" sku="DCC-MN-403" price="₹7,533" strategy="Margin capture" tone="bg-[#ecf8f1] text-[#136c3f] ring-[#cdebd9]" p={87} />
             </div>
           </div>
         </div>

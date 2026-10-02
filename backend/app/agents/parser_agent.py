@@ -22,15 +22,21 @@ from sqlalchemy import select
 
 from app.agents.base import Agent, PipelineContext, StageLog
 from app.agents.messages import (
-    ClientInfo, CommercialTerms, CurrencyInfo, ParsedRfp, ProductMatch, RequestedItem, Requirement,
+    ClientInfo, CommercialTerms, CurrencyInfo, ParsedRfp, ProductMatch, RequestedItem, Requirement, TenderDocument,
+    TenderSection,
 )
 from app.db.models import Customer, Product
 from app.db.session import session_scope
 from app.ml.registry import registry
 from app.nlp import extractors as ex
 from app.nlp.gazetteer import countries, country_currency
-from app.nlp.line_items import RawItem, build_item, extract_table_items
-from app.nlp.text import fold, normalize, split_sentences, tokenize
+from app.nlp.layout import Block, Layout, analyse
+from app.nlp.line_items import RawItem, build_item, extract_specs, extract_table_items
+from app.nlp.sections import CLAUSE_NO, Section, build_sections
+from app.nlp.tender import (
+    Unit, categorise, extract_eligibility, extract_evaluation, extract_facts, extract_key_dates, modality,
+)
+from app.nlp.text import analyze, fold, normalize, split_sentences, tokenize
 from app.rag.stores import catalogue_store
 
 MATCHED_THRESHOLD = 0.42
@@ -45,7 +51,7 @@ BRAND_ALIASES = {"fortigate": "fortinet", "meraki": "cisco", "hpe": "hpe", "hp":
 def _product_spec_view(p: Product) -> dict[str, Any]:
     s = dict(p.specs or {})
     view: dict[str, Any] = {
-        k: s[k] for k in ("ram_gb", "storage_gb", "screen_in", "ports", "capacity_va", "bays")
+        k: s[k] for k in ("ram_gb", "storage_gb", "screen_in", "ports", "capacity_va", "bays", "vram_gb", "dpi")
         if isinstance(s.get(k), (int, float)) and not isinstance(s.get(k), bool)
     }
     for k in ("poe", "wifi"):
@@ -64,6 +70,17 @@ def _product_spec_view(p: Product) -> dict[str, Any]:
         view["cpu_family"] = "xeon"
     if "topology" in s:
         view["topology"] = "online" if "online" in s["topology"] else s["topology"]
+    for k in ("throughput_gbps", "ppm"):
+        if isinstance(s.get(k), (int, float)):
+            view[k] = s[k]
+    m = re.search(r"(\d+)\s*g", str(s.get("uplinks", "")).lower())
+    if m:
+        view["uplink_gbps"] = int(m.group(1))
+    ff = str(s.get("form_factor", "")).lower()
+    m = re.search(r"\b([124])u\b", ff)
+    view_ff = f"{m.group(1)}U" if m else ("tower" if "tower" in ff else ff or None)
+    if view_ff:
+        view["form_factor"] = view_ff
     return view
 
 
@@ -89,7 +106,20 @@ def spec_fit(requested: dict[str, Any], product: Product) -> tuple[float | None,
     at_least("ram_gb", "RAM", " GB")
     at_least("storage_gb", "Storage", " GB")
     at_least("bays", "Drive bays")
-    at_least("cpu_tier", "CPU tier")
+    at_least("vram_gb", "Video memory", " GB")
+    at_least("dpi", "Sensor resolution", " DPI")
+    if "cpu_tier" in requested:
+        want, got = requested["cpu_tier"], have.get("cpu_tier")
+        cpu = (product.specs or {}).get("cpu", "")
+        if got is None:
+            scores.append(0.5)
+            reasons.append("Processor class not specified by product")
+        else:
+            scores.append(1.0 if got >= want else 0.0)
+            reasons.append(f"{cpu or 'Processor'} {'meets' if got >= want else 'is below'} the Core i{want} class requested")
+    at_least("throughput_gbps", "Throughput", " Gbps")
+    at_least("uplink_gbps", "Uplink speed", "G")
+    at_least("ppm", "Print speed", " ppm")
     if "capacity_va" in requested:
         want, got = requested["capacity_va"], have.get("capacity_va")
         if got is None or got < want:
@@ -106,14 +136,42 @@ def spec_fit(requested: dict[str, Any], product: Product) -> tuple[float | None,
         want, got = requested["ports"], have["ports"]
         scores.append(1.0 if got == want else 0.6 if got > want else 0.0)
         reasons.append(f"{got} ports vs {want} requested")
-    for key, label in (("poe", "PoE"), ("resolution", "Resolution"), ("wifi", "Wi-Fi standard"), ("topology", "UPS topology"), ("cpu_family", "CPU family")):
+    for key, label in (("poe", "PoE"), ("resolution", "Resolution"), ("wifi", "Wi-Fi standard"), ("topology", "UPS topology"),
+                       ("cpu_family", "CPU family"), ("form_factor", "Form factor")):
         if key in requested:
+            if have.get(key) is None:
+                scores.append(0.5)
+                reasons.append(f"{label}: not specified by product")
+                continue
             ok = have.get(key) == requested[key]
             scores.append(1.0 if ok else 0.2)
             reasons.append(f"{label} {'matches' if ok else 'differs'}")
     if not scores:
         return None, []
     return sum(scores) / len(scores), reasons
+
+
+_SMALL_WORDS = {"a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with"}
+
+
+def _display_title(title: str) -> str:
+    """Title case for ALL-CAPS headings ("SCOPE OF WORK" -> "Scope of Work"); others unchanged."""
+    letters = [c for c in title if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.8:
+        return title
+    words = title.lower().split()
+    out = []
+    for i, w in enumerate(words):
+        if i and w in _SMALL_WORDS:
+            out.append(w)
+        elif w.startswith("(") and len(w) > 1:
+            out.append("(" + w[1:2].upper() + w[2:])
+        elif "-" in w and not w.startswith("annexure"):
+            out.append("-".join(p[:1].upper() + p[1:] for p in w.split("-")))
+        else:
+            out.append(w[:1].upper() + w[1:])
+    result = " ".join(out)
+    return re.sub(r"\b(Boq|Emd|Nit|Gcc|Scc|Itb|Oem|Maf|Gst|Msme?|Ups|Usb|Gpu|Cpu|Ai|Ml|Ict)\b", lambda m: m.group(1).upper(), result)
 
 
 # --------------------------------------------------------------------------- agent
@@ -126,55 +184,106 @@ class RfpParserAgent(Agent):
 
     def run(self, ctx: PipelineContext, log: StageLog) -> ParsedRfp:
         text = normalize(ctx.raw_text)
-        lines = [l for l in text.split("\n")]
         warnings: list[str] = []
-        log.info("Document normalised", characters=len(text), lines=len(lines))
+        layout = self._layout(ctx, log)
+        sections, owner = build_sections(layout.blocks)
+        long_form = layout.pages >= 3 and len(sections) >= 5
+        by_id = {s.id: s for s in sections}
+        log.info("Document structure", format=layout.format, pages=layout.pages, sections=len(sections),
+                 tables=layout.tables, long_form=long_form,
+                 kinds={k: sum(1 for s in sections if s.kind == k) for k in dict.fromkeys(s.kind for s in sections)})
+        warnings += layout.notes
 
         client = self._client(text, ctx, log)
         currency = self._currency(text, client, ctx, log)
         month_first = client.country == "US"
         dates = ex.extract_dates(text, month_first=month_first)
+
+        units, tables = self._units(layout, sections, owner)
+        # Key facts, dates, evaluation method and eligibility criteria.
+        reference = ex.extract_reference(text)
+        key_dates = extract_key_dates(units, month_first)
+        facts = extract_facts(units, reference)
+        evaluation = extract_evaluation(units)
+        eligibility = extract_eligibility(units, long_form)
+        for d in key_dates:
+            if d.key == "submission":
+                dates["due"] = d.date
+            elif d.key == "publication" and not dates["issued"]:
+                dates["issued"] = d.date
         log.info("Dates resolved by role", **dates)
+        if key_dates:
+            log.info("Key dates", **{d.key: f"{d.date} {d.time or ''}".strip() for d in key_dates})
+        if facts:
+            log.info("Tender key data", **{f.key: f.value for f in facts})
+        if long_form:
+            log.decision(f"Evaluation method: {evaluation.method}", technical_weight=evaluation.technical_weight,
+                         financial_weight=evaluation.financial_weight, min_technical_score=evaluation.min_technical_score)
+            log.info("Eligibility criteria extracted", count=len(eligibility),
+                     kinds=[c.kind for c in eligibility])
 
-        terms = self._terms(text, client, ctx, log)
+        terms = self._terms(self._scoped_text(layout, sections, owner, long_form) or text, client, ctx, log)
+        if evaluation.method == "L1":
+            terms.lowest_price_award = True
+        elif evaluation.method == "QCBS":
+            terms.lowest_price_award = False
+            if evaluation.financial_weight:
+                terms.price_weight_pct = evaluation.financial_weight
 
-        # --- sentence classification
+        # --- line items: in long documents only from the schedule / bill of quantities
         clause_model = registry.clause_classifier()
         category_model = registry.category_classifier()
-        table_items, consumed = extract_table_items(lines)
-        if table_items:
-            log.info("Tabular schedule detected", rows=len(table_items))
-
-        units: list[str] = []
-        for i, line in enumerate(lines):
-            if i in consumed or not line.strip():
+        item_kinds = self._item_kinds(sections, tables, owner, long_form)
+        raw_items: list[RawItem] = []
+        consumed_tables: set[int] = set()
+        for tid, rows in tables.items():
+            sid = owner[rows[0][0]]
+            kind = by_id[sid].kind if sid else "general"
+            if item_kinds is not None and kind not in item_kinds:
                 continue
-            # Bulleted or short lines are atomic; longer prose is split into sentences.
-            if len(line) < 180:
-                units.append(line.strip())
-            else:
-                units.extend(split_sentences(line))
-        units = [
-            u for u in units
-            if len(u) > 3 and not ex.is_header_field(u) and not ex.is_address_line(u) and not ex.is_title_line(u)
-        ]
-        clause_preds = clause_model.predict(units)
+            found, used = extract_table_items(["| " + " | ".join(layout.blocks[i].cells or []) + " |" for i, _ in rows])
+            for it in found:
+                it.section = sid
+            if found:
+                raw_items += found
+                consumed_tables.add(tid)
+                log.info("Tabular schedule detected", rows=len(found), section=by_id[sid].label if sid else None)
 
-        raw_items: list[RawItem] = list(table_items)
+        units = [u for u in units if u.table not in consumed_tables]
+        text_units = [u for u in units if u.source == "text"]
+        clause_preds = clause_model.predict([u.text for u in text_units])
+        preds = dict(zip(map(id, text_units), clause_preds))
         requirements: list[Requirement] = []
-        for idx, (unit, pred) in enumerate(zip(units, clause_preds)):
-            candidate = build_item(unit)
-            if candidate:
+        req_units: list[Unit] = []
+        for u in units:
+            if u.source == "field" or (long_form and u.kind == "forms"):
+                continue
+            if u.source == "table":
+                if not self._is_requirement_row(u):
+                    continue
+                mod, actor = modality(u.text)
+                requirements.append(Requirement(
+                    id=f"R{len(requirements) + 1:02d}", text=u.text, type="technical" if u.kind != "eligibility" else "eligibility",
+                    confidence=1.0, section=u.section, clause=u.clause, page=u.page,
+                    modality="mandatory" if mod == "information" else mod, actor=actor,
+                    category=categorise(u.text, u.kind, "line_item", 1.0, long_form), source="table"))
+                req_units.append(u)
+                continue
+            pred = preds[id(u)]
+            candidate = build_item(u.text)
+            if candidate and (item_kinds is None or u.kind in item_kinds):
                 cat = category_model.predict_one(candidate.description)
                 p_item = pred.distribution.get("line_item", 0.0)
                 accept = (pred.label == "line_item" and pred.confidence >= 0.4) or (
                     p_item >= 0.2 and cat.confidence >= 0.7 and pred.label not in NON_ITEM_CLAUSES
                 )
                 if accept:
+                    candidate.section = u.section
                     raw_items.append(candidate)
                     continue
                 if pred.label == "line_item":
-                    log.warn("Quantity-like sentence rejected as line item", text=unit[:120], category_confidence=round(cat.confidence, 3))
+                    log.warn("Quantity-like sentence rejected as line item", text=u.text[:120], section_kind=u.kind,
+                             category_confidence=round(cat.confidence, 3))
             label, confidence = pred.label, pred.confidence
             if label == "line_item":
                 # Item-like wording without a quantity (e.g. "Minimum 3 years warranty on all
@@ -183,21 +292,38 @@ class RfpParserAgent(Agent):
                 if confidence < 0.1:
                     continue
             if (
-                len(tokenize(unit)) >= 3 and not ex.is_heading(unit)
-                and not ex.labelled_value(unit + "\n", "client") and not ex.labelled_value(unit + "\n", "address")
+                len(tokenize(u.text)) >= 3 and not ex.is_heading(u.text)
+                and not ex.labelled_value(u.text + "\n", "client") and not ex.labelled_value(u.text + "\n", "address")
             ):
                 # Low-confidence clauses are kept as general context rather than mislabelled.
                 if confidence < 0.45:
                     label = "scope"
-                requirements.append(Requirement(id=f"R{len(requirements) + 1:02d}", text=unit, type=label, confidence=round(confidence, 3)))
+                mod, actor = modality(u.text)
+                requirements.append(Requirement(
+                    id=f"R{len(requirements) + 1:02d}", text=u.text, type=label, confidence=round(confidence, 3),
+                    section=u.section, clause=u.clause, page=u.page, modality=mod, actor=actor,
+                    category=categorise(u.text, u.kind, label, confidence, long_form)))
+                req_units.append(u)
 
         counts: dict[str, int] = {}
         for r in requirements:
             counts[r.type] = counts.get(r.type, 0) + 1
-        log.info("Clauses classified", sentences=len(units), requirements=len(requirements), by_type=counts)
+        log.info("Clauses classified", sentences=len(text_units), requirements=len(requirements), by_type=counts,
+                 mandatory=sum(r.modality == "mandatory" for r in requirements))
+
+        # --- specifications linked from technical sections ("as per specification 5.1")
+        spec_links = self._link_specs(raw_items, sections, units, category_model, log) if long_form else {}
 
         # --- product resolution
         items = self._resolve_items(raw_items, category_model, log)
+        for raw, item in zip(self._dedupe(raw_items), items):
+            sid = spec_links.get(id(raw))
+            if sid:
+                by_id[sid].line_nos.append(item.line_no)
+        line_by_section = {lno: s.id for s in sections for lno in s.line_nos}
+        for r in requirements:
+            if r.source == "table" and r.category == "technical":
+                r.line_no = next((lno for lno, sid in line_by_section.items() if sid == r.section), None)
         if not items:
             warnings.append("No priced line items could be identified in the request.")
         for it in items:
@@ -210,9 +336,10 @@ class RfpParserAgent(Agent):
         if not client.country:
             warnings.append("Delivery country not found; domestic supply assumed.")
 
+        document = self._document(layout, sections, requirements, facts, key_dates, eligibility, evaluation, long_form, text)
         parsed = ParsedRfp(
             title=ex.extract_title(text),
-            client_reference=ex.extract_reference(text),
+            client_reference=reference,
             client=client,
             currency=currency,
             issued_on=dates["issued"],
@@ -224,13 +351,184 @@ class RfpParserAgent(Agent):
             requirement_counts=counts,
             warnings=warnings,
             stats={
-                "sentences": len(units),
+                "sentences": len(text_units),
                 "line_items": len(items),
                 "matched": sum(i.status == "matched" for i in items),
                 "mean_match_confidence": round(sum(i.match_confidence for i in items) / len(items), 3) if items else 0,
+                "pages": layout.pages,
+                "sections": len(sections),
+                "mandatory": sum(r.modality == "mandatory" for r in requirements),
             },
+            document=document,
         )
         return parsed
+
+    # ------------------------------------------------------------------ document structure
+
+    def _layout(self, ctx: PipelineContext, log: StageLog) -> Layout:
+        data = None
+        if ctx.source_path is not None and ctx.source_path.exists():
+            data = ctx.source_path.read_bytes()
+        layout = analyse(ctx.source_filename, data, ctx.raw_text)
+        log.info("Layout analysed", source="original file" if data is not None else "extracted text", **layout.stats())
+        return layout
+
+    @staticmethod
+    def _units(layout: Layout, sections: list[Section], owner: list[str | None]) -> tuple[list[Unit], dict[int, list[tuple[int, Block]]]]:
+        by_id = {s.id: s for s in sections}
+        headings = {s.heading_block for s in sections}
+        units: list[Unit] = []
+        tables: dict[int, list[tuple[int, Block]]] = {}
+        headers: dict[int, list[str]] = {}
+        for i, b in enumerate(layout.blocks):
+            if i in headings:
+                continue
+            sid = owner[i]
+            sec = by_id.get(sid) if sid else None
+            kind = sec.kind if sec else "general"
+            base_clause = sec.number if sec and sec.number and not sec.keyword else (sec.number if sec else None)
+            if b.kind == "row" and b.table is not None:
+                tables.setdefault(b.table, []).append((i, b))
+                cells = b.cells or []
+                if b.table not in headers:
+                    headers[b.table] = cells
+                    continue
+                header = headers[b.table]
+                serial = cells[0] if cells and re.fullmatch(r"\d{1,3}\.?|[a-z]\)?", cells[0] or "") else None
+                clause = f"{base_clause} ({serial.rstrip('.')})" if base_clause and serial else base_clause
+                row_text = " | ".join(c for c in cells if c)
+                h = " ".join(header).lower()
+                if re.search(r"parameter|specification|feature|attribute", h) and len(cells) >= 2:
+                    params = [c for c in cells if c and c != serial]
+                    row_text = f"{params[0]}: {' '.join(params[1:])}" if len(params) >= 2 else row_text
+                elif re.search(r"criteri|eligib|requirement|condition", h):
+                    ci = next((j for j, x in enumerate(header) if re.search(r"criteri|eligib|requirement|condition", x, re.I)), None)
+                    if ci is not None and ci < len(cells) and cells[ci]:
+                        row_text = cells[ci]
+                units.append(Unit(row_text, sid, kind, b.page, clause, source="table", table=b.table, cells=cells, header=header))
+                continue
+            text = b.text.replace("\t", " ")
+            m = CLAUSE_NO.match(text)
+            clause = base_clause
+            if m and re.match(r"\d", m.group(1)):
+                clause = m.group(1)
+                text = text[m.end():].strip()
+            pieces = split_sentences(text) if len(text) >= 180 else [text.strip()]
+            for piece in pieces:
+                piece = piece.strip()
+                if len(piece) <= 3:
+                    continue
+                if ex.is_header_field(piece):
+                    units.append(Unit(piece, sid, kind, b.page, clause, source="field"))
+                elif not ex.is_address_line(piece) and not ex.is_title_line(piece):
+                    units.append(Unit(piece, sid, kind, b.page, clause))
+        return units, tables
+
+    @staticmethod
+    def _is_requirement_row(u: Unit) -> bool:
+        h = " ".join(u.header or []).lower()
+        if re.search(r"parameter|specification|feature|attribute", h):
+            return len(u.text.split()) >= 2
+        if re.search(r"criteri|eligib|requirement|condition", h):
+            return len(u.text.split()) >= 5
+        return False
+
+    @staticmethod
+    def _item_kinds(sections: list[Section], tables: dict, owner: list[str | None], long_form: bool) -> set[str] | None:
+        if not long_form:
+            return None
+        if any(s.kind == "boq" for s in sections):
+            return {"boq"}
+        return {"boq", "scope", "technical", "general", "notice"}
+
+    @staticmethod
+    def _scoped_text(layout: Layout, sections: list[Section], owner: list[str | None], long_form: bool) -> str:
+        """Text for term extraction: commercial and scope sections first; eligibility and forms excluded."""
+        if not long_form:
+            return ""
+        by_id = {s.id: s for s in sections}
+        order = ["commercial", "boq", "scope", "notice", "technical", "evaluation", "conditions", "instructions", "general"]
+        parts: dict[str, list[str]] = {k: [] for k in order}
+        for i, b in enumerate(layout.blocks):
+            sid = owner[i]
+            kind = by_id[sid].kind if sid else "general"
+            if kind in parts and b.kind == "text":
+                parts[kind].append(b.text)
+        return normalize("\n".join(line for k in order for line in parts[k]))
+
+    def _link_specs(self, raw_items: list[RawItem], sections: list[Section], units: list[Unit], category_model,
+                    log: StageLog) -> dict[int, str]:
+        """Attach each schedule line to the technical section that specifies it."""
+        tech = [s for s in sections if s.kind == "technical" and not any(c.parent == s.id for c in sections)]
+        if not tech:
+            return {}
+        rows: dict[str, list[str]] = {}
+        for u in units:
+            if u.section and u.kind == "technical":
+                rows.setdefault(u.section, []).append(u.text)
+        links: dict[int, str] = {}
+        title_cats = {s.id: category_model.predict_one(s.title).label for s in tech}
+        for raw in raw_items:
+            target = None
+            m = re.search(r"(?:specification|spec\.?|clause|section|annexure|item)\s*(?:no\.?\s*)?(\d{1,2}(?:\.\d{1,2})+)", raw.text, re.I)
+            if m:
+                target = next((s for s in tech if s.number == m.group(1)), None)
+            if target is None:
+                want = set(analyze(raw.description))
+                best, best_score = None, 0.0
+                cat = category_model.predict_one(raw.description).label
+                same = [s for s in tech if title_cats[s.id] == cat]
+                for s in tech:
+                    have = set(analyze(s.title))
+                    if not have:
+                        continue
+                    score = len(want & have) / len(have)
+                    if title_cats[s.id] == cat:
+                        # A section of the same product category; decisive when it is the only one.
+                        score += 0.35 + (0.3 if len(same) == 1 else 0.0)
+                    if score > best_score:
+                        best, best_score = s, score
+                target = best if best_score >= 0.6 else None
+            if target is None:
+                continue
+            spec_text = f"{target.title}. " + ". ".join(rows.get(target.id, []))
+            specs = extract_specs(spec_text)
+            added = {k: v for k, v in specs.items() if k not in raw.specs}
+            raw.specs = {**specs, **raw.specs}
+            raw.context = spec_text[:600]
+            links[id(raw)] = target.id
+            log.info("Specification linked to schedule line", line=raw.description[:70], section=target.label,
+                     added_specs=added or None)
+        return links
+
+    @staticmethod
+    def _dedupe(raw_items: list[RawItem]) -> list[RawItem]:
+        out, seen = [], set()
+        for raw in raw_items:
+            key = (fold(raw.description), raw.quantity)
+            if key not in seen:
+                seen.add(key)
+                out.append(raw)
+        return out
+
+    @staticmethod
+    def _document(layout: Layout, sections: list[Section], requirements: list[Requirement], facts, key_dates, eligibility,
+                  evaluation, long_form: bool, text: str) -> TenderDocument:
+        out: list[TenderSection] = []
+        for s in sections:
+            reqs = [r for r in requirements if r.section == s.id]
+            out.append(TenderSection(
+                id=s.id, number=s.number, title=_display_title(s.label if not s.keyword else s.title), level=s.level, kind=s.kind,
+                kind_confidence=s.kind_confidence, parent=s.parent, page_start=s.page_start, page_end=s.page_end,
+                requirement_count=len(reqs), mandatory_count=sum(r.modality == "mandatory" for r in reqs), line_nos=s.line_nos,
+            ))
+        forms = [s.title for s in sections if s.kind == "forms" and s.level == 1]
+        return TenderDocument(
+            format=layout.format, pages=layout.pages, pages_estimated=layout.pages_estimated, words=len(text.split()),
+            tables=layout.tables, scanned_pages=layout.scanned_pages, removed_lines=layout.removed_lines, long_form=long_form,
+            sections=out, facts=facts, key_dates=key_dates, eligibility=eligibility, evaluation=evaluation, forms=forms,
+            notes=layout.notes,
+        )
 
     def summarize(self, output: ParsedRfp) -> str:  # type: ignore[override]
         s = output.stats
@@ -323,7 +621,8 @@ class RfpParserAgent(Agent):
             seen.add(key)
             cat = category_model.predict_one(raw.description)
             prior = {c: p for c, p in cat.distribution.items() if p >= 0.05}
-            hits = store.search(raw.description, k=6, category_prior=prior)
+            query = f"{raw.description} {raw.context}".strip() if raw.context else raw.description
+            hits = store.search(query, k=6, category_prior=prior)
             candidates: list[ProductMatch] = []
             for h in hits:
                 product = store.products[h.doc.id]

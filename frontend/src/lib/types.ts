@@ -17,6 +17,9 @@ export interface RfpSummary {
   strategy_summary: string | null;
   line_count: number;
   below_cost_competitors: number | null;
+  recommendation: "Bid" | "Bid with clarifications" | "Do not bid" | null;
+  eligibility_verdict: string | null;
+  pages: number | null;
   source_filename: string | null;
   created_at: string;
   updated_at: string;
@@ -36,7 +39,47 @@ export interface RequestedItem {
   category: string | null; category_confidence: number; specs: Record<string, unknown>; brand: string | null;
   candidates: ProductMatch[]; selected_sku: string | null; match_confidence: number; status: "matched" | "ambiguous" | "unmatched";
 }
-export interface Requirement { id: string; text: string; type: string; confidence: number }
+export interface Requirement {
+  id: string; text: string; type: string; confidence: number;
+  section?: string | null; clause?: string | null; page?: number | null;
+  modality?: "mandatory" | "desirable" | "information"; actor?: "bidder" | "buyer"; category?: string;
+  line_no?: number | null; source?: "text" | "table"; reviewed?: boolean;
+}
+export interface TenderSection {
+  id: string; number: string | null; title: string; level: number; kind: string; kind_confidence: number; parent: string | null;
+  page_start: number | null; page_end: number | null; requirement_count: number; mandatory_count: number; line_nos: number[];
+}
+export interface TenderFact { key: string; label: string; value: string; amount: number | null; section: string | null; page: number | null; evidence: string | null }
+export interface KeyDate { key: string; label: string; date: string; time: string | null; section: string | null; page: number | null; evidence: string | null }
+export interface TenderDocument {
+  format: string; pages: number; pages_estimated: boolean; words: number; tables: number; scanned_pages: number[]; removed_lines: number;
+  long_form: boolean; sections: TenderSection[]; facts: TenderFact[]; key_dates: KeyDate[];
+  eligibility: { id: string; kind: string; label: string; text: string; clause: string | null; page: number | null }[];
+  evaluation: { method: "L1" | "QCBS" | "Weighted" | "Not stated"; technical_weight: number | null; financial_weight: number | null;
+    min_technical_score: number | null; criteria: { criterion: string; marks: number }[]; notes: string[]; evidence: string | null };
+  forms: string[]; notes: string[];
+}
+export type ComplianceStatus = "Complies" | "Complies with note" | "Clarification required" | "Deviation" | "Noted";
+export type EligibilityStatus = "Meets" | "Documents required" | "Needs review" | "Does not meet";
+export interface Evidence { source: string; section: string; text: string; score: number }
+export interface ComplianceItem {
+  id: string; clause: string | null; section: string | null; section_title: string | null; page: number | null; text: string;
+  category: string; modality: string; line_no: number | null; status: ComplianceStatus; response: string; basis: string;
+  verify: boolean; evidence: Evidence[]; risk: string | null; overridden: boolean;
+}
+export interface EligibilityCheck {
+  id: string; kind: string; label: string; text: string; clause: string | null; page: number | null; status: EligibilityStatus;
+  position: string; evidence: string[]; documents: string | null; overridden: boolean;
+}
+export interface RiskFlag { title: string; detail: string; severity: "high" | "medium" | "low"; clause: string | null; page: number | null }
+export interface ComplianceReport {
+  items: ComplianceItem[]; eligibility: EligibilityCheck[];
+  eligibility_verdict: "Eligible" | "Eligible subject to documents" | "Review required" | "Not eligible" | "Not assessed";
+  recommendation: "Bid" | "Bid with clarifications" | "Do not bid"; reasons: string[]; counts: Record<string, number>;
+  mandatory_total: number; mandatory_met: number; risks: RiskFlag[];
+  checklist: { name: string; status: "Ready" | "To prepare" | "To obtain"; source: string | null; note: string | null }[];
+  benefits: string[]; contract_value_estimate: number; summary: string;
+}
 export interface ParsedRfp {
   title: string; client_reference: string | null;
   client: {
@@ -52,7 +95,7 @@ export interface ParsedRfp {
     price_weight_pct: number | null; lowest_price_award: boolean;
   };
   line_items: RequestedItem[]; requirements: Requirement[]; requirement_counts: Record<string, number>;
-  warnings: string[]; stats: Record<string, number>;
+  warnings: string[]; stats: Record<string, number>; document?: TenderDocument | null;
 }
 
 export interface ValueAddOption { code: string; name: string; kind: string; description: string; unit_cost: number; unit_value: number; warranty_extension_months: number }
@@ -60,6 +103,7 @@ export interface CostedLine {
   line_no: number; sku: string; mpn: string; name: string; category: string; quantity: number; unit: string;
   unit_cost: number; list_price: number; floor_price: number; standard_price: number; tier_discount_pct: number;
   stock_qty: number; stock_ok: boolean; lead_time_days: number; warranty_months: number; value_adds: ValueAddOption[];
+  included_addons?: ValueAddOption[]; warranty_required_months?: number | null;
 }
 export interface MarketOffer {
   competitor: string; competitor_id: string; positioning: string; unit_price: number; currency: string; unit_price_base: number;
@@ -80,7 +124,17 @@ export interface CompetitiveAnalysis {
   base_currency: string; market_endpoint: string | null; market_latency_ms: number | null; market_available: boolean;
   lines: PricedLine[]; revenue: number; cost: number; bundle_cost: number; margin: number; margin_pct: number;
   expected_profit: number; win_probability: number; strategy_counts: Record<string, number>; below_cost_competitors: number;
-  summary: string; warnings: string[];
+  summary: string; warnings: string[]; award?: AwardAnalysis | null;
+}
+export interface AwardAnalysis {
+  rule: "L1" | "QCBS" | "Weighted"; our_total: number; cost_total: number; floor_total: number;
+  competitors: { id: string; name: string; total: number; coverage_pct: number }[];
+  lowest_competitor: string | null; lowest_total: number | null; rank: number | null; gap_pct: number | null;
+  target_total: number | null; target_feasible: boolean; target_prices: Record<string, number>;
+  msme_band_pct: number | null; msme_match: boolean; technical_score: number | null; competitor_technical_score: number | null;
+  combined_score: number | null; best_competitor_combined: number | null; reverse_auction: boolean; walk_away_total: number | null;
+  options: { label: string; total: number; margin: number; margin_pct: number; feasible: boolean; outcome: string }[];
+  recommendation: string; reasons: string[];
 }
 export interface TaxLine { name: string; rate_pct: number; amount: number }
 export interface Localisation {
@@ -92,16 +146,17 @@ export interface Localisation {
 export interface Proposal {
   quote_number: string; version: number; issue_date: string; valid_until: string; salutation: string;
   cover_letter: string[]; executive_summary: string[]; highlights: string[];
-  compliance: { ref: string; requirement: string; type: string; status: string; response: string; evidence: { source: string; section: string; text: string; score: number }[] }[];
+  compliance: { ref: string; requirement: string; type: string; status: string; response: string; evidence: Evidence[]; req_id?: string | null }[];
   compliance_counts: Record<string, number>; delivery_plan: string[]; milestones: { label: string; day: number; detail: string }[];
   inclusions: { line_no: number; item: string; service: string; quantity: number; value: number; description: string }[];
   terms: string[]; signatory: Record<string, string>; retrieval_log: { purpose: string; query: string; passages: { source: string; section: string; score: number }[] }[];
-  documents: { quotation?: string; memo?: string; report?: string };
+  documents: { quotation?: string; memo?: string; report?: string; compliance?: string };
 }
 
 export interface RfpDetail extends RfpSummary {
   raw_text: string; parsed: ParsedRfp | null;
   pricing: { costing?: { lines: CostedLine[]; excluded: { line_no: number; description: string; reason: string }[]; warnings: string[] }; strategy?: CompetitiveAnalysis; localisation?: Localisation } | null;
+  compliance: ComplianceReport | null; has_original: boolean;
   proposal: Proposal | null; overrides: Record<string, unknown>; stages: StageRun[]; stage_order: string[]; events: ApprovalEvent[];
 }
 
@@ -116,4 +171,5 @@ export interface Product {
   sku: string; mpn: string; name: string; brand: string; category: string; description: string; specs: Record<string, unknown>;
   keywords: string[]; unit: string; unit_cost: number; list_price: number; min_margin_pct: number; floor_price: number;
   stock_qty: number; lead_time_days: number; warranty_months: number; tax_category: string; active: boolean; list_margin_pct: number;
+  hsn: string | null; gst_rate_pct: number | null; price_updated_at: string | null;
 }

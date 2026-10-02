@@ -6,8 +6,8 @@ reproduce or extend it.
 ## 1. Pipeline and agents
 
 ```
-RFP text ─▶ RFP Parser ─▶ Internal Pricing ─▶ Competitive Strategy ─▶ Currency & Tax ─▶ Proposal Drafting
-             (parsed)       (costing)            (strategy)              (localisation)     (proposal + PDFs)
+RFP ─▶ RFP Parser ─▶ Internal Pricing ─▶ Tender Compliance ─▶ Competitive Strategy ─▶ Currency & Tax ─▶ Proposal Drafting
+        (parsed)       (costing)           (compliance)          (strategy)             (localisation)     (proposal + PDFs)
 ```
 
 * **Contract.** Every agent implements `run(ctx, log) -> message`
@@ -74,8 +74,8 @@ with `failed` on error, and `reopen` / `retry` to go back.
 ## 3. Trained models
 
 All three live in `app/ml/`. They are trained on first start and persisted with
-joblib in `var/models`. The **Retrain models** button (Models & data page)
-rebuilds them.
+joblib in `var/<company>/models`. `POST /api/models/retrain` rebuilds them, and they
+retrain on their own as reviewer labels and bid outcomes arrive (section 13.4).
 
 ### 3.1 Clause classifier
 
@@ -251,7 +251,139 @@ timeline. It contains:
 * requirement coverage;
 * risks to weigh and next steps.
 
-## 8. Reviewer adjustments and sign-in
+## 8. Long tenders and compliance
+
+### 8.1 Layout (`app/nlp/layout.py`)
+
+The original upload is kept (`documents/<ref>/source.pdf|docx`) and re-read at
+intake, so structure is not lost to plain-text extraction.
+
+* **PDF** (PyMuPDF): text lines with font size and weight; ruled tables via the
+  table finder, emitted as cell rows. Lines inside tables are not repeated as
+  text. Span gaps wider than ~2 em become tab separators (rule-less tables).
+* **Running headers/footers**: lines in the top/bottom 7.5% of the page whose
+  digit-normalised shape repeats on ≥ 40% of pages, plus "Page x of y".
+* **Continued tables**: a table whose first row repeats the previous table's
+  header is merged into it.
+* **Typography**: a line is `title` at ≥ 1.45× the body size, `heading` at
+  ≥ 1.12× or when fully bold and short without sentence punctuation.
+* **DOCX**: Word heading styles give levels; explicit and rendered page breaks
+  give pages (estimated at 3,200 characters per page otherwise).
+* **Scans**: pages without a text layer are OCR'd when Tesseract is available,
+  otherwise listed in the parse warnings.
+
+### 8.2 Section tree (`app/nlp/sections.py`)
+
+A block is a heading when it matches `Section/Part N`, `Annexure/Appendix N`,
+a short numbered title (`5.1 Desktop Computer`), a styled line or an all-caps
+line. Numbered blocks that read like sentences (modal verbs, > 12 words,
+terminal punctuation) are **clauses**; their numbers become the clause
+reference of the requirements inside them. Addresses and numbered request lines
+are rejected. Everything before the first structural heading is the cover.
+
+Section types come from a weighted lexicon over the title (e.g.
+`bill of quantities` 3.5, `commercial` 4, `annexure` 2), then the body, then
+the parent: "5.3 Laptop" inherits *technical* from "Section V".
+
+### 8.3 Tender understanding (`app/nlp/tender.py`)
+
+* **Units** are sentences, list items and table rows with section, page and
+  clause. Specification rows become `Parameter: value` requirements; the
+  criterion column of eligibility tables becomes the requirement text.
+* **Modality**: prohibitions and `shall/must/should/required` → mandatory;
+  `preferably/desirable/preference` → desirable; clauses whose subject is the
+  purchaser, or that reserve rights, bind the buyer.
+* **Category**: the section type decides for eligibility, technical, BOQ and
+  evaluation sections; elsewhere keyword rules, then the trained clause
+  classifier.
+* **Key data**: label/value pairs from key-data tables and `Label: value`
+  lines; amounts in Indian notation (`Rs. 4,50,000`, `2.25 crore`) are
+  normalised; dates are assigned roles (queries, pre-bid, submission, opening,
+  publication) from their labels, with times.
+* **Evaluation**: QCBS with its weights (`70:30`), L1, minimum technical score
+  and the marking-scheme table.
+* **Eligibility**: each criterion is typed (turnover, net worth, similar
+  works, supply volume, certifications, OEM authorisation, manpower, local
+  presence, blacklisting, years in business, registration, local content) and
+  its parameters parsed — e.g. the "three works of 40% / two of 50% / one of
+  80% of the estimated cost in seven years" options.
+* **Items** are extracted only from bill-of-quantities sections in long
+  documents. Each line is linked to a technical section by explicit reference
+  ("as per specification 5.1") or by title overlap plus category agreement,
+  and inherits its specifications (RAM, storage, CPU class, throughput, uplink
+  speed, print speed, form factor …) for matching.
+
+### 8.4 Tender Compliance Agent (`app/agents/compliance_agent.py`)
+
+Runs after costing, so it knows the product offered and the warranty quoted
+for every line.
+
+| Clause type | Assessed against |
+|-------------|------------------|
+| Eligibility | Company profile in `data/company.json`: turnover by financial year and segment share, incorporation date, net worth, completed credentials (value, sector, date, device counts), certifications, OEM authorisations, offices, engineers, Udyam registration |
+| Specification row | Catalogue data of the offered SKU via the same spec-fit function used for matching; failures name the parameter and search for a compliant alternative. Unknown parameters are marked *verify against datasheet* |
+| Warranty | The warranty actually quoted. `pricing/warranty.py` folds a mandated extension into cost and price at costing time |
+| Delivery | Lead times + transit + installation vs the days required |
+| Support levels | Service desk hours, on-site response and office locations |
+| Payment, LD, securities | MSMED Act 45-day rule, LD cap, bank-guarantee exposure on the estimated contract value |
+| Liability, indemnity, termination | Policy: liability capped at contract value |
+| Other | Knowledge-base evidence, accepted only with real topical overlap; otherwise an undertaking |
+
+Outputs: the matrix, eligibility verdict (*Eligible*, *subject to documents*,
+*review required*, *not eligible*), risk flags, a bid-documents checklist,
+MSE benefits and a recommendation: **Do not bid** if any criterion fails,
+**Bid with clarifications** for mandatory deviations, high risks or criteria
+needing review, otherwise **Bid**. Reviewer decisions per clause or criterion
+are stored in the overrides and applied last.
+
+The **compliance statement** PDF (`services/compliance_renderer.py`) is the
+client-facing annexure: eligibility with documents, the matrix grouped by the
+tender's sections with page references, the statement of deviations ("Nil"
+when there are none) and the declaration.
+
+## 9. Award-rule strategy and the editable report
+
+### 9.1 Whole-bid award analysis (`app/pricing/award.py`)
+
+* **Rival totals.** For every competitor, the sum of its offers across the
+  schedule; where it does not carry an item, the market median for that item.
+  Only rivals quoting at least half the schedule by value are kept.
+* **L1.** Rank, gap to L1, and the smallest uniform reduction (bounded by
+  every line's margin floor, found by bisection) that undercuts L1 by 0.5%.
+  For a registered MSE within 15% of L1, the purchase-preference option —
+  match L1 for 25% of the quantities — is priced at L1 with its margin. Line
+  pricing under L1 ignores warranty, lead-time and bundle effects in the win
+  model, and offers no free bundle: evaluation scores price only.
+* **QCBS.** Combined = w_t × T + w_f × 100 × (lowest ÷ ours). Our technical
+  score T is estimated as 55 + 40 × (mandatory clauses met ratio) − 3 per
+  deviation (clamped 40–95); rivals are assumed at a policy value (75). The
+  highest winning total is found by bisection.
+* **Reverse auction.** Opening at the recommended total, walk-away at the
+  floor total.
+
+### 9.2 Editable report (`app/report/`)
+
+The report is a document of sections and typed blocks (lead, paragraph,
+bullets, KPIs, bars, table, callout, note) generated from the pipeline
+messages and stored on the request with a 40-step undo/redo history and the
+chat log. Untouched reports follow each re-draft; edited ones are flagged as
+stale when prices change, and the assistant can refresh any generated section.
+`export.py` renders the same model to PDF (bid-report design) and Word.
+
+### 9.3 Editing assistant (`app/report/assistant.py`)
+
+No language model. Instructions go through an ordered grammar of edit
+patterns (rename, set title, hide/show, delete section, move to top/end or
+relative, add section, replace text, delete matching bullets or sentences,
+add paragraph or bullet, shorten, refresh, insert a figure or a
+knowledge-base fact, undo/redo, help, list). Section names are resolved by
+synonyms and token overlap. Shortening is extractive (sentence centrality).
+Facts come from the pipeline's figures or from knowledge-base retrieval.
+When no pattern matches, a character n-gram TF-IDF + logistic-regression
+intent model, trained on generated command phrasings, identifies what the
+user meant and the reply shows the exact phrasing that will work.
+
+## 10. Reviewer adjustments and sign-in
 
 * **Overrides** are stored on the request, and the approval events record them.
   Line overrides cover price, service, quantity, SKU and exclusion.
@@ -267,14 +399,16 @@ timeline. It contains:
   * federated sign-in for Google and SSO, which accepts the identity returned
     by the provider step.
 
-## 9. Data model
+## 11. Data model
 
 `users`, `products`, `price_tiers`, `value_adds`, `customers`, `deal_history`,
-`tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message),
+`tax_rules`, `fx_rates`, `rfps` (with JSON columns for each message, including
+`compliance` and the editable `report_doc`),
 `stage_runs`, `approval_events`. The seeder is idempotent, so edits made
-through the Catalogue screen survive restarts.
+through the Catalogue screen survive restarts. New nullable columns are added
+to existing databases automatically at start-up.
 
-## 10. Mock competitor market
+## 12. Mock competitor market
 
 `app/market/service.py` is a separate FastAPI app with `X-Api-Key`
 authentication and its own data file.
@@ -288,3 +422,85 @@ authentication and its own data file.
 
 It is mounted at `/market-api`, and can also run standalone on its own port
 (`TD_MARKET_API_URL`).
+
+
+## 13. Company data, competitor intelligence, learning loop and the response pack
+
+### 13.1 Company data sets (`app/config.py`)
+Company-specific files (`company.json`, `catalog.json`, `customers.json`, `market.json`, `value_adds.json`,
+`price_tiers.json`, `knowledge/`, `competitor_quotes.csv`, `award_history.csv`) live in
+`data/companies/<TD_COMPANY>/`; shared reference data (tax rules, countries, FX, pricing policy) stays in
+`data/`. `data_file(name)` resolves a name to the active company's copy first.
+
+### 13.2 Company data import (`app/imports/`)
+* `tabular.read_table` reads CSV (delimiter sniffed, BOM tolerated) and Excel. The header row is the one
+  with the most text cells among the first ten, so title lines of accounting exports are skipped.
+* `map_headers` assigns each field its header: exact synonym match first, then all-words match
+  ("Purchase Rate" → landed cost, "Closing Qty" → stock, "HSN/SAC" → HSN).
+* Values are parsed with Indian conventions: `₹1,23,456.50`, `45,000/Nos`, `2.5 lakh`, `18%`, `3 years`.
+* `tally_to_table` flattens a Tally stock-item XML export: name, group, opening or closing balance,
+  standard cost and price lists, HSN and the integrated-tax GST rate.
+* `preview` matches every row to a product (SKU, then MPN, then exact name) and plans create, update,
+  unchanged or skip. It raises row-level issues: price below cost, a change of 25% or more, an HSN code
+  that is not 4, 6 or 8 digits, a non-standard GST slab, missing name or cost. New products get a category
+  (group rules, then the trained category classifier), specifications inferred from the name, and keywords.
+* `commit` applies the plan, writes a `PriceVersion` row for every cost, price or stock change and
+  records the `ImportBatch`. Retrieval rebuilds automatically and the category model retrains when new
+  products arrive.
+
+### 13.3 Competitor intelligence (`app/intel/sources.py`)
+Every competitor price is a `PriceObservation`: competitor, product (MPN), unit price, currency, quantity,
+date, adapter and source reference.
+
+| Adapter | Input | Notes |
+|---|---|---|
+| `feed` | market API, per bid | brand stores (`brands` in `market.json`) offer their nearest same-category model within 40% of the price, reported as *equivalent* |
+| `quotes` | CSV or Excel of collected quotes | columns recognised by name |
+| `awards` | public award results | the winner becomes a competitor; the company's own awards are skipped |
+| `web` | saved product page | schema.org `Offer`, then price meta tags, then visible `₹ 12,345` text; nothing is fetched |
+
+`market_view` merges feed offers and stored observations for the lines of a bid. For each competitor and
+product the freshest observation wins. Observations older than `observation_max_age_days` (180) are
+dropped. Reliability is scaled by source (quotes 0.90, awards 0.88, web 0.75) and by age:
+`× (1 − 0.35 · age / max_age)`. The strategy agent logs how many offers each source supplied.
+
+### 13.4 Learning loop (`app/learning/loop.py`, `app/ml/registry.py`)
+* **Labels.** Correcting a requirement's type stores (sentence → type) for the clause model. Swapping a
+  line's product stores (line description → category) for the category model. Real labels are weighted
+  five times a synthetic example.
+* **Outcomes.** Won or lost becomes a `DealHistory` row with `source = "outcome"`. The price ratio is our
+  total against the winning price, or against the best rival total if we won; warranty and lead-time
+  deltas are medians over the lines. Real outcomes are weighted ten times.
+* **Retraining.** A model is stale when five new labels or outcomes have arrived since it was trained, or
+  when labels were removed; it retrains on next use.
+* **Evaluation** (`/api/learning/evaluate`). Leave-one-document-out accuracy on reviewer labels: a model
+  trained on synthetic data plus the other documents' labels, compared with the synthetic-only baseline.
+  Also expected calibration error with a reliability table, and Brier score and calibration of the win
+  model against recorded outcomes. It needs at least eight real labels or outcomes.
+
+### 13.5 Specification rows against catalogue data (`app/nlp/attributes.py`)
+Measurable limits ("Minimum 1000 DPI", "30 mm drivers", "Minimum 6 hours battery", "3 Indian sockets") are
+compared with the product attribute for that unit. A failure is a deviation, and a compliant catalogue
+alternative is named. Descriptive requirements are split into conjuncts (",", "and") and alternatives
+("or"). Purpose phrases ("for the language laboratory") are dropped, and a conjunct is met when every
+significant word of one alternative appears in the product's attributes, description or keywords. The
+response quotes the matching attribute. Warranty clauses that name several groups ("graphics cards three
+years and UPS units two years") are split per category by `months_by_category`.
+
+### 13.6 Submission pack (`app/pack/builder.py`)
+The technical proposal is a document in the same section and block model as the editable report, so it
+renders to PDF and Word with the same exporter. It contains:
+
+* covering letter;
+* bidder information form (legal, statutory, MSME, turnover, net worth, certifications, bank);
+* eligibility statement with evidence;
+* make and model offered per item, and a parameter-by-parameter compliance table per item;
+* commercial and general conditions, and the statement of deviations (or "Nil");
+* delivery plan;
+* warranty and support, grounded in retrieved knowledge-base passages;
+* declarations: non-blacklisting, MSE, local content and integrity;
+* checklist of documents.
+
+`maf_letters` writes one authorisation request per OEM offered. The ZIP adds the compliance statement, the
+quotation (as the financial bid) and a submission index that separates the technical and financial
+envelopes.

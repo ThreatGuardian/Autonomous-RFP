@@ -1,0 +1,101 @@
+[
+ {
+  "code": "WTY-EXT12",
+  "name": "Extended warranty, +12 months",
+  "kind": "warranty",
+  "basis": "percent",
+  "cost_rate": 2.8,
+  "value_rate": 7.5,
+  "warranty_extension_months": 12,
+  "categories": [
+   "laptop",
+   "desktop",
+   "workstation",
+   "monitor",
+   "peripheral",
+   "audio",
+   "printer",
+   "av",
+   "power"
+  ],
+  "description": "Extends the OEM warranty by twelve months, back-to-back with the OEM care pack and handled by Data Care Corp."
+ },
+ {
+  "code": "WTY-EXT24",
+  "name": "Extended warranty, +24 months",
+  "kind": "warranty",
+  "basis": "percent",
+  "cost_rate": 5.0,
+  "value_rate": 12.5,
+  "warranty_extension_months": 24,
+  "categories": [
+   "laptop",
+   "desktop",
+   "workstation",
+   "monitor",
+   "component"
+  ],
+  "description": "Extends the OEM warranty by twenty-four months including on-site engineer visits in Pune."
+ },
+ {
+  "code": "SVC-DEPLOY",
+  "name": "On-site installation, imaging and asset tagging",
+  "kind": "service",
+  "basis": "flat",
+  "cost_rate": 350,
+  "value_rate": 900,
+  "warranty_extension_months": 0,
+  "categories": [
+   "laptop",
+   "desktop",
+   "workstation",
+   "monitor",
+   "printer",
+   "av"
+  ],
+  "description": "Unpacking, installation, OS imaging, asset tagging and hand-over at the client's laboratories."
+ },
+ {
+  "code": "SVC-GPUFIT",
+  "name": "GPU fitment, driver and CUDA set-up",
+  "kind": "service",
+  "basis": "flat",
+  "cost_rate": 450,
+  "value_rate": 1500,
+  "warranty_extension_months": 0,
+  "categories": [
+   "component"
+  ],
+  "description": "Fitting the card, power-supply check, driver and CUDA toolkit installation and burn-in test."
+ },
+ {
+  "code": "SVC-SPARES",
+  "name": "On-site spares buffer (2%)",
+  "kind": "support",
+  "basis": "percent",
+  "cost_rate": 2.0,
+  "value_rate": 6.0,
+  "warranty_extension_months": 0,
+  "categories": [
+   "peripheral",
+   "audio",
+   "monitor"
+  ],
+  "description": "Two per cent spare units kept at the client's site for same-day swap during the warranty."
+ },
+ {
+  "code": "TRN-LAB",
+  "name": "Lab administrator training (half day)",
+  "kind": "training",
+  "basis": "flat",
+  "cost_rate": 500,
+  "value_rate": 2500,
+  "warranty_extension_months": 0,
+  "categories": [
+   "software",
+   "desktop",
+   "component"
+  ],
+  "description": "Imaging, driver management and first-level troubleshooting training for lab staff."
+ }
+]

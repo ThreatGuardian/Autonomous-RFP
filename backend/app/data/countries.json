@@ -1,6 +1,6 @@
 [
  {"code":"IN","name":"India","aliases":["india","bharat"],"currency":"INR","eu":false,
-  "regions":{"Maharashtra":["maharashtra","mumbai","pune","nagpur","nashik","thane","navi mumbai","aurangabad"],
+  "regions":{"Maharashtra":["maharashtra","mumbai","pune","nagpur","nashik","thane","navi mumbai","aurangabad","chhatrapati sambhajinagar","ratnagiri","kolhapur","satara","sangli","solapur","amravati","jalgaon","ahmednagar","nanded","latur"],
              "Karnataka":["karnataka","bengaluru","bangalore","mysuru","mysore","mangaluru"],
              "Delhi":["delhi","new delhi"],
              "Tamil Nadu":["tamil nadu","chennai","coimbatore","madurai"],

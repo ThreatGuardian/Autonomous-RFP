@@ -1,0 +1,50 @@
+[
+ {
+  "name": "DES Pune University",
+  "country": "IN",
+  "region": "Maharashtra",
+  "segment": "education",
+  "tax_id": "27AAATD0421B1ZK",
+  "deals_won": 1
+ },
+ {
+  "name": "Symbiosis Skills and Professional University",
+  "country": "IN",
+  "region": "Maharashtra",
+  "segment": "education",
+  "tax_id": null,
+  "deals_won": 2
+ },
+ {
+  "name": "Pimpri Chinchwad Municipal Corporation",
+  "country": "IN",
+  "region": "Maharashtra",
+  "segment": "public",
+  "tax_id": null,
+  "deals_won": 0
+ },
+ {
+  "name": "Hinjewadi Contact Centre Services",
+  "country": "IN",
+  "region": "Maharashtra",
+  "segment": "enterprise",
+  "tax_id": "27AADCH7719Q1Z1",
+  "deals_won": 3
+ },
+ {
+  "name": "Nashik Polytechnic Society",
+  "country": "IN",
+  "region": "Maharashtra",
+  "segment": "education",
+  "tax_id": null,
+  "deals_won": 1
+ },
+ {
+  "name": "Karnataka Skills Board",
+  "country": "IN",
+  "region": "Karnataka",
+  "segment": "public",
+  "tax_id": null,
+  "deals_won": 0
+ }
+]

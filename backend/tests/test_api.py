@@ -29,7 +29,7 @@ def test_full_workflow():
         rfp = wait_for(client, a.json()["id"])
         other = wait_for(client, b.json()[0]["id"])
         assert rfp["status"] == "review" and other["status"] == "review"
-        assert [s["stage"] for s in rfp["stages"]] == ["intake", "costing", "strategy", "localisation", "drafting"]
+        assert [s["stage"] for s in rfp["stages"]] == ["intake", "costing", "compliance", "strategy", "localisation", "drafting"]
         assert all(s["status"] == "completed" and s["log"] for s in rfp["stages"])
         assert rfp["currency"] == "AED" and rfp["proposal"]["documents"]["quotation"].endswith(".pdf")
 
@@ -67,5 +67,9 @@ def test_reference_endpoints():
         assert tax["treatments"]["goods_standard"]["rate_pct"] == 6.25
         assert client.get("/api/models").json()["win_model"]["metrics"]["holdout_auc"] > 0.7
         assert client.get("/api/knowledge/search", params={"q": "ISO 27001"}).json()["evidence"]
-        assert len(client.get("/api/rfps/samples").json()) == 5
+        samples = client.get("/api/rfps/samples").json()
+        assert sum(s["kind"] == "text" for s in samples) == 5
+        assert [s["filename"] for s in samples if s["kind"] == "file"] == ["08_godavari_smart_city_tender.pdf",
+                                                                           "09_konkan_university_rfp.docx",
+                                                                               "10_des_pune_university_rfp.pdf"]
         assert client.get("/market-api/v1/competitors").status_code == 401

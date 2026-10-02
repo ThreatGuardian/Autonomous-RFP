@@ -44,6 +44,7 @@ class BuyerContext:
     segment: str
     repeat_customer: bool
     price_weight_pct: float  # weight of price in the buyer's evaluation
+    award: str = "weighted"  # "L1" when the lowest compliant price wins outright
 
 
 @dataclass
@@ -86,6 +87,10 @@ class StrategyEngine:
                   buyer: BuyerContext) -> BidFeatures:
         ratio = 1 + (price / best.unit_price_base - 1) * self._amplification(buyer)
         ext = bundle.warranty_extension_months if bundle else 0
+        if buyer.award == "L1":
+            # Lowest-price awards score only the price of a compliant offer: extras earn nothing.
+            return BidFeatures(price_ratio=ratio, warranty_delta_months=0, lead_time_delta_days=0,
+                               bundled_value_add=False, repeat_customer=False, segment=buyer.segment)
         return BidFeatures(
             price_ratio=ratio,
             warranty_delta_months=line.warranty_months + ext - best.warranty_months,
@@ -129,7 +134,10 @@ class StrategyEngine:
         below_cost = best.unit_price_base < line.unit_cost
 
         candidates: list[Candidate] = []
-        allowed = [b for b in bundles if b is not None] if below_cost and line.value_adds else bundles
+        if buyer.award == "L1":
+            allowed: list[ValueAddOption | None] = [None]  # a free bundle adds cost and wins no marks under L1
+        else:
+            allowed = [b for b in bundles if b is not None] if below_cost and line.value_adds else bundles
         for bundle in allowed:
             for price in grid:
                 if self._feasible(line, price, bundle):
@@ -249,6 +257,10 @@ class StrategyEngine:
         elif best.unit_price_base < line.floor_price:
             r.append(f"The best competitor is above our cost but below our margin floor; matching would breach the "
                      f"{line.min_margin_pct:g}% minimum-margin policy and was rejected.")
+        if buyer.award == "L1" and (below_cost or best.unit_price_base < line.floor_price):
+            r.append("The tender is awarded to the lowest compliant bid (L1), where bundled services earn no evaluation "
+                     "credit, so value differentiation cannot win this line; the price is held at the policy floor and "
+                     "the whole-bid position is assessed in the award analysis.")
         if c.bundle is not None:
             b = c.bundle
             extra = f", extending warranty to {line.warranty_months + b.warranty_extension_months} months" if b.warranty_extension_months else ""

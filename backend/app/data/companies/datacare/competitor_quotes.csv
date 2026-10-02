@@ -1,0 +1,245 @@
+observed_on,competitor,competitor_id,mpn,product,quantity,unit_price,currency,gst_included,warranty_months,source,reference,collected_by
+2026-07-07,Flipkart Wholesale,flipkart_wholesale,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,10,17978.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-07-10,Flipkart Wholesale,flipkart_wholesale,ZB-THUNDER-HP,Zebronics Zeb-Thunder Wireless Headphones,50,820.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-07-12,Flipkart Wholesale,flipkart_wholesale,LG-960-001063-C270,Logitech C270 HD Webcam,10,1530.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-07-13,Apple authorised store,apple_store,AP-MC8H4HN-A,"Apple MacBook Air 13-inch (M3, 16 GB)",50,107357.7,INR,no,12,Store quotation,"Apple authorised store, Pune",Rohan D.
+2026-07-15,Amazon Business,amazon_business,AC-NHQPJSI-A715,"Acer Aspire 7 (Core i5, RTX 3050)",25,65376.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-07-15,HP World (factory outlet),hp_world,HP-64W34AA-P24G5,HP P24 G5 23.8-inch FHD Monitor,10,10883.2,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-07-16,Amazon Business,amazon_business,HP-664R5AA-150,HP 150 Wired Keyboard,25,600.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-07-18,Flipkart Wholesale,flipkart_wholesale,CR-CT16G48C40U5,Crucial 16 GB DDR5-4800 Desktop RAM,10,4280.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-07-22,Amazon Business,amazon_business,KG-KVR32N22S8-8,Kingston 8 GB DDR4-3200 Desktop RAM,25,1810.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-07-22,Dell Exclusive Store,dell_store,DL-P3680-I7-4060,Dell Precision 3680 Tower (RTX 4000 Ada),10,243707.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-07-22,Flipkart Wholesale,flipkart_wholesale,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),1,174561.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-07-23,Amazon Business,amazon_business,HP-9H1P7PA-280G9,"HP Pro Tower 280 G9 (Core i5, 16 GB)",10,53263.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-07-23,Amazon Business,amazon_business,LG-980-000418-Z120,Logitech Z120 USB Stereo Speakers,50,710.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-07-24,Amazon Business,amazon_business,SD-SDCZ73-064G,SanDisk Ultra Flair 64 GB USB 3.0 Pen Drive,1,530.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-07-25,Amazon Business,amazon_business,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,10,12641.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-07-27,Amazon Business,amazon_business,DL-OP7020T-I5-16,"Dell OptiPlex 7020 Tower (Core i5, 16 GB)",10,61784.3,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-07-27,Dell Exclusive Store,dell_store,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),25,55988.4,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-07-28,Apple authorised store,apple_store,AP-MWUC3HN-IMAC,Apple iMac 24-inch (M4),10,139182.8,INR,no,12,Store quotation,"Apple authorised store, Pune",Sneha P.
+2026-07-28,Flipkart Wholesale,flipkart_wholesale,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,10,4490.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-07-29,Amazon Business,amazon_business,ZT-G30500H-10L,ZOTAC GeForce RTX 3050 6 GB,1,17726.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-07-29,Amazon Business,amazon_business,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,1,16887.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-07-31,Apple authorised store,apple_store,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",50,60790.4,INR,no,12,Store quotation,"Apple authorised store, Pune",Sneha P.
+2026-07-31,HP World (factory outlet),hp_world,HP-53X27AA-W300,HP W300 1080p Webcam,1,2910.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-08-01,Amazon Business,amazon_business,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,50,4050.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-02,Amazon Business,amazon_business,LN-12U3-M70T5,Lenovo ThinkCentre M70t Gen 5 (Core i7),50,81909.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-02,Flipkart Wholesale,flipkart_wholesale,LG-24MP400-B,LG 24MP400 24-inch IPS Monitor,50,7779.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-03,Amazon Business,amazon_business,AM-100-100000591WOF,AMD Ryzen 7 7700X Processor,1,27915.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-04,Amazon Business,amazon_business,BQ-GW2790,BenQ GW2790 27-inch Eye-care Monitor,25,12213.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-05,Amazon Business,amazon_business,LG-960-001063-C270,Logitech C270 HD Webcam,50,1510.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-06,Amazon Business,amazon_business,CR-CT16G48C40U5,Crucial 16 GB DDR5-4800 Desktop RAM,25,4110.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-06,Flipkart Wholesale,flipkart_wholesale,SN-MDRZX110-B,Sony MDR-ZX110 Wired Over-ear Headphones,10,770.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-07,Flipkart Wholesale,flipkart_wholesale,LG-960-001396-C920,Logitech C920 HD Pro Webcam,50,5835.6,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-07,Flipkart Wholesale,flipkart_wholesale,KG-KVR32N22S8-8,Kingston 8 GB DDR4-3200 Desktop RAM,10,1890.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-08,Amazon Business,amazon_business,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),10,85100.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-08,Amazon Business,amazon_business,MS-RTX4060TI-VENTUS,MSI GeForce RTX 4060 Ti Ventus 2X 16 GB,10,42949.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-08,Amazon Business,amazon_business,ZT-G30500H-10L,ZOTAC GeForce RTX 3050 6 GB,10,16504.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-08,Flipkart Wholesale,flipkart_wholesale,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",1,59906.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-08,Flipkart Wholesale,flipkart_wholesale,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,50,13008.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-08,HP World (factory outlet),hp_world,HP-A1RR7PA-440G11,HP ProBook 440 G11 (Core Ultra 5),50,70330.9,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-08-09,Amazon Business,amazon_business,HP-A3EQ8PA-400G9,HP ProDesk 400 G9 SFF (Core i7),50,76374.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-10,Amazon Business,amazon_business,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,1,12749.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-10,Flipkart Wholesale,flipkart_wholesale,AP-MWUC3HN-IMAC,Apple iMac 24-inch (M4),10,144147.5,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-11,Amazon Business,amazon_business,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,1,4360.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-12,Amazon Business,amazon_business,LN-12U3-M70T5,Lenovo ThinkCentre M70t Gen 5 (Core i7),10,78510.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-12,Amazon Business,amazon_business,EP-V11HA85056-EBX51,Epson EB-X51 XGA Projector,25,44246.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-12,Apple authorised store,apple_store,AP-MWUC3HN-IMAC,Apple iMac 24-inch (M4),10,143126.2,INR,no,12,Store quotation,"Apple authorised store, Pune",Amit K.
+2026-08-12,Flipkart Wholesale,flipkart_wholesale,LG-910-005672-M331,Logitech M331 Silent Wireless Mouse,1,1080.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-13,Amazon Business,amazon_business,DL-KB216-BK,Dell KB216 Multimedia USB Keyboard,25,650.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-13,Amazon Business,amazon_business,HP-664R5AA-150,HP 150 Wired Keyboard,10,620.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-13,HP World (factory outlet),hp_world,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),10,171826.2,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-08-14,Amazon Business,amazon_business,LN-83ER-IPS3,Lenovo IdeaPad Slim 3 (Core i5),1,50663.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-14,Amazon Business,amazon_business,BQ-MW560,BenQ MW560 WXGA Projector,10,43032.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-15,Amazon Business,amazon_business,DL-V3030-I5-8,"Dell Vostro 3030 Tower (Core i5, 8 GB)",25,47268.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-15,Amazon Business,amazon_business,AM-100-100000591WOF,AMD Ryzen 7 7700X Processor,1,27904.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-15,Apple authorised store,apple_store,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",10,60458.0,INR,no,12,Store quotation,"Apple authorised store, Pune",Sneha P.
+2026-08-15,Flipkart Wholesale,flipkart_wholesale,CR-CT16G48C40U5,Crucial 16 GB DDR5-4800 Desktop RAM,50,4320.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-16,Amazon Business,amazon_business,DL-OP7020T-I5-16,"Dell OptiPlex 7020 Tower (Core i5, 16 GB)",1,65707.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-16,Flipkart Wholesale,flipkart_wholesale,LG-910-001605-B100,Logitech B100 USB Optical Mouse,25,340.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-17,Amazon Business,amazon_business,SG-ST2000DM008,Seagate BarraCuda 2 TB HDD,50,5317.3,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-17,Flipkart Wholesale,flipkart_wholesale,LN-83ER-IPS3,Lenovo IdeaPad Slim 3 (Core i5),10,52047.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-17,Flipkart Wholesale,flipkart_wholesale,ZB-THUNDER-HP,Zebronics Zeb-Thunder Wireless Headphones,1,830.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-17,Flipkart Wholesale,flipkart_wholesale,APC-BX600C-IN,APC Back-UPS BX600C-IN 600 VA,1,3590.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-18,Amazon Business,amazon_business,HP-9H1P7PA-280G9,"HP Pro Tower 280 G9 (Core i5, 16 GB)",50,55981.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-18,Amazon Business,amazon_business,LG-24MP400-B,LG 24MP400 24-inch IPS Monitor,50,8251.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-18,Amazon Business,amazon_business,LG-960-001063-C270,Logitech C270 HD Webcam,25,1600.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-18,HP World (factory outlet),hp_world,HP-64W34AA-P24G5,HP P24 G5 23.8-inch FHD Monitor,50,10665.5,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-08-19,Amazon Business,amazon_business,SD-SDCZ73-064G,SanDisk Ultra Flair 64 GB USB 3.0 Pen Drive,1,530.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-19,Flipkart Wholesale,flipkart_wholesale,HP-53X27AA-W300,HP W300 1080p Webcam,25,2640.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-19,Flipkart Wholesale,flipkart_wholesale,ZT-G30500H-10L,ZOTAC GeForce RTX 3050 6 GB,25,17364.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-20,Dell Exclusive Store,dell_store,DL-V3030-I5-8,"Dell Vostro 3030 Tower (Core i5, 8 GB)",10,44459.8,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Amit K.
+2026-08-20,Flipkart Wholesale,flipkart_wholesale,AM-100-100001015BOX,AMD Ryzen 5 7600 Processor (boxed),1,19443.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-20,HP World (factory outlet),hp_world,HP-A3EQ8PA-400G9,HP ProDesk 400 G9 SFF (Core i7),50,72824.5,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-08-20,HP World (factory outlet),hp_world,HP-428K7AA-G2,HP G2 USB Stereo Headset,1,1990.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Amit K.
+2026-08-21,Amazon Business,amazon_business,JBL-T510BT-BLK,JBL Tune 510BT Wireless Headphones,10,2760.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-21,Amazon Business,amazon_business,LG-980-000418-Z120,Logitech Z120 USB Stereo Speakers,10,720.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-21,Amazon Business,amazon_business,KG-KVR32N22S8-8,Kingston 8 GB DDR4-3200 Desktop RAM,10,1850.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-21,Flipkart Wholesale,flipkart_wholesale,DL-OP7020T-I5-16,"Dell OptiPlex 7020 Tower (Core i5, 16 GB)",1,60845.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-21,Flipkart Wholesale,flipkart_wholesale,DL-E2425H,Dell E2425H 24-inch FHD Monitor,10,9435.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-21,Flipkart Wholesale,flipkart_wholesale,SN-WHCH520-B,Sony WH-CH520 Wireless On-ear Headphones,10,3540.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-22,Amazon Business,amazon_business,ZT-G40600H-10M,ZOTAC GeForce RTX 4060 Twin Edge 8 GB,1,30555.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-22,Dell Exclusive Store,dell_store,DL-MS116-BK,Dell MS116 USB Optical Mouse,50,420.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-08-22,Flipkart Wholesale,flipkart_wholesale,LG-960-001063-C270,Logitech C270 HD Webcam,50,1590.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-22,Flipkart Wholesale,flipkart_wholesale,LG-981-000593-H111,Logitech H111 3.5 mm Stereo Headset,50,660.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-22,Flipkart Wholesale,flipkart_wholesale,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,50,13395.4,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-23,Amazon Business,amazon_business,HP-53X27AA-W300,HP W300 1080p Webcam,25,2620.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-23,Dell Exclusive Store,dell_store,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),1,57362.6,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-08-24,Amazon Business,amazon_business,HP-A1RR7PA-440G11,HP ProBook 440 G11 (Core Ultra 5),50,67626.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-24,Amazon Business,amazon_business,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",1,60556.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-24,Flipkart Wholesale,flipkart_wholesale,JB-23189-999-889-E30,Jabra Evolve2 30 SE USB Stereo Headset,1,6018.4,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-24,Flipkart Wholesale,flipkart_wholesale,IN-BX8071514400F,Intel Core i5-14400F Processor (boxed),25,17154.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-25,Amazon Business,amazon_business,AS-X1504VA-VIVO15,Asus Vivobook 15 (Core i5),25,48337.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-25,Dell Exclusive Store,dell_store,DL-P3680-I7-4060,Dell Precision 3680 Tower (RTX 4000 Ada),1,248203.4,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Sneha P.
+2026-08-25,Dell Exclusive Store,dell_store,DL-KB216-BK,Dell KB216 Multimedia USB Keyboard,25,720.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Sneha P.
+2026-08-25,Flipkart Wholesale,flipkart_wholesale,HP-9Z9X3PA-250G10,HP 250 G10 Notebook (Core i5),25,54462.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-26,Amazon Business,amazon_business,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),10,56963.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-26,Flipkart Wholesale,flipkart_wholesale,HP-4ZB78A-M211DW,HP LaserJet Pro M211dw,50,16866.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-26,Flipkart Wholesale,flipkart_wholesale,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,1,17708.4,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-27,Amazon Business,amazon_business,SN-WHCH520-B,Sony WH-CH520 Wireless On-ear Headphones,25,3610.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-27,Dell Exclusive Store,dell_store,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),1,82257.1,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-08-27,Flipkart Wholesale,flipkart_wholesale,BQ-GW2790,BenQ GW2790 27-inch Eye-care Monitor,50,12192.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-27,Flipkart Wholesale,flipkart_wholesale,ZB-CRISPCAM-FHD,Zebronics Zeb-Crisp Pro FHD Webcam,50,1450.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-27,HP World (factory outlet),hp_world,HP-53X27AA-W300,HP W300 1080p Webcam,25,2780.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Amit K.
+2026-08-28,Amazon Business,amazon_business,HP-4ZB78A-M211DW,HP LaserJet Pro M211dw,1,15981.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-28,Apple authorised store,apple_store,AP-MC8H4HN-A,"Apple MacBook Air 13-inch (M3, 16 GB)",1,110248.4,INR,no,12,Store quotation,"Apple authorised store, Pune",Rohan D.
+2026-08-28,Flipkart Wholesale,flipkart_wholesale,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),10,83732.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-28,Flipkart Wholesale,flipkart_wholesale,LG-24MP400-B,LG 24MP400 24-inch IPS Monitor,25,8204.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-08-28,Flipkart Wholesale,flipkart_wholesale,GB-B760M-DS3H-DDR4,Gigabyte B760M DS3H DDR4 Motherboard,1,10274.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-29,Amazon Business,amazon_business,MS-RTX4060TI-VENTUS,MSI GeForce RTX 4060 Ti Ventus 2X 16 GB,1,46922.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-08-29,Flipkart Wholesale,flipkart_wholesale,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,10,4130.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-29,Flipkart Wholesale,flipkart_wholesale,TP-TL-SG1024D,TP-Link TL-SG1024D 24-port Gigabit Switch,10,6170.5,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-30,Amazon Business,amazon_business,AC-NHQPJSI-A715,"Acer Aspire 7 (Core i5, RTX 3050)",10,67471.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-08-30,Amazon Business,amazon_business,GB-B760M-DS3H-DDR4,Gigabyte B760M DS3H DDR4 Motherboard,1,9845.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-08-30,Flipkart Wholesale,flipkart_wholesale,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),50,178547.3,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-08-30,Flipkart Wholesale,flipkart_wholesale,MS-RTX4060TI-VENTUS,MSI GeForce RTX 4060 Ti Ventus 2X 16 GB,1,46646.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-08-31,Amazon Business,amazon_business,TP-TL-SG1024D,TP-Link TL-SG1024D 24-port Gigabit Switch,50,6452.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-01,Flipkart Wholesale,flipkart_wholesale,LN-12JB-NEO50T,Lenovo ThinkCentre neo 50t Gen 5 (Core i5),25,59199.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-02,Amazon Business,amazon_business,DL-E2425H,Dell E2425H 24-inch FHD Monitor,1,9783.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-02,Amazon Business,amazon_business,BQ-GW2790,BenQ GW2790 27-inch Eye-care Monitor,1,11998.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-02,Amazon Business,amazon_business,LG-960-001396-C920,Logitech C920 HD Pro Webcam,1,5886.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-02,Amazon Business,amazon_business,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,50,17638.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-05,Amazon Business,amazon_business,AC-NHQPJSI-A715,"Acer Aspire 7 (Core i5, RTX 3050)",1,68489.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-05,Amazon Business,amazon_business,LG-24MP400-B,LG 24MP400 24-inch IPS Monitor,1,8172.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-05,Flipkart Wholesale,flipkart_wholesale,LN-12JB-NEO50T,Lenovo ThinkCentre neo 50t Gen 5 (Core i5),1,57635.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-05,Flipkart Wholesale,flipkart_wholesale,LG-910-001605-B100,Logitech B100 USB Optical Mouse,50,340.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-05,Flipkart Wholesale,flipkart_wholesale,CR-CT16G48C40U5,Crucial 16 GB DDR5-4800 Desktop RAM,1,4300.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-05,Flipkart Wholesale,flipkart_wholesale,KG-KVR32N22S8-8,Kingston 8 GB DDR4-3200 Desktop RAM,50,1850.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-06,Amazon Business,amazon_business,HP-664R5AA-150,HP 150 Wired Keyboard,50,640.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-06,Amazon Business,amazon_business,ZB-K20-KEYBOARD,Zebronics Zeb-K20 USB Keyboard,1,330.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-06,Amazon Business,amazon_business,LG-981-000593-H111,Logitech H111 3.5 mm Stereo Headset,10,710.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-06,Amazon Business,amazon_business,JB-23189-999-889-E30,Jabra Evolve2 30 SE USB Stereo Headset,1,6349.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-06,Amazon Business,amazon_business,WD-WDS500G3B0C,WD Blue SN580 500 GB NVMe SSD,10,3640.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-06,Amazon Business,amazon_business,HP-4ZB78A-M211DW,HP LaserJet Pro M211dw,50,15573.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-06,Amazon Business,amazon_business,EP-V11HA85056-EBX51,Epson EB-X51 XGA Projector,25,44037.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-06,Dell Exclusive Store,dell_store,DL-P3680-I7-4060,Dell Precision 3680 Tower (RTX 4000 Ada),10,267730.8,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Sneha P.
+2026-09-06,Flipkart Wholesale,flipkart_wholesale,LN-83ER-IPS3,Lenovo IdeaPad Slim 3 (Core i5),50,52281.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-06,Flipkart Wholesale,flipkart_wholesale,HP-265A9AA-M100,HP M100 USB Optical Mouse,10,390.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-07,Amazon Business,amazon_business,DL-KB216-BK,Dell KB216 Multimedia USB Keyboard,1,700.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-07,Amazon Business,amazon_business,LG-910-001605-B100,Logitech B100 USB Optical Mouse,1,340.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-07,Flipkart Wholesale,flipkart_wholesale,HP-A3EQ8PA-400G9,HP ProDesk 400 G9 SFF (Core i7),1,81771.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-07,Flipkart Wholesale,flipkart_wholesale,LG-920-009437-K120,Logitech K120 USB Keyboard,1,610.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-07,Flipkart Wholesale,flipkart_wholesale,ZB-THUNDER-HP,Zebronics Zeb-Thunder Wireless Headphones,10,760.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-08,Amazon Business,amazon_business,LG-920-009437-K120,Logitech K120 USB Keyboard,1,590.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-08,Amazon Business,amazon_business,HP-428K7AA-G2,HP G2 USB Stereo Headset,10,1660.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-08,Amazon Business,amazon_business,AM-100-100001015BOX,AMD Ryzen 5 7600 Processor (boxed),50,17645.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-08,Amazon Business,amazon_business,AM-100-100000591WOF,AMD Ryzen 7 7700X Processor,1,29774.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-08,Flipkart Wholesale,flipkart_wholesale,HP-9Z9X3PA-250G10,HP 250 G10 Notebook (Core i5),50,55654.4,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-09,Amazon Business,amazon_business,HP-9Z9X3PA-250G10,HP 250 G10 Notebook (Core i5),1,54260.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-09,Amazon Business,amazon_business,DL-E2425H,Dell E2425H 24-inch FHD Monitor,10,9082.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-09,Amazon Business,amazon_business,LG-910-005672-M331,Logitech M331 Silent Wireless Mouse,25,1080.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-09,Amazon Business,amazon_business,IN-BX8071514400F,Intel Core i5-14400F Processor (boxed),25,16160.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-09,Amazon Business,amazon_business,CR-CT16G48C40U5,Crucial 16 GB DDR5-4800 Desktop RAM,10,4010.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-09,Dell Exclusive Store,dell_store,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),25,80044.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Sneha P.
+2026-09-09,Flipkart Wholesale,flipkart_wholesale,ZB-CRISPCAM-FHD,Zebronics Zeb-Crisp Pro FHD Webcam,50,1390.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-09,Flipkart Wholesale,flipkart_wholesale,HP-4ZB78A-M211DW,HP LaserJet Pro M211dw,25,16783.6,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-09,Flipkart Wholesale,flipkart_wholesale,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,10,13839.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-09,Flipkart Wholesale,flipkart_wholesale,TP-TL-SG1024D,TP-Link TL-SG1024D 24-port Gigabit Switch,10,6202.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-09,HP World (factory outlet),hp_world,HP-53X27AA-W300,HP W300 1080p Webcam,10,2740.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Amit K.
+2026-09-10,Amazon Business,amazon_business,AS-X1504VA-VIVO15,Asus Vivobook 15 (Core i5),1,47916.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-10,Amazon Business,amazon_business,MS-RTX4060TI-VENTUS,MSI GeForce RTX 4060 Ti Ventus 2X 16 GB,10,45907.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-11,Amazon Business,amazon_business,HP-A1RR7PA-440G11,HP ProBook 440 G11 (Core Ultra 5),50,69311.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-11,Amazon Business,amazon_business,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),25,81408.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-11,Amazon Business,amazon_business,KG-KVR32N22S8-8,Kingston 8 GB DDR4-3200 Desktop RAM,1,1730.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-11,Amazon Business,amazon_business,SM-MZV9P1T0BW-990,Samsung 990 PRO 1 TB NVMe SSD,10,8636.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-11,Amazon Business,amazon_business,APC-BX600C-IN,APC Back-UPS BX600C-IN 600 VA,50,3770.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-11,HP World (factory outlet),hp_world,HP-265A9AA-M100,HP M100 USB Optical Mouse,25,440.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-09-11,HP World (factory outlet),hp_world,HP-428K7AA-G2,HP G2 USB Stereo Headset,25,2020.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-09-12,Flipkart Wholesale,flipkart_wholesale,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",1,63527.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-12,HP World (factory outlet),hp_world,HP-64W34AA-P24G5,HP P24 G5 23.8-inch FHD Monitor,50,11286.4,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-09-13,Amazon Business,amazon_business,SG-ST2000DM008,Seagate BarraCuda 2 TB HDD,10,5071.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-13,Amazon Business,amazon_business,EP-C11CJ67501-L3250,Epson EcoTank L3250 All-in-One,10,13918.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-13,Apple authorised store,apple_store,AP-MWUC3HN-IMAC,Apple iMac 24-inch (M4),10,140085.7,INR,no,12,Store quotation,"Apple authorised store, Pune",Amit K.
+2026-09-13,Flipkart Wholesale,flipkart_wholesale,LG-910-005672-M331,Logitech M331 Silent Wireless Mouse,50,1080.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-13,HP World (factory outlet),hp_world,HP-A1RR7PA-440G11,HP ProBook 440 G11 (Core Ultra 5),25,71872.7,INR,no,12,Store quotation,"HP World, FC Road, Pune",Amit K.
+2026-09-13,HP World (factory outlet),hp_world,HP-9H1P7PA-280G9,"HP Pro Tower 280 G9 (Core i5, 16 GB)",25,54953.7,INR,no,12,Store quotation,"HP World, FC Road, Pune",Amit K.
+2026-09-14,Amazon Business,amazon_business,DL-OP7020T-I5-16,"Dell OptiPlex 7020 Tower (Core i5, 16 GB)",50,64090.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-14,Amazon Business,amazon_business,LN-12U3-M70T5,Lenovo ThinkCentre M70t Gen 5 (Core i7),50,76246.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-14,Amazon Business,amazon_business,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),50,168642.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-14,Amazon Business,amazon_business,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,10,16249.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-14,Flipkart Wholesale,flipkart_wholesale,DL-P3680-I7-4060,Dell Precision 3680 Tower (RTX 4000 Ada),25,249960.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-14,Flipkart Wholesale,flipkart_wholesale,LG-981-000593-H111,Logitech H111 3.5 mm Stereo Headset,25,700.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-14,HP World (factory outlet),hp_world,HP-A3EQ8PA-400G9,HP ProDesk 400 G9 SFF (Core i7),25,78032.8,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-09-14,HP World (factory outlet),hp_world,HP-4ZB78A-M211DW,HP LaserJet Pro M211dw,50,17308.3,INR,no,12,Store quotation,"HP World, FC Road, Pune",Rohan D.
+2026-09-15,Amazon Business,amazon_business,DL-V3030-I5-8,"Dell Vostro 3030 Tower (Core i5, 8 GB)",1,48048.6,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-15,Amazon Business,amazon_business,BQ-GW2790,BenQ GW2790 27-inch Eye-care Monitor,10,11612.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-15,Apple authorised store,apple_store,AP-MC8H4HN-A,"Apple MacBook Air 13-inch (M3, 16 GB)",1,114805.9,INR,no,12,Store quotation,"Apple authorised store, Pune",Rohan D.
+2026-09-15,Flipkart Wholesale,flipkart_wholesale,AC-NHQPJSI-A715,"Acer Aspire 7 (Core i5, RTX 3050)",1,66899.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-15,Flipkart Wholesale,flipkart_wholesale,SN-WHCH520-B,Sony WH-CH520 Wireless On-ear Headphones,50,3650.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-15,Flipkart Wholesale,flipkart_wholesale,GB-B760M-DS3H-DDR4,Gigabyte B760M DS3H DDR4 Motherboard,50,11031.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-15,Flipkart Wholesale,flipkart_wholesale,WD-WDS500G3B0C,WD Blue SN580 500 GB NVMe SSD,1,3740.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-16,Amazon Business,amazon_business,LG-960-001063-C270,Logitech C270 HD Webcam,25,1510.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-16,Amazon Business,amazon_business,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,50,4210.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-16,Flipkart Wholesale,flipkart_wholesale,LG-24MP400-B,LG 24MP400 24-inch IPS Monitor,50,8465.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-17,Amazon Business,amazon_business,HP-A3EQ8PA-400G9,HP ProDesk 400 G9 SFF (Core i7),50,79441.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-17,Amazon Business,amazon_business,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",50,57617.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-17,Amazon Business,amazon_business,HP-64W34AA-P24G5,HP P24 G5 23.8-inch FHD Monitor,50,10162.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-17,Amazon Business,amazon_business,SN-WHCH520-B,Sony WH-CH520 Wireless On-ear Headphones,50,3520.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-17,Amazon Business,amazon_business,BQ-MW560,BenQ MW560 WXGA Projector,50,39193.5,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-17,Apple authorised store,apple_store,AP-MU9D3HN-MINI,"Apple Mac mini (M4, 16 GB)",50,60199.5,INR,no,12,Store quotation,"Apple authorised store, Pune",Amit K.
+2026-09-17,Flipkart Wholesale,flipkart_wholesale,DL-OP7020T-I5-16,"Dell OptiPlex 7020 Tower (Core i5, 16 GB)",50,63052.4,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-17,Flipkart Wholesale,flipkart_wholesale,LG-960-001396-C920,Logitech C920 HD Pro Webcam,1,5618.5,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-17,Flipkart Wholesale,flipkart_wholesale,MS-RTX4060TI-VENTUS,MSI GeForce RTX 4060 Ti Ventus 2X 16 GB,25,47740.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-17,HP World (factory outlet),hp_world,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),25,171823.6,INR,no,12,Store quotation,"HP World, FC Road, Pune",Rohan D.
+2026-09-18,Amazon Business,amazon_business,DL-MS116-BK,Dell MS116 USB Optical Mouse,1,370.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-18,Flipkart Wholesale,flipkart_wholesale,DL-L3550-I7-16-512,Dell Latitude 3550 (Core i7),1,83127.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-18,Flipkart Wholesale,flipkart_wholesale,BQ-GW2790,BenQ GW2790 27-inch Eye-care Monitor,25,11929.3,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-19,Amazon Business,amazon_business,HP-9H1P7PA-280G9,"HP Pro Tower 280 G9 (Core i5, 16 GB)",10,52823.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-19,Amazon Business,amazon_business,SD-SDCZ73-064G,SanDisk Ultra Flair 64 GB USB 3.0 Pen Drive,1,520.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-19,Flipkart Wholesale,flipkart_wholesale,ZB-K20-KEYBOARD,Zebronics Zeb-K20 USB Keyboard,10,320.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-19,Flipkart Wholesale,flipkart_wholesale,MS-MAG-A650BN,MSI MAG A650BN 650 W 80+ Bronze PSU,50,4510.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-19,HP World (factory outlet),hp_world,HP-664R5AA-150,HP 150 Wired Keyboard,25,660.0,INR,no,12,Store quotation,"HP World, FC Road, Pune",Sneha P.
+2026-09-20,Amazon Business,amazon_business,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),1,53599.4,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-20,Amazon Business,amazon_business,LN-83ER-IPS3,Lenovo IdeaPad Slim 3 (Core i5),10,52979.9,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-20,Amazon Business,amazon_business,LG-920-004437-MK270,Logitech MK270 Wireless Keyboard and Mouse Combo,10,1550.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-20,Dell Exclusive Store,dell_store,DL-MS116-BK,Dell MS116 USB Optical Mouse,10,430.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-09-20,Flipkart Wholesale,flipkart_wholesale,DL-E2425H,Dell E2425H 24-inch FHD Monitor,1,9508.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Sneha P.
+2026-09-22,Amazon Business,amazon_business,LG-960-001396-C920,Logitech C920 HD Pro Webcam,1,6269.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-22,Flipkart Wholesale,flipkart_wholesale,ZT-G40600H-10M,ZOTAC GeForce RTX 4060 Twin Edge 8 GB,50,30381.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-22,Flipkart Wholesale,flipkart_wholesale,ZT-G30500H-10L,ZOTAC GeForce RTX 3050 6 GB,10,16571.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-23,Amazon Business,amazon_business,ZT-G30500H-10L,ZOTAC GeForce RTX 3050 6 GB,50,16591.8,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-23,Flipkart Wholesale,flipkart_wholesale,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),1,57437.1,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-23,Flipkart Wholesale,flipkart_wholesale,JB-23189-999-889-E30,Jabra Evolve2 30 SE USB Stereo Headset,1,5843.9,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-23,Flipkart Wholesale,flipkart_wholesale,AM-100-100001015BOX,AMD Ryzen 5 7600 Processor (boxed),10,19321.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-24,Amazon Business,amazon_business,AP-MC8H4HN-A,"Apple MacBook Air 13-inch (M3, 16 GB)",1,101493.2,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-24,Amazon Business,amazon_business,ZT-G40600H-10M,ZOTAC GeForce RTX 4060 Twin Edge 8 GB,50,28243.7,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-24,Dell Exclusive Store,dell_store,DL-V3530-I5-16-512,Dell Vostro 3530 (Core i5),50,57575.9,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-09-24,Flipkart Wholesale,flipkart_wholesale,AP-MWUC3HN-IMAC,Apple iMac 24-inch (M4),1,135179.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-24,Flipkart Wholesale,flipkart_wholesale,HP-Z2G9-I7-A2000,HP Z2 G9 Tower Workstation (RTX A2000),50,171241.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-24,Flipkart Wholesale,flipkart_wholesale,IN-BX8071514400F,Intel Core i5-14400F Processor (boxed),50,16051.5,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-25,Amazon Business,amazon_business,HP-53X27AA-W300,HP W300 1080p Webcam,50,2480.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Amit K.
+2026-09-25,Amazon Business,amazon_business,JBL-T510BT-BLK,JBL Tune 510BT Wireless Headphones,25,2660.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-25,Amazon Business,amazon_business,TP-TL-SG1024D,TP-Link TL-SG1024D 24-port Gigabit Switch,10,6452.1,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-25,Dell Exclusive Store,dell_store,DL-KB216-BK,Dell KB216 Multimedia USB Keyboard,10,760.0,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Sneha P.
+2026-09-25,Flipkart Wholesale,flipkart_wholesale,LG-960-001063-C270,Logitech C270 HD Webcam,10,1460.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-25,Flipkart Wholesale,flipkart_wholesale,TP-TL-SG3428,TP-Link JetStream TL-SG3428 24-port Managed Switch,1,17046.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-26,Amazon Business,amazon_business,LG-980-000418-Z120,Logitech Z120 USB Stereo Speakers,10,700.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Rohan D.
+2026-09-26,Amazon Business,amazon_business,GB-B760M-DS3H-DDR4,Gigabyte B760M DS3H DDR4 Motherboard,1,9888.0,INR,no,12,Marketplace listing,https://www.amazon.in/business/,Sneha P.
+2026-09-26,Flipkart Wholesale,flipkart_wholesale,HP-64W34AA-P24G5,HP P24 G5 23.8-inch FHD Monitor,10,10373.2,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-26,Flipkart Wholesale,flipkart_wholesale,HP-53X27AA-W300,HP W300 1080p Webcam,10,2400.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-26,Flipkart Wholesale,flipkart_wholesale,SN-MDRZX110-B,Sony MDR-ZX110 Wired Over-ear Headphones,50,770.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-26,Flipkart Wholesale,flipkart_wholesale,APC-BX600C-IN,APC Back-UPS BX600C-IN 600 VA,10,3640.0,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-26,Flipkart Wholesale,flipkart_wholesale,APC-BX1100C-IN,APC Back-UPS BX1100C-IN 1100 VA,10,6755.6,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Rohan D.
+2026-09-27,Dell Exclusive Store,dell_store,DL-V3030-I5-8,"Dell Vostro 3030 Tower (Core i5, 8 GB)",10,44658.8,INR,no,36,Store quotation,"Dell Exclusive Store, Aundh, Pune",Rohan D.
+2026-09-27,Flipkart Wholesale,flipkart_wholesale,AS-X1504VA-VIVO15,Asus Vivobook 15 (Core i5),10,45233.7,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
+2026-09-27,Flipkart Wholesale,flipkart_wholesale,AC-DTVZ4SI-S2690G,Acer Veriton S2690G (Core i5),50,51577.8,INR,no,12,Marketplace listing,https://www.flipkartwholesale.com/,Amit K.
