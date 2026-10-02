@@ -203,13 +203,6 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
             </Link>
           </p>
 
-          {!signup && (
-            <button type="button" onClick={() => setForm({ ...form, username: "priya", password: "tenderdesk" })}
-              className="mt-8 flex items-center gap-3 rounded-xl border border-dashed border-line-strong px-4 py-3 text-left text-[12.5px] text-muted transition hover:border-[#e2cfa6] hover:bg-[#fffcf5]">
-              <KeyRound className="size-4 shrink-0 text-accent" />
-              <span>Demo workspace — username <span className="font-mono text-ink">priya</span>, password <span className="font-mono text-ink">tenderdesk</span>. Click to fill in.</span>
-            </button>
-          )}
         </div>
 
         <div className="text-[11.5px] text-subtle">© Tenderdesk</div>
