@@ -12,6 +12,7 @@ import type {
   ComplianceItem, ComplianceReport, ComplianceStatus, EligibilityCheck, EligibilityStatus, RfpDetail, TenderDocument, TenderSection,
 } from "../../lib/types";
 import { date, daysUntil, getBaseCurrency, money } from "../../lib/format";
+import { MotionRow, rowMotion } from "../../components/motion";
 
 type Tone = "neutral" | "blue" | "amber" | "green" | "red" | "violet" | "gold";
 
@@ -245,15 +246,15 @@ function EligibilityCard({ report, onOpen }: { report: ComplianceReport; onOpen:
       <table className="table-base">
         <thead><tr><th className="w-[74px]">Clause</th><th className="w-[200px]">Criterion</th><th className="w-[150px]">Status</th><th>Our position</th><th className="w-10" /></tr></thead>
         <tbody>
-          {report.eligibility.map((c) => (
-            <tr key={c.id} className="cursor-pointer" onClick={() => onOpen(c)}>
+          {report.eligibility.map((c, rowIndex) => (
+            <MotionRow {...rowMotion(rowIndex)} key={c.id} className="cursor-pointer" onClick={() => onOpen(c)}>
               <td className="font-mono text-[11.5px] text-muted">{c.clause ?? c.id}</td>
               <td><div className="font-medium">{c.label}</div><div className="line-clamp-1 text-[11.5px] text-muted" title={c.text}>{c.text}</div></td>
               <td><Badge tone={ELIGIBILITY_TONE[c.status]} dot>{c.status}</Badge>{c.overridden && <div className="mt-1 text-[11px] text-muted">Set by reviewer</div>}</td>
               <td className="text-ink-soft"><div className="line-clamp-2">{c.position}</div>
                 {c.evidence.length > 0 && <div className="mt-0.5 line-clamp-1 text-[11.5px] text-muted">{c.evidence.join(" · ")}</div>}</td>
               <td><ChevronRight className="size-4 text-subtle" /></td>
-            </tr>
+            </MotionRow>
           ))}
         </tbody>
       </table>
@@ -352,8 +353,8 @@ function Matrix({ report, doc, onOpen }: { report: ComplianceReport; doc: Tender
             <table className="table-base">
               <thead className="sticky top-0 z-10 bg-white"><tr><th className="w-[84px]">Clause</th><th>Requirement</th><th className="w-[170px]">Status</th><th className="w-[36%]">Response</th></tr></thead>
               <tbody>
-                {items.map((i) => (
-                  <tr key={i.id} className="cursor-pointer" onClick={() => onOpen(i)}>
+                {items.map((i, rowIndex) => (
+                  <MotionRow {...rowMotion(rowIndex)} key={i.id} className="cursor-pointer" onClick={() => onOpen(i)}>
                     <td className="align-top">
                       <div className="font-mono text-[11.5px] text-ink-soft">{i.clause ?? i.id}</div>
                       {i.page && !doc?.pages_estimated && <div className="text-[11px] text-subtle">p. {i.page}</div>}
@@ -374,7 +375,7 @@ function Matrix({ report, doc, onOpen }: { report: ComplianceReport; doc: Tender
                       </div>
                     </td>
                     <td className="align-top text-ink-soft"><div className="line-clamp-2">{i.response}</div></td>
-                  </tr>
+                  </MotionRow>
                 ))}
               </tbody>
             </table>

@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, CheckCircle2, ChevronDown, Download, ExternalLink, FileArchive, FileCheck2, FileText, Flag, PenLine, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CountryTag, StageTracker, StatusBadge } from "../../components/domain";
 import { Page, PageHeader } from "../../components/layout/Shell";
+import { FadeSwitch } from "../../components/motion";
 import { Badge, Button, Card, Dialog, Empty, Field, Segmented, Skeleton, Spinner, Tabs } from "../../components/ui";
 import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
@@ -103,11 +105,19 @@ export default function RequestDetail() {
             <div className="font-semibold">Processing stopped</div><div className="mt-1">{rfp.error}</div>
           </div>
         )}
-        {rfp.status === "approved" && (
-          <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-[13px] text-emerald-900">
-            <CheckCircle2 className="size-4" /> Approved — the final quotation has been issued without the draft watermark and is ready to send.
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {rfp.status === "approved" && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden">
+              <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-[13px] text-emerald-900">
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 18, delay: 0.1 }}>
+                  <CheckCircle2 className="size-4" />
+                </motion.span>
+                Approved — the final quotation has been issued without the draft watermark and is ready to send.
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!ready && busy ? (
           <Card>
@@ -132,18 +142,20 @@ export default function RequestDetail() {
               ]} />
               {busy && <span className="flex items-center gap-2 text-[12.5px] text-muted"><Spinner className="size-3.5" /> Re-pricing…</span>}
             </div>
-            {tab === "pricing" && <PricingTab rfp={rfp} editable={editable} />}
-            {tab === "compliance" && <ComplianceTab rfp={rfp} editable={editable} />}
-            {tab === "requirements" && <RequirementsTab rfp={rfp} />}
-            {tab === "quotation" && <QuotationTab rfp={rfp} editable={editable} />}
-            {tab === "activity" && <ActivityTab rfp={rfp} focus={stageFocus} />}
-            {tab === "source" && (
-              <Card title={rfp.source_filename ?? "Pasted text"}
-                subtitle={`${rfp.raw_text.length.toLocaleString()} characters${rfp.parsed?.document ? ` · ${rfp.parsed.document.pages} ${rfp.parsed.document.pages_estimated ? "estimated " : ""}page(s)` : ""}`}
-                actions={rfp.has_original ? <a href={api.originalUrl(id)} target="_blank" rel="noreferrer"><Button size="sm" icon={<ExternalLink className="size-3.5" />}>Open original</Button></a> : undefined}>
-                <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-[1.65] text-ink-soft">{rfp.raw_text}</pre>
-              </Card>
-            )}
+            <FadeSwitch id={tab}>
+              {tab === "pricing" && <PricingTab rfp={rfp} editable={editable} />}
+              {tab === "compliance" && <ComplianceTab rfp={rfp} editable={editable} />}
+              {tab === "requirements" && <RequirementsTab rfp={rfp} />}
+              {tab === "quotation" && <QuotationTab rfp={rfp} editable={editable} />}
+              {tab === "activity" && <ActivityTab rfp={rfp} focus={stageFocus} />}
+              {tab === "source" && (
+                <Card title={rfp.source_filename ?? "Pasted text"}
+                  subtitle={`${rfp.raw_text.length.toLocaleString()} characters${rfp.parsed?.document ? ` · ${rfp.parsed.document.pages} ${rfp.parsed.document.pages_estimated ? "estimated " : ""}page(s)` : ""}`}
+                  actions={rfp.has_original ? <a href={api.originalUrl(id)} target="_blank" rel="noreferrer"><Button size="sm" icon={<ExternalLink className="size-3.5" />}>Open original</Button></a> : undefined}>
+                  <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-[1.65] text-ink-soft">{rfp.raw_text}</pre>
+                </Card>
+              )}
+            </FadeSwitch>
           </>
         )}
       </Page>

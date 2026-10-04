@@ -112,7 +112,7 @@ function OperatingRegionCard() {
   return (
     <Card title="Operating region" subtitle="Where your company is registered. Sales inside this region are taxed as domestic supplies; others as exports."
       actions={<Badge tone="neutral">Catalogue in {workspace.data?.base_currency ?? getBaseCurrency()}</Badge>}>
-      <RegionPicker value={place} onChange={setPlace} label="Country" />
+      <RegionPicker value={place} onChange={setPlace} label="Country" currencyLabel="Local currency" />
       <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
         <span className="text-[12px] text-muted">Currently {regionLabel(regions.data, current)}. Applies to requests processed from now on.</span>
         <Button variant="primary" size="sm" disabled={!changed} loading={save.isPending} onClick={() => save.mutate()}>Save</Button>

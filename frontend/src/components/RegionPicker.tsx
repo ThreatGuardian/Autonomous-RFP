@@ -19,8 +19,8 @@ export function regionLabel(regions: Region[] | undefined, place: ClientRegion |
  * The selected region decides the quotation currency, the tax treatment and which
  * regional procurement conventions apply.
  */
-export function RegionPicker({ value, onChange, label = "Client region", compact = false }: {
-  value: ClientRegion | null; onChange: (v: ClientRegion) => void; label?: string; compact?: boolean;
+export function RegionPicker({ value, onChange, label = "Client region", compact = false, currencyLabel = "Quoted in" }: {
+  value: ClientRegion | null; onChange: (v: ClientRegion) => void; label?: string; compact?: boolean; currencyLabel?: string;
 }) {
   const regions = useRegions();
   const list = regions.data ?? [];
@@ -57,7 +57,7 @@ export function RegionPicker({ value, onChange, label = "Client region", compact
             transition={{ duration: 0.18 }} className="flex items-start gap-2.5 rounded-xl bg-[#f6f7f9] px-3.5 py-2.5 text-[12px] text-ink-soft">
             <Globe2 className="mt-0.5 size-3.5 shrink-0 text-muted" />
             <span>
-              Quoted in <span className="font-medium text-ink">{current.currency}</span> · {current.tax}
+              {currencyLabel} <span className="font-medium text-ink">{current.currency}</span> · {current.tax}
               {current.conventions.length > 0 && <span className="text-muted"> · {current.conventions.join(" · ")}</span>}
             </span>
           </motion.div>

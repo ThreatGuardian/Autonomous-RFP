@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { X } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { type ButtonHTMLAttributes, type ReactNode, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 
@@ -147,50 +147,65 @@ export function Segmented<T extends string>({ value, onChange, items }: { value:
 
 // ----------------------------------------------------------------------------- Overlays
 
-function useEscape(onClose: () => void) {
+function useEscape(open: boolean, onClose: () => void) {
   useEffect(() => {
+    if (!open) return;
     const h = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
+  }, [open, onClose]);
 }
+
+const SPRING = { type: "spring", stiffness: 380, damping: 36, mass: 0.9 } as const;
 
 export function Sheet({ open, onClose, title, subtitle, children, footer, width = 720 }: {
   open: boolean; onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; width?: number;
 }) {
-  useEscape(onClose);
-  if (!open) return null;
+  useEscape(open, onClose);
   return createPortal(
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-[#0b1220]/25 animate-fade-in" onClick={onClose} />
-      <aside style={{ width }} className="animate-slide-in absolute inset-y-0 right-0 flex max-w-full flex-col bg-white shadow-[var(--shadow-pop)]">
-        <header className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
-          <div className="min-w-0">
-            <h2 className="truncate text-[15px] font-semibold text-ink">{title}</h2>
-            {subtitle && <div className="mt-0.5 text-[12px] text-muted">{subtitle}</div>}
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-black/5 hover:text-ink" aria-label="Close"><X className="size-4" /></button>
-        </header>
-        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
-        {footer && <footer className="border-t border-line bg-[#fafbfc] px-6 py-3">{footer}</footer>}
-      </aside>
-    </div>,
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <motion.div className="absolute inset-0 bg-[#0b1220]/25 backdrop-blur-[1px]" onClick={onClose}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          <motion.aside style={{ width }} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={SPRING}
+            className="absolute inset-y-0 right-0 flex max-w-full flex-col bg-white shadow-[var(--shadow-pop)]">
+            <header className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
+              <div className="min-w-0">
+                <h2 className="truncate text-[15px] font-semibold text-ink">{title}</h2>
+                {subtitle && <div className="mt-0.5 text-[12px] text-muted">{subtitle}</div>}
+              </div>
+              <button onClick={onClose} className="rounded-md p-1 text-muted transition hover:rotate-90 hover:bg-black/5 hover:text-ink" aria-label="Close"><X className="size-4" /></button>
+            </header>
+            <motion.div className="flex-1 overflow-y-auto px-6 py-5" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.08 }}>{children}</motion.div>
+            {footer && <footer className="border-t border-line bg-[#fafbfc] px-6 py-3">{footer}</footer>}
+          </motion.aside>
+        </div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }
 
 export function Dialog({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode }) {
-  useEscape(onClose);
-  if (!open) return null;
+  useEscape(open, onClose);
   return createPortal(
-    <div className="fixed inset-0 z-50 grid place-items-center p-4">
-      <div className="absolute inset-0 bg-[#0b1220]/30 animate-fade-in" onClick={onClose} />
-      <div className="animate-fade-in relative w-full max-w-md rounded-xl bg-white shadow-[var(--shadow-pop)]">
-        <header className="border-b border-line px-5 py-3.5 text-[14px] font-semibold">{title}</header>
-        <div className="px-5 py-4">{children}</div>
-        {footer && <footer className="flex justify-end gap-2 border-t border-line bg-[#fafbfc] px-5 py-3 rounded-b-xl">{footer}</footer>}
-      </div>
-    </div>,
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
+          <motion.div className="absolute inset-0 bg-[#0b1220]/30 backdrop-blur-[1px]" onClick={onClose}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} />
+          <motion.div className="relative w-full max-w-md rounded-xl bg-white shadow-[var(--shadow-pop)]"
+            initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 4 }}
+            transition={SPRING}>
+            <header className="border-b border-line px-5 py-3.5 text-[14px] font-semibold">{title}</header>
+            <div className="px-5 py-4">{children}</div>
+            {footer && <footer className="flex justify-end gap-2 border-t border-line bg-[#fafbfc] px-5 py-3 rounded-b-xl">{footer}</footer>}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }

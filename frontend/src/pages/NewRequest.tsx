@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { FileText, UploadCloud, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Page, PageHeader } from "../components/layout/Shell";
@@ -69,7 +70,7 @@ export default function NewRequest() {
           }>
             {mode === "upload" ? (
               <>
-                <div
+                <motion.div animate={{ scale: drag ? 1.01 : 1 }} transition={{ type: "spring", stiffness: 400, damping: 28 }}
                   onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
                   onDragLeave={() => setDrag(false)}
                   onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files); }}
@@ -77,21 +78,26 @@ export default function NewRequest() {
                   className={clsx("flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-14 text-center transition-colors",
                     drag ? "border-ink/40 bg-[#f6f7f9]" : "border-line-strong hover:bg-[#fafbfc]")}
                 >
-                  <div className="grid size-11 place-items-center rounded-full bg-[#f1f2f4] text-ink-soft"><UploadCloud className="size-5" /></div>
+                  <motion.div animate={{ y: drag ? -4 : 0 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                    className="grid size-11 place-items-center rounded-full bg-[#f1f2f4] text-ink-soft"><UploadCloud className="size-5" /></motion.div>
                   <div className="mt-3 text-[14px] font-medium">Drop files here or <span className="text-link">browse</span></div>
                   <div className="mt-1 text-[12.5px] text-muted">PDF, Word (.docx) or plain text, up to 10 MB each. Several files are processed in parallel.</div>
                   <input ref={input} type="file" multiple accept={ACCEPT} className="hidden" onChange={(e) => addFiles(e.target.files)} />
-                </div>
+                </motion.div>
                 {files.length > 0 && (
-                  <ul className="mt-4 divide-y divide-line rounded-xl border border-line">
+                  <ul className="mt-4 divide-y divide-line overflow-hidden rounded-xl border border-line">
+                    <AnimatePresence initial={false}>
                     {files.map((f, i) => (
-                      <li key={i} className="flex items-center gap-3 px-4 py-2.5">
+                      <motion.li key={`${f.name}-${f.size}-${f.lastModified}`} layout initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.22 }}
+                        className="flex items-center gap-3 px-4 py-2.5">
                         <FileText className="size-4 text-muted" />
                         <span className="flex-1 truncate">{f.name}</span>
                         <span className="text-[12px] text-muted tnum">{(f.size / 1024).toFixed(0)} KB</span>
                         <button className="rounded p-1 text-muted hover:bg-black/5" onClick={() => setFiles(files.filter((_, j) => j !== i))}><X className="size-3.5" /></button>
-                      </li>
+                      </motion.li>
                     ))}
+                    </AnimatePresence>
                   </ul>
                 )}
               </>
@@ -112,12 +118,13 @@ export default function NewRequest() {
         <div className="space-y-6">
           <Card title="Sample requests" subtitle="Realistic requests for trying the workflow" bodyClassName="p-0">
             <ul className="divide-y divide-line">
-              {(samples.data ?? []).map((s) => (
-                <li key={s.filename}>
+              {(samples.data ?? []).map((s, i) => (
+                <motion.li key={s.filename} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: Math.min(i, 10) * 0.035 }}>
                   {s.kind === "file" ? (
-                    <button className="flex w-full items-start gap-3 px-5 py-3 text-left hover:bg-[#fafbfc] disabled:opacity-60" disabled={sample.isPending || !region}
+                    <button className="group flex w-full items-start gap-3 px-5 py-3 text-left transition-colors hover:bg-[#fafbfc] disabled:opacity-60" disabled={sample.isPending || !region}
                       onClick={() => { setError(null); sample.mutate(s.filename); }}>
-                      <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-md bg-accent-soft text-[9.5px] font-bold text-[#8a5a0b]">{s.format}</span>
+                      <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-md bg-accent-soft text-[9.5px] font-bold text-[#8a5a0b] transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110">{s.format}</span>
                       <span className="min-w-0">
                         <span className="line-clamp-2 text-[13px] font-medium">{s.title}</span>
                         <span className="block truncate text-[11.5px] text-muted">{s.pages} pages · full tender · processes immediately</span>
@@ -129,7 +136,7 @@ export default function NewRequest() {
                       <div className="truncate text-[11.5px] text-muted">{s.filename}</div>
                     </button>
                   )}
-                </li>
+                </motion.li>
               ))}
             </ul>
           </Card>

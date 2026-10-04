@@ -7,6 +7,7 @@ import { Badge, Button, Card, Field, Segmented, Sheet, Skeleton } from "../compo
 import { api, type ImportPreview } from "../lib/api";
 import type { Product } from "../lib/types";
 import { CATEGORY_LABEL, date, getBaseCurrency, money, pct, titleCase } from "../lib/format";
+import { MotionRow, rowMotion } from "../components/motion";
 
 export default function Catalogue() {
   const [view, setView] = useState<"products" | "services" | "tiers">("products");
@@ -45,8 +46,8 @@ export default function Catalogue() {
                 <table className="table-base">
                   <thead><tr><th>Product</th><th>Category</th><th className="!text-right">Landed cost</th><th className="!text-right">List price</th><th className="!text-right">List margin</th><th className="!text-right">Floor</th><th className="!text-right">Stock</th><th className="!text-right">Lead time</th><th /></tr></thead>
                   <tbody>
-                    {products.data?.map((p) => (
-                      <tr key={p.sku} className={clsx("hover:bg-[#fafbfc]", !p.active && "opacity-50")}>
+                    {products.data?.map((p, i) => (
+                      <MotionRow key={p.sku} {...rowMotion(i)} className={clsx("hover:bg-[#fafbfc]", !p.active && "opacity-50")}>
                         <td className="max-w-[360px]"><div className="truncate font-medium">{p.name}</div><div className="text-[11.5px] text-muted"><span className="font-mono">{p.sku}</span> · {p.mpn}{p.hsn && <> · Tax code {p.hsn}</>}</div></td>
                         <td><Badge>{CATEGORY_LABEL[p.category] ?? p.category}</Badge></td>
                         <td className="text-right tnum">{money(p.unit_cost)}</td>
@@ -56,7 +57,7 @@ export default function Catalogue() {
                         <td className={clsx("text-right tnum", p.stock_qty < 20 && p.stock_qty < 99999 && "text-amber-700")}>{p.stock_qty >= 99999 ? "Licensed" : p.stock_qty.toLocaleString()}</td>
                         <td className="text-right tnum">{p.lead_time_days} d</td>
                         <td className="text-right"><Button size="sm" variant="ghost" onClick={() => setEdit(p)}>Edit</Button></td>
-                      </tr>
+                      </MotionRow>
                     ))}
                   </tbody>
                 </table>

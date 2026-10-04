@@ -6,6 +6,7 @@ import { Badge, Card, KeyValue } from "../../components/ui";
 import { api } from "../../lib/api";
 import type { Requirement, RfpDetail } from "../../lib/types";
 import { date, titleCase } from "../../lib/format";
+import { MotionRow, rowMotion } from "../../components/motion";
 
 const TYPE_LABEL: Record<string, string> = {
   delivery: "Delivery", payment: "Commercial", warranty_support: "Warranty & support", compliance: "Compliance",
@@ -81,10 +82,10 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
         <table className="table-base">
           <thead><tr><th className="w-10">#</th><th>As requested</th><th className="!text-right">Qty</th><th>Extracted specification</th><th>Matched product</th><th className="!text-right">Confidence</th></tr></thead>
           <tbody>
-            {p.line_items.map((it) => {
+            {p.line_items.map((it, rowIndex) => {
               const match = it.candidates.find((c2) => c2.sku === it.selected_sku);
               return (
-                <tr key={it.line_no}>
+                <MotionRow {...rowMotion(rowIndex)} key={it.line_no}>
                   <td className="text-muted tnum">{it.line_no}</td>
                   <td className="max-w-[320px]"><div className="font-medium">{it.description}</div><div className="text-[11.5px] text-muted">Quantity from {it.quantity_source}</div></td>
                   <td className="text-right tnum">{it.quantity.toLocaleString()}</td>
@@ -101,7 +102,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
                   <td className="text-right">
                     <Badge tone={it.status === "matched" ? "green" : it.status === "ambiguous" ? "amber" : "red"}>{Math.round(it.match_confidence * 100)}%</Badge>
                   </td>
-                </tr>
+                </MotionRow>
               );
             })}
           </tbody>
@@ -112,10 +113,10 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
         <table className="table-base">
           <thead><tr><th className="w-12">Ref</th><th>Requirement</th><th className="w-[150px]">Type</th><th className="w-[170px]">Status</th><th>Response</th></tr></thead>
           <tbody>
-            {p.requirements.map((r) => {
+            {p.requirements.map((r, rowIndex) => {
               const row = compliance.get(r.id);
               return (
-                <tr key={r.id}>
+                <MotionRow {...rowMotion(rowIndex)} key={r.id}>
                   <td className="font-mono text-[11.5px] text-muted">{r.clause ?? r.id}{r.page && p.document?.long_form ? <div className="font-sans text-[11px] text-subtle">p. {r.page}</div> : null}</td>
                   <td className="max-w-[380px] text-ink-soft">{r.text}</td>
                   <td><TypeCell rfpId={rfp.id} r={r} /></td>
@@ -123,7 +124,7 @@ export function RequirementsTab({ rfp }: { rfp: RfpDetail }) {
                   <td className="max-w-[360px]">
                     {row ? <><div>{row.response}</div>{row.evidence[0] && <div className="mt-1 text-[11.5px] text-muted">“{row.evidence[0].text}” <span className="text-subtle">— {row.evidence[0].section}</span></div>}</> : <span className="text-muted">Background</span>}
                   </td>
-                </tr>
+                </MotionRow>
               );
             })}
           </tbody>

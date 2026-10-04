@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { motion } from "motion/react";
 import { AlertTriangle, Check, Circle, X } from "lucide-react";
 import type { RfpStatus, StageRun } from "../lib/types";
 import { duration } from "../lib/format";
@@ -50,36 +51,44 @@ export function StageTracker({ order, stages, onSelect, active }: { order: strin
   // Latest run per stage.
   const latest = new Map<string, StageRun>();
   stages.forEach((s) => latest.set(s.stage, s));
+  const done = order.filter((k) => latest.get(k)?.status === "completed").length;
   return (
-    <ol className="grid gap-0 overflow-hidden rounded-xl border border-line bg-white" style={{ gridTemplateColumns: `repeat(${order.length}, minmax(0, 1fr))` }}>
-      {order.map((key, i) => {
-        const run = latest.get(key);
-        const state = run?.status ?? "pending";
-        return (
-          <li key={key} className={clsx(i > 0 && "border-l border-line")}>
-            <button
-              disabled={!run}
-              onClick={() => onSelect?.(key)}
-              className={clsx("flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors disabled:cursor-default",
-                run && "hover:bg-[#fafbfc]", active === key && "bg-[#fafbfc]")}
-            >
-              <span className={clsx("grid size-5 shrink-0 place-items-center rounded-full",
-                state === "completed" && "bg-emerald-600 text-white", state === "failed" && "bg-rose-600 text-white",
-                state === "running" && "bg-blue-50 text-blue-700", state === "pending" && "bg-[#eef0f3] text-subtle")}>
-                {state === "completed" ? <Check className="size-3" strokeWidth={3} /> : state === "failed" ? <X className="size-3" strokeWidth={3} />
-                  : state === "running" ? <Spinner className="size-3" /> : <Circle className="size-2" />}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[12.5px] font-medium text-ink">{STAGE_LABEL[key] ?? key}</span>
-                <span className="block truncate text-[11.5px] text-muted">
-                  {state === "completed" ? duration(run?.duration_ms) : state === "running" ? "In progress" : state === "failed" ? "Failed" : "Waiting"}
+    <div className="relative overflow-hidden rounded-xl border border-line bg-white">
+      <ol className="grid gap-0" style={{ gridTemplateColumns: `repeat(${order.length}, minmax(0, 1fr))` }}>
+        {order.map((key, i) => {
+          const run = latest.get(key);
+          const state = run?.status ?? "pending";
+          return (
+            <li key={key} className={clsx(i > 0 && "border-l border-line")}>
+              <button
+                disabled={!run}
+                onClick={() => onSelect?.(key)}
+                className={clsx("flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors disabled:cursor-default",
+                  run && "hover:bg-[#fafbfc]", active === key && "bg-[#fafbfc]")}
+              >
+                <motion.span key={state} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 520, damping: 22 }}
+                  className={clsx("grid size-5 shrink-0 place-items-center rounded-full",
+                    state === "completed" && "bg-emerald-600 text-white", state === "failed" && "bg-rose-600 text-white",
+                    state === "running" && "bg-blue-50 text-blue-700", state === "pending" && "bg-[#eef0f3] text-subtle")}>
+                  {state === "completed" ? <Check className="size-3" strokeWidth={3} /> : state === "failed" ? <X className="size-3" strokeWidth={3} />
+                    : state === "running" ? <Spinner className="size-3" /> : <Circle className="size-2" />}
+                </motion.span>
+                <span className="min-w-0">
+                  <span className="block text-[12.5px] font-medium text-ink">{STAGE_LABEL[key] ?? key}</span>
+                  <span className="block truncate text-[11.5px] text-muted">
+                    {state === "completed" ? duration(run?.duration_ms) : state === "running" ? "In progress" : state === "failed" ? "Failed" : "Waiting"}
+                  </span>
                 </span>
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ol>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {/* Pipeline progress */}
+      <motion.div className="absolute bottom-0 left-0 h-[2px] bg-emerald-600/70" initial={false}
+        animate={{ width: `${(100 * done) / Math.max(order.length, 1)}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} />
+    </div>
   );
 }
 

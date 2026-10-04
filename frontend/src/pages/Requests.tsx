@@ -8,6 +8,7 @@ import { Button, Empty, Skeleton, Tabs } from "../components/ui";
 import { api } from "../lib/api";
 import type { RfpSummary } from "../lib/types";
 import { date, daysUntil, getBaseCurrency, money, pct, prob, relative } from "../lib/format";
+import { MotionRow, rowMotion } from "../components/motion";
 
 const FILTERS = [
   { value: "all", label: "All", match: () => true },
@@ -57,10 +58,10 @@ export default function Requests() {
                   <tr><th>Reference</th><th>Request</th><th>Client</th><th>Status</th><th>Due</th><th className="!text-right">Quoted value</th><th className="!text-right">Margin</th><th className="!text-right">Win</th><th>Main strategy</th><th>Updated</th></tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => {
+                  {rows.map((r, i) => {
                     const days = daysUntil(r.due_date);
                     return (
-                      <tr key={r.id} className="cursor-pointer hover:bg-[#fafbfc]" onClick={() => navigate(`/app/requests/${r.id}`)}>
+                      <MotionRow key={r.id} {...rowMotion(i)} className="cursor-pointer hover:bg-[#fafbfc]" onClick={() => navigate(`/app/requests/${r.id}`)}>
                         <td className="whitespace-nowrap font-mono text-[12px] text-ink-soft">{r.reference}</td>
                         <td className="max-w-[300px]"><div className="truncate font-medium">{r.title}</div><div className="text-[11.5px] text-muted">{r.line_count ? `${r.line_count} line items` : r.source_filename ?? "Pasted text"}</div></td>
                         <td className="max-w-[220px]"><div className="truncate">{r.client_name ?? "—"}</div><div className="mt-0.5"><CountryTag code={r.client_country} /></div></td>
@@ -71,7 +72,7 @@ export default function Requests() {
                         <td className="text-right tnum">{prob(r.win_probability)}</td>
                         <td>{r.strategy_summary ? <StrategyBadge strategy={r.strategy_summary} /> : <span className="text-muted">—</span>}</td>
                         <td className="whitespace-nowrap text-muted">{relative(r.updated_at)}</td>
-                      </tr>
+                      </MotionRow>
                     );
                   })}
                 </tbody>

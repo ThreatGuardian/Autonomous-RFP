@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Boxes, FileStack, Globe, Landmark, LayoutDashboard, LogOut, Plus, Radar, Settings2 } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { api } from "../../lib/api";
 import { initials, useAuth } from "../../lib/auth";
+import { Spinner } from "../ui";
 import { setBaseCurrency } from "../../lib/format";
 
 export function Logo({ className }: { className?: string }) {
@@ -83,7 +84,9 @@ export function Shell() {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={location.pathname.split("/").slice(0, 4).join("/")} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
-            <Outlet />
+            <Suspense fallback={<div className="grid min-h-[40vh] place-items-center"><Spinner className="size-5 text-muted" /></div>}>
+              <Outlet />
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>

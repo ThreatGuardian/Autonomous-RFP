@@ -5,7 +5,7 @@ import { StrategyBadge, WarningList } from "../../components/domain";
 import { Badge, Button, Card, Meter, Stat, StatGrid } from "../../components/ui";
 import type { RfpDetail } from "../../lib/types";
 import { money, pct, prob } from "../../lib/format";
-import { AnimatedNumber } from "../../components/motion";
+import { AnimatedNumber, MotionRow, rowMotion } from "../../components/motion";
 import { AwardCard } from "./AwardCard";
 import { LineSheet } from "./LineSheet";
 import { Workbench } from "./Workbench";
@@ -64,11 +64,11 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
               </tr>
             </thead>
             <tbody>
-              {strat.lines.map((l) => {
+              {strat.lines.map((l, rowIndex) => {
                 const best = l.market.best;
                 const belowCost = best && best.unit_price_base < l.unit_cost;
                 return (
-                  <tr key={l.line_no} onClick={() => setOpen(l.line_no)} className="group cursor-pointer hover:bg-[#fafbfc]">
+                  <MotionRow {...rowMotion(rowIndex)} key={l.line_no} onClick={() => setOpen(l.line_no)} className="group cursor-pointer hover:bg-[#fafbfc]">
                     <td className="text-muted tnum">{l.line_no}</td>
                     <td className="max-w-[300px]">
                       <div className="truncate font-medium">{l.name}</div>
@@ -96,7 +96,7 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
                       <div className="flex flex-wrap items-center gap-1"><StrategyBadge strategy={l.strategy} />{l.flags.length > 0 && <Badge tone="red">{l.flags.length} flag{l.flags.length > 1 ? "s" : ""}</Badge>}</div>
                     </td>
                     <td className="text-subtle group-hover:text-ink"><ChevronRight className="size-4" /></td>
-                  </tr>
+                  </MotionRow>
                 );
               })}
             </tbody>

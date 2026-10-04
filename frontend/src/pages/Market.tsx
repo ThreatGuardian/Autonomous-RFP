@@ -8,6 +8,7 @@ import { Page, PageHeader } from "../components/layout/Shell";
 import { Button, Card, Field, Meter, Segmented, Sheet } from "../components/ui";
 import { api } from "../lib/api";
 import { date, getBaseCurrency, money } from "../lib/format";
+import { MotionRow, rowMotion } from "../components/motion";
 
 const ADAPTER_ICON = { feed: Radio, quotes: FileSpreadsheet, awards: Award, web: Globe2 } as const;
 const ADAPTER_HINT: Record<string, string> = {
@@ -50,8 +51,8 @@ export default function Market() {
                   <thead><tr><th>Competitor</th><th className="!text-right">Unit price</th><th className="!text-right">vs our cost</th><th className="!text-right">Warranty</th><th>Source</th></tr></thead>
                   <tbody>
                     {o.offers.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-muted">No competitor price on record for this product in {country}.</td></tr>}
-                    {o.offers.map((x) => (
-                      <tr key={x.competitor}>
+                    {o.offers.map((x, i) => (
+                      <MotionRow key={x.competitor} {...rowMotion(i)}>
                         <td className="max-w-[260px]">
                           <div className="font-medium">{x.competitor}</div>
                           <div className="text-[11.5px] text-muted">
@@ -63,7 +64,7 @@ export default function Market() {
                         <td className={clsx("text-right tnum", x.vs_cost_pct < 0 ? "text-rose-700" : "text-muted")}>{x.vs_cost_pct > 0 ? "+" : ""}{x.vs_cost_pct.toFixed(1)}%</td>
                         <td className="text-right tnum">{x.warranty_months} mo</td>
                         <td className="max-w-[200px] text-[12px]"><div className="truncate">{x.source ?? "Market feed"}</div><div className="text-[11px] text-muted">{x.observed_on ? date(x.observed_on) : "today"}</div></td>
-                      </tr>
+                      </MotionRow>
                     ))}
                   </tbody>
                 </table>
@@ -164,8 +165,8 @@ function Intelligence() {
           <thead className="sticky top-0 z-10 bg-white"><tr><th>Date</th><th>Competitor</th><th>Product</th><th className="!text-right">Unit price</th><th className="!text-right">Qty</th><th>Source</th><th /></tr></thead>
           <tbody>
             {obs.data?.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-muted">No observations yet.</td></tr>}
-            {obs.data?.map((x) => (
-              <tr key={x.id} className="group">
+            {obs.data?.map((x, i) => (
+              <MotionRow key={x.id} {...rowMotion(i)} className="group">
                 <td className="whitespace-nowrap tnum text-muted">{date(x.observed_on)}</td>
                 <td className="font-medium">{x.competitor}</td>
                 <td className="max-w-[260px]"><div className="truncate">{x.product ?? x.mpn}</div><div className="font-mono text-[11px] text-muted">{x.mpn}</div></td>
@@ -173,7 +174,7 @@ function Intelligence() {
                 <td className="text-right tnum text-muted">{x.quantity}</td>
                 <td className="max-w-[220px] text-[12px]"><div className="truncate">{x.source}</div>{x.reference && <div className="truncate text-[11px] text-muted">{x.reference}</div>}</td>
                 <td className="w-8"><button aria-label="Delete" onClick={() => remove.mutate(x.id)} className="rounded p-1 text-subtle opacity-0 transition-opacity hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100"><Trash2 className="size-3.5" /></button></td>
-              </tr>
+              </MotionRow>
             ))}
           </tbody>
         </table>

@@ -7,8 +7,7 @@ import { Logo } from "../../components/layout/Shell";
 import { Spinner } from "../../components/ui";
 import { auth as apiAuth, type User } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
-import { firebaseAuth, ssoProviderId } from "../../lib/firebase";
-import { type AuthProvider, GoogleAuthProvider, OAuthProvider, SAMLAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { firebaseAuth, firebaseConfigured, ssoProviderId } from "../../lib/firebase";
 
 export function GoogleMark({ className }: { className?: string }) {
   return (
@@ -90,7 +89,7 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
   const signup = mode === "signup";
 
   const config = useQuery({ queryKey: ["auth-config"], queryFn: apiAuth.config, staleTime: Infinity });
-  const firebaseReady = Boolean(firebaseAuth && config.data?.firebase);
+  const firebaseReady = firebaseConfigured && Boolean(config.data?.firebase);
   const canSignUp = config.data?.signup ?? true;
 
   const finish = (u: User) => {
@@ -108,23 +107,25 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
 
   // Google and SSO: the browser signs in with Firebase, the server verifies the ID token
   // and opens its own session. The Firebase session itself is not kept.
-  const viaFirebase = async (provider: AuthProvider) => {
-    if (!firebaseAuth) return;
+  const viaFirebase = async (provider: "google" | "sso") => {
     setError(null);
     try {
-      const cred = await signInWithPopup(firebaseAuth, provider);
-      const token = await cred.user.getIdToken();
-      finish(await apiAuth.firebaseLogin(token));
+      const [auth, sdk] = await Promise.all([firebaseAuth(), import("firebase/auth")]);
+      const chosen = provider === "google" ? new sdk.GoogleAuthProvider()
+        : ssoProviderId!.startsWith("saml.") ? new sdk.SAMLAuthProvider(ssoProviderId!) : new sdk.OAuthProvider(ssoProviderId!);
+      try {
+        const cred = await sdk.signInWithPopup(auth, chosen);
+        finish(await apiAuth.firebaseLogin(await cred.user.getIdToken()));
+      } finally {
+        await sdk.signOut(auth).catch(() => undefined);
+      }
     } catch (e) {
       const code = (e as { code?: string }).code;
       if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") setError((e as Error).message);
-    } finally {
-      await signOut(firebaseAuth).catch(() => undefined);
     }
   };
-  const goGoogle = () => viaFirebase(new GoogleAuthProvider());
-  const goSSO = () => ssoProviderId && viaFirebase(
-    ssoProviderId.startsWith("saml.") ? new SAMLAuthProvider(ssoProviderId) : new OAuthProvider(ssoProviderId));
+  const goGoogle = () => viaFirebase("google");
+  const goSSO = () => ssoProviderId && viaFirebase("sso");
 
   if (!loading && user) return <Navigate to={next} replace />;
   const onSubmit = (e: FormEvent) => { e.preventDefault(); setError(null); submit.mutate(); };
