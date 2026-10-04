@@ -690,7 +690,9 @@ As FR-FX-* and FR-TX-*; rules are data in `tax_rules.json`.
 | Pricing review | Tool loop, effort high, history cached | `set_price` enforces floor, service funding and cap, L1 rule, reviewer locks | Engine optimum |
 | Drafting | Structured output from client-safe facts and passages | Leak check (internal terms, competitors, unknown amounts), structure | Template text |
 
-Learning is in context: reviewer clause and product corrections (most similar first), recorded bid outcomes and the
+Two providers implement the same interface: Claude (Anthropic SDK) and any OpenAI-compatible server, by default
+NVIDIA's hosted API with the open model Nemotron 3.5 Lightning (30B MoE, 3B active); validation and fallback are
+identical. Learning is in context: reviewer clause and product corrections (most similar first), recorded bid outcomes and the
 last approved letters are included in each request. Requests stream, use `fallbacks: "default"` (server-side refusal
 fallback) and raise `LLMError` on refusal, truncation, schema mismatch or API errors. `python -m app.llm.evaluate
 [--llm]` scores the parser against `evals/parser_gold.json`.
@@ -770,8 +772,9 @@ competitor figures are labelled estimates with source and date; stale FX is flag
 | `TD_COOKIE_SECURE` / `TD_ALLOW_SIGNUP` / `TD_DEMO_USER` | by environment | Cookie flag, open sign-up, demo account |
 | `TD_FIREBASE_PROJECT_ID` | empty | Firebase project whose tokens are accepted |
 | `TD_ALLOWED_ORIGINS` | localhost:5173 | Extra browser origins allowed to call the API |
-| `ANTHROPIC_API_KEY` | empty | Enables the Claude agents |
-| `TD_LLM` / `TD_LLM_MODEL` / `TD_LLM_TIMEOUT` | `auto` / `claude-opus-5-5` / 300 s | Agent mode, model, request timeout |
+| `TD_LLM_PROVIDER` | `anthropic` | `nvidia` (Nemotron 3.5 Lightning via NVIDIA's API), `anthropic` (Claude) or `openai_compatible` |
+| `NVIDIA_API_KEY` / `ANTHROPIC_API_KEY` / `TD_LLM_API_KEY` | empty | The selected provider's key; enables the model agents |
+| `TD_LLM` / `TD_LLM_MODEL` / `TD_LLM_BASE_URL` / `TD_LLM_TIMEOUT` | `auto` / per provider / per provider / 300 s | Agent mode, model, endpoint, request timeout |
 
 Keys and setup steps: `docs/SETUP.md`. `run.sh` / `run.ps1` load `.env`; the web build reads `frontend/.env.local`.
 

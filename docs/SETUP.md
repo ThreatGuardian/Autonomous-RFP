@@ -6,7 +6,7 @@ sources that need no key. Add the keys below to switch on the parts that need th
 
 | What | Needed for | Where it goes | Cost |
 |---|---|---|---|
-| **Anthropic API key** | The Claude agents (parser, pricing & competitor analysis, drafting) | `.env` → `ANTHROPIC_API_KEY` | Pay per use (see step 1.4) |
+| **NVIDIA API key** *or* **Anthropic API key** | The language-model agents (parser, pricing & competitor analysis, drafting): NVIDIA Nemotron 3.5 Lightning or Claude | `.env` → `NVIDIA_API_KEY` or `ANTHROPIC_API_KEY` | NVIDIA: free developer access with rate limits; Anthropic: pay per use |
 | **Firebase project** | "Continue with Google" and single sign-on | `.env` → `TD_FIREBASE_PROJECT_ID`, and `frontend/.env.local` | Free tier is enough |
 | **Session secret** | Signing sign-in cookies (required in production) | `.env` → `TD_SECRET_KEY` | — |
 | Market API key | Only if you run the mock market as a separate service | `.env` → `TD_MARKET_API_KEY` | — |
@@ -24,7 +24,56 @@ cp frontend/.env.example frontend/.env.local   # browser settings (Firebase)
 
 ---
 
-## 1. Anthropic API key (Claude agents)
+## 1. Choose the language model
+
+The agents work with either provider; set one in `.env`.
+
+| | NVIDIA Nemotron 3.5 Lightning (open model) | Claude (Anthropic) |
+|---|---|---|
+| `TD_LLM_PROVIDER` | `nvidia` | `anthropic` (default) |
+| Key | `NVIDIA_API_KEY` (step 1A) | `ANTHROPIC_API_KEY` (step 1B) |
+| Model | `nvidia/nemotron-3.5-lightning-30b-a3b` (30B mixture-of-experts, 3B active) | `claude-opus-5-5` |
+| Cost | Free developer access with rate limits on build.nvidia.com | Pay per use |
+| Runs on your PC? | Not on a 2 GB laptop GPU (needs ~20 GB even at 4-bit); the hosted API needs no GPU | Hosted only |
+
+The guard-rails (margin floor, catalogue-only products, leak checks) and the rule-based
+fallback are identical for both. Compare them on the reference tenders with
+`python -m app.llm.evaluate --llm` (run once per provider).
+
+## 1A. NVIDIA API key (Nemotron 3.5 Lightning)
+
+1. Go to **https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b** and sign in
+   (or create a free NVIDIA developer account).
+2. Click **Get API Key** (or **View Code → Generate API Key**) and copy the key. It starts
+   with `nvapi-` and is shown once.
+3. Put it in `.env`:
+
+   ```bash
+   TD_LLM_PROVIDER=nvidia
+   NVIDIA_API_KEY=nvapi-...
+   TD_LLM=auto
+   # Optional; these are the defaults for the nvidia provider:
+   # TD_LLM_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+   # TD_LLM_BASE_URL=https://integrate.api.nvidia.com/v1
+   ```
+
+4. Restart and check `GET /api/llm/status` →
+   `{"enabled": true, "provider": "NVIDIA", "model": "nvidia/nemotron-3.5-lightning-30b-a3b"}`.
+   Process a sample tender; the **Activity** tab shows the model's token usage per stage.
+
+How it is called: the OpenAI-compatible chat-completions API at
+`integrate.api.nvidia.com`; JSON-schema structured output for the parser and drafting
+agents, function calling for the pricing agent. Reasoning (`enable_thinking`) is on for
+medium- and high-effort steps with a capped reasoning budget, off for simple
+classification. The free tier is rate-limited, so a long tender may take longer; if a
+call is refused or times out, that agent falls back to its rules for that request.
+
+**Self-hosting later.** The same settings work with your own server: run the model with
+vLLM, SGLang or Ollama on a machine with a 24 GB+ GPU, then set
+`TD_LLM_PROVIDER=openai_compatible`, `TD_LLM_BASE_URL=http://<host>:<port>/v1`,
+`TD_LLM_MODEL=<served model name>` (and `TD_LLM_API_KEY` if your server needs one).
+
+## 1B. Anthropic API key (Claude agents)
 
 1. Go to **https://console.anthropic.com** and sign up or sign in.
 2. Open **Settings → Billing** and add a payment method or buy prepaid credits.
@@ -158,7 +207,7 @@ It is never created in production. Otherwise, create an account from the sign-up
 ## 6. Checklist
 
 - [ ] `.env` created from `.env.example`
-- [ ] `ANTHROPIC_API_KEY` set and `/api/llm/status` shows `enabled: true`
+- [ ] `TD_LLM_PROVIDER` and its key (`NVIDIA_API_KEY` or `ANTHROPIC_API_KEY`) set, and `/api/llm/status` shows `enabled: true`
 - [ ] (optional) Firebase web config in `frontend/.env.local` and `TD_FIREBASE_PROJECT_ID` in `.env`
 - [ ] (production) `TD_ENV=production`, `TD_SECRET_KEY`, `TD_MARKET_API_KEY`, HTTPS in front of the server
 - [ ] Operating region set on the **Tax & currency** page

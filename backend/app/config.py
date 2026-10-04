@@ -20,8 +20,21 @@ COMPANIES_DIR = DATA_DIR / "companies"
 COMPANY_FILES = {"company.json", "catalog.json", "customers.json", "market.json", "value_adds.json", "price_tiers.json"}
 
 
+# Default model and endpoint per language-model provider.
+LLM_DEFAULTS = {
+    "anthropic": ("claude-opus-5-5", ""),
+    "nvidia": ("nvidia/nemotron-3.5-lightning-30b-a3b", "https://integrate.api.nvidia.com/v1"),
+    "openai_compatible": ("", "http://127.0.0.1:8000/v1"),
+}
+
+
 def _env(name: str, default: str) -> str:
     return os.environ.get(f"TD_{name}", default)
+
+
+def _llm_default() -> tuple[str, str]:
+    """(model, base URL) defaults for the configured provider."""
+    return LLM_DEFAULTS.get(_env("LLM_PROVIDER", "anthropic").strip().lower(), ("", ""))
 
 
 def _flag(name: str, default: bool) -> bool:
@@ -56,7 +69,10 @@ class Settings:
     # Language-model agents (Claude). "auto" uses them when ANTHROPIC_API_KEY is set,
     # "on" requires them, "off" runs the rule-based agents only.
     llm_mode: str = field(default_factory=lambda: _env("LLM", "auto").strip().lower())
-    llm_model: str = field(default_factory=lambda: _env("LLM_MODEL", "claude-opus-5-5"))
+    # anthropic (Claude) | nvidia (NVIDIA's hosted API) | openai_compatible (vLLM, SGLang, Ollama, ...)
+    llm_provider: str = field(default_factory=lambda: _env("LLM_PROVIDER", "anthropic").strip().lower())
+    llm_model: str = field(default_factory=lambda: _env("LLM_MODEL", "") or _llm_default()[0])
+    llm_base_url: str = field(default_factory=lambda: _env("LLM_BASE_URL", "") or _llm_default()[1])
     llm_timeout_s: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT", "300")))
 
     # Authentication: session cookies signed with a per-install secret.

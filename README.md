@@ -8,9 +8,11 @@ landed cost**, it does not follow them down. It holds a compliant price and
 competes on value instead, by bundling warranty or services. Every decision
 comes with a plain-language rationale.
 
-**Agents built on Claude, held to account by code.** The parser, the pricing &
-competitor analysis agent and the drafting agent use Claude (Anthropic) through
-structured output and tool use. Everything the model proposes is checked by
+**Agents built on a language model, held to account by code.** The parser, the
+pricing & competitor analysis agent and the drafting agent use a language model
+through structured output and tool use: NVIDIA's open **Nemotron 3.5 Lightning**
+(30B mixture-of-experts, 3B active, via NVIDIA's API) or **Claude** (Anthropic),
+chosen with `TD_LLM_PROVIDER`. Everything the model proposes is checked by
 deterministic code before it is used: prices against the margin floor, products
 against the catalogue, client-facing text against leaks of internal figures.
 Under the model sit rules, classical retrieval (BM25 + LSA) and models trained in
@@ -130,7 +132,7 @@ issues the final PDF without the draft watermark.
 | Multi-currency and regional tax | `backend/app/finance/` — FX provider chain and tax engine (Indian GST split, US state sales tax with category brackets, Canadian GST/HST/PST/QST, EU/UK/Gulf/APAC VAT/GST, export zero-rating, reverse charge) |
 | Relational database for pricing data | SQLAlchemy models in `backend/app/db/models.py` (SQLite by default; any SQLAlchemy URL works) |
 | Currency conversion API | ECB rates via Frankfurter, then open.er-api.com, then a cached copy in the database, then a reference table |
-| Agentic LLM pipeline (recommended approach) | Claude via the Anthropic SDK: structured output for parsing and drafting, a tool-using loop for pricing; deterministic guard-rails and rule-based fallback |
+| Agentic LLM pipeline (recommended approach) | NVIDIA Nemotron 3.5 Lightning (OpenAI-compatible API) or Claude (Anthropic SDK): structured output for parsing and drafting, a tool-using loop for pricing; deterministic guard-rails and rule-based fallback |
 
 ## Architecture
 
@@ -195,8 +197,8 @@ Passwords are stored as PBKDF2-SHA256 hashes; repeated failed logins are
 throttled.
 
 **Keys and configuration.** Copy `.env.example` to `.env`; `run.sh` / `run.ps1`
-load it. Without any keys everything works on rules. Add `ANTHROPIC_API_KEY` to
-switch on the Claude agents. Step-by-step instructions for every key, and for a
+load it. Without any keys everything works on rules. Add `NVIDIA_API_KEY` (with
+`TD_LLM_PROVIDER=nvidia`) or `ANTHROPIC_API_KEY` to switch on the model agents. Step-by-step instructions for every key, and for a
 production deployment (`TD_ENV=production`), are in [`docs/SETUP.md`](docs/SETUP.md).
 
 ### Company data set
@@ -485,7 +487,7 @@ is running in development. The main endpoints:
 | `GET` · `POST` | `/api/rfps/{id}/outcome`, `/api/rfps/{id}/labels`, `/api/learning/status`, `/api/learning/evaluate` | Learning loop |
 | `GET` | `/api/rfps/{id}/pack` | Submission pack (ZIP) |
 | `GET` | `/api/regions` · `GET` / `PUT /api/workspace` | Selectable regions; the workspace's operating region |
-| `GET` | `/api/llm/status` | Whether the Claude agents are enabled, and the model |
+| `GET` | `/api/llm/status` | Whether the model agents are enabled, the provider and the model |
 | `GET` | `/api/models` · `POST /api/models/retrain` · `GET /api/knowledge/search` | Models and retrieval |
 | `GET` | `/market-api/v1/...` | The mock market service (requires `X-Api-Key`) |
 

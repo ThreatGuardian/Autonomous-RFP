@@ -312,3 +312,129 @@ def test_drafting_agent_uses_safe_model_text_and_rejects_unsafe_text(use_llm):
     proposal = ProposalDraftingAgent().run(ctx, log)
     assert proposal.cover_letter != leaky["cover_letter"]
     assert any("client-safety check" in e["message"] for e in log.entries)
+
+
+# --------------------------------------------------------------------------- OpenAI-compatible provider (NVIDIA Nemotron)
+
+
+class ScriptedChat:
+    """Stands in for ``openai.OpenAI``: ``chat.completions.create`` answers with ``respond(kwargs, n)``."""
+
+    def __init__(self, respond):
+        self.respond = respond
+        self.requests = []
+        self.chat = SimpleNamespace(completions=self)
+
+    def create(self, **kwargs):
+        self.requests.append(kwargs)
+        return self.respond(kwargs, len(self.requests))
+
+
+def _completion(content="", tool_calls=None, finish="stop"):
+    message = SimpleNamespace(content=content, tool_calls=tool_calls)
+    return SimpleNamespace(choices=[SimpleNamespace(message=message, finish_reason=finish)],
+                           usage=SimpleNamespace(prompt_tokens=20, completion_tokens=7))
+
+
+def _fn_call(id_, name, arguments):
+    return SimpleNamespace(id=id_, function=SimpleNamespace(name=name, arguments=arguments))
+
+
+@pytest.fixture
+def nvidia(monkeypatch):
+    monkeypatch.setenv("TD_LLM_PROVIDER", "nvidia")
+    from app.config import get_settings
+
+    get_settings.cache_clear()
+    yield
+    monkeypatch.delenv("TD_LLM_PROVIDER")
+    get_settings.cache_clear()
+
+
+def scripted_nvidia(respond):
+    from app.llm.client import OpenAICompatibleLLM
+
+    chat = ScriptedChat(respond)
+    return OpenAICompatibleLLM(client=chat), chat
+
+
+def test_nvidia_provider_defaults_and_key(nvidia, monkeypatch):
+    from app.config import get_settings
+
+    s = get_settings()
+    assert s.llm_model == "nvidia/nemotron-3.5-lightning-30b-a3b" and s.llm_base_url == "https://integrate.api.nvidia.com/v1"
+    monkeypatch.setenv("TD_LLM", "auto")
+    get_settings.cache_clear()
+    monkeypatch.delenv("NVIDIA_API_KEY", raising=False)
+    assert llm_client.llm_enabled() is False
+    monkeypatch.setenv("NVIDIA_API_KEY", "nvapi-test")
+    assert llm_client.llm_enabled() is True
+    assert llm_client.status()["provider"] == "NVIDIA"
+    assert type(llm_client._default_factory()).__name__ == "OpenAICompatibleLLM"
+
+
+def test_nvidia_structured_answers_strip_reasoning_and_set_the_schema(nvidia):
+    answer = "<think>The payment clause mentions days.</think>```json\n" + json.dumps({"labels": [{"id": "R01", "type": "payment"}]}) + "\n```"
+    llm, chat = scripted_nvidia(lambda kw, n: _completion(answer))
+    from app.llm.parser import classify
+
+    assert classify(llm, [("R01", "Payment within 30 days of invoice.")], ["payment", "scope"]) == {"R01": "payment"}
+    req = chat.requests[0]
+    assert req["model"] == "nvidia/nemotron-3.5-lightning-30b-a3b" and req["messages"][0]["role"] == "system"
+    assert req["response_format"]["type"] == "json_schema" and req["response_format"]["json_schema"]["strict"] is True
+    assert req["extra_body"]["chat_template_kwargs"] == {"enable_thinking": False}  # low effort: no reasoning trace
+    assert llm.usage.input_tokens == 20 and llm.usage.output_tokens == 7
+
+    llm, chat = scripted_nvidia(lambda kw, n: _completion(json.dumps({"salutation": "Dear Team,", "cover_letter": ["a", "b"],
+                                                                     "executive_summary": ["c"], "highlights": []})))
+    llm.structured(system="s", user="u", schema=Drafted, effort="medium")
+    assert chat.requests[0]["extra_body"] == {"chat_template_kwargs": {"enable_thinking": True}, "reasoning_budget": 4096}
+
+
+def test_nvidia_truncation_is_an_error(nvidia):
+    llm, _ = scripted_nvidia(lambda kw, n: _completion("{", finish="length"))
+    with pytest.raises(LLMError, match="cut off"):
+        llm.structured(system="s", user="u", schema=Drafted)
+
+
+def test_nvidia_tool_loop_reports_bad_arguments_and_finishes(nvidia):
+    from pydantic import BaseModel
+
+    class In(BaseModel):
+        value: int
+
+    def respond(kw, n):
+        if n == 1:
+            return _completion(tool_calls=[_fn_call("a", "double", "{not json"), _fn_call("b", "double", '{"value": 4}')],
+                               finish="tool_calls")
+        tool_msgs = [m for m in kw["messages"] if m["role"] == "tool"]
+        assert tool_msgs[0]["content"].startswith("Error:") and tool_msgs[1]["content"] == "8"
+        assert kw["messages"][2]["tool_calls"][0]["function"]["name"] == "double"
+        return _completion("<think>done thinking</think>All lines doubled.")
+
+    llm, chat = scripted_nvidia(respond)
+    run = llm.run_tools(system="s", user="u", tools=[llm_client.Tool("double", "doubles", In, lambda a: a.value * 2)])
+    assert run.text == "All lines doubled." and [c.ok for c in run.calls] == [False, True]
+    assert chat.requests[0]["tools"][0]["function"]["parameters"]["additionalProperties"] is False
+    assert chat.requests[0]["tool_choice"] == "auto"
+
+
+def test_pricing_agent_runs_on_the_nvidia_provider(nvidia, use_llm):
+    ctx = _context()
+    for agent in (RfpParserAgent(), InternalPricingAgent()):
+        ctx.messages[agent.produces] = agent.run(ctx, StageLog())
+    line = ctx.messages["costing"].lines[0]
+    target = round(line.floor_price + 2, 2)
+
+    def respond(kw, n):
+        if n == 1:
+            return _completion(tool_calls=[_fn_call("x", "set_price", json.dumps(
+                {"line_no": 1, "unit_price": target, "bundle_code": None, "rationale": "Hold above the floor."}))],
+                finish="tool_calls")
+        return _completion("Line 1 held just above the floor.")
+
+    llm, _ = scripted_nvidia(respond)
+    use_llm(llm)
+    strat = CompetitiveStrategyAgent().run(ctx, StageLog())
+    first = next(p for p in strat.lines if p.line_no == 1)
+    assert first.unit_price == target and strat.agent_summary == "Line 1 held just above the floor."

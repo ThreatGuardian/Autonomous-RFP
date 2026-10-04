@@ -528,6 +528,15 @@ model proposes, deterministic code validates, the rules remain the fallback.**
   raises `LLMError`; the calling agent logs it and uses its rules.
 * `TD_LLM=auto|on|off`, `TD_LLM_MODEL` (default `claude-opus-5-5`); tests replace
   the client with a scripted one (`set_llm_factory`).
+* **Second provider:** `OpenAICompatibleLLM` implements the same two methods over the
+  chat-completions interface — NVIDIA's hosted API with Nemotron 3.5 Lightning
+  (`TD_LLM_PROVIDER=nvidia`, key `NVIDIA_API_KEY`) or a self-hosted vLLM/SGLang/Ollama
+  server (`openai_compatible`). Structured answers use `response_format` with the same
+  strict JSON schema (a `<think>` trace or code fence around the JSON is removed before
+  validation); tools use function calling with `tool` result messages; reasoning is
+  switched on through the chat template (`enable_thinking`) for medium and high effort,
+  with a reasoning budget on NVIDIA's API. Length cut-offs and content filters raise
+  `LLMError` like Anthropic refusals.
 
 ### 14.2 Parser (`parser.py`)
 
