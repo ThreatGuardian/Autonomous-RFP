@@ -42,7 +42,7 @@ def write(llm: LLM, facts: dict[str, Any], passages: list[str], house_style: lis
     lines = [f"- {k.replace('_', ' ')}: {v}" for k, v in facts.items() if v not in (None, "", [], {})]
     kb = "\n".join(f"[{i + 1}] {p}" for i, p in enumerate(passages)) or "(none)"
     style = "\n\n".join("\n".join(letter) for letter in house_style) or "(none yet)"
-    user = (f"Facts of this quotation:\n" + "\n".join(lines) + f"\n\nKnowledge-base passages:\n{kb}"
+    user = ("Facts of this quotation:\n" + "\n".join(lines) + f"\n\nKnowledge-base passages:\n{kb}"
             f"\n\nApproved letters for tone (do not copy their facts):\n{style}")
     return llm.structured(system=SYSTEM, user=user, schema=Drafted, effort="medium")
 

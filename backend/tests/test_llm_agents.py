@@ -157,6 +157,7 @@ def test_tool_loop_returns_errors_to_the_model_and_finishes():
     run = llm.run_tools(system="s", user="u", tools=[llm_client.Tool("double", "doubles", In, lambda a: a.value * 2)])
     assert run.text == "done" and run.turns == 2 and [c.ok for c in run.calls] == [False, True]
     assert client.requests[0]["tools"][0]["strict"] is True
+    assert client.requests[1]["cache_control"] == {"type": "ephemeral"}  # the growing history is cached
 
 
 # --------------------------------------------------------------------------- parser

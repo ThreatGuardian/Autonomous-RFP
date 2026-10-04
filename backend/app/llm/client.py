@@ -150,7 +150,8 @@ class LLM:
     # ------------------------------------------------------------------ transport
 
     def _call(self, *, system: str, messages: list[dict[str, Any]], effort: str, max_tokens: int,
-              tools: list[dict[str, Any]] | None = None, output_format: dict[str, Any] | None = None) -> Any:
+              tools: list[dict[str, Any]] | None = None, output_format: dict[str, Any] | None = None,
+              cache_history: bool = False) -> Any:
         import anthropic
 
         output_config: dict[str, Any] = {"effort": effort}
@@ -164,6 +165,9 @@ class LLM:
         }
         if tools:
             kwargs["tools"] = tools
+        if cache_history:
+            # Agent loops resend the conversation each turn; caching it bills the repeat at the cache-read rate.
+            kwargs["cache_control"] = {"type": "ephemeral"}
         try:
             with self.client.beta.messages.stream(**kwargs) as stream:
                 message = stream.get_final_message()
@@ -211,7 +215,8 @@ class LLM:
         messages: list[dict[str, Any]] = [{"role": "user", "content": user}]
         run = AgentRun(text="")
         for turn in range(1, max_turns + 1):
-            message = self._call(system=system, messages=messages, effort=effort, max_tokens=max_tokens, tools=definitions)
+            message = self._call(system=system, messages=messages, effort=effort, max_tokens=max_tokens, tools=definitions,
+                                 cache_history=True)
             run.turns = turn
             # The whole assistant turn goes back unchanged (thinking blocks included).
             messages.append({"role": "assistant", "content": message.content})

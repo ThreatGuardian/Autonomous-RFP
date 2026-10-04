@@ -8,9 +8,18 @@ landed cost**, it does not follow them down. It holds a compliant price and
 competes on value instead, by bundling warranty or services. Every decision
 comes with a plain-language rationale.
 
-**No large language model is used anywhere.** Parsing, matching, pricing and
-writing all use explicit rules, classical information retrieval, and models
-trained in this repository with scikit-learn.
+**Agents built on Claude, held to account by code.** The parser, the pricing &
+competitor analysis agent and the drafting agent use Claude (Anthropic) through
+structured output and tool use. Everything the model proposes is checked by
+deterministic code before it is used: prices against the margin floor, products
+against the catalogue, client-facing text against leaks of internal figures.
+Under the model sit rules, classical retrieval (BM25 + LSA) and models trained in
+this repository with scikit-learn; without an API key the agents run on those
+alone. See [`docs/SETUP.md`](docs/SETUP.md) for the keys.
+
+**Any region.** The user selects the client's region for every request (and the
+company's operating region once); currency, VAT / GST / sales tax and regional
+procurement rules follow from that choice.
 
 ![Landing page](docs/screenshots/00-landing.png)
 
@@ -64,13 +73,13 @@ The generated documents are in [`docs/trial/`](docs/trial/).
 
 | Step | Stage (agent) | Result |
 |------|---------------|--------|
-| 1 | **RFP Parser Agent** | Extracts the client, contact, delivery location, currency, deadlines, commercial terms, every requested item with its specification, and every requirement clause. Matches each item to a catalogue SKU. |
+| 1 | **RFP Parser Agent** | Extracts the client, contact, delivery location, currency, deadlines, commercial terms, every requested item with its specification, and every requirement clause. Matches each item to a catalogue SKU. With Claude enabled, the model reads the whole document too; its reading is reconciled with the rules, and it chooses products from the retrieved candidates. |
 | 2 | **Internal Pricing Agent** | Reads landed cost, list price, margin floor, volume tier, stock, lead time and eligible bundle services from the internal pricing database. A warranty the tender mandates is priced into the line rather than given away. |
 | 3 | **Tender Compliance Agent** | For long tenders: checks every eligibility criterion against the company profile, every specification row against the offered product, and every commercial and contractual clause against policy. Produces a clause-by-clause compliance matrix, risk flags, a bid-documents checklist and a **bid / no-bid recommendation**. |
-| 4 | **Competitive Strategy Agent** | Queries the competitor market API and normalises offers to rupees. Picks the price and bundle that maximise expected profit within policy, and applies the value-differentiation pivot when a competitor is below cost. |
+| 4 | **Pricing & Competitor Analysis Agent** (competitive strategy) | Queries the competitor market API and normalises offers to the catalogue currency. Picks the price and bundle that maximise expected profit within policy, and applies the value-differentiation pivot when a competitor is below cost. With Claude enabled, the model then reviews every line through tools and may move prices within the guard-rails the tools enforce. |
 | 5 | **Currency & Tax Agent** | Converts to the client's currency (live FX with fallbacks and a hedging buffer) and applies jurisdiction tax: GST/IGST, destination VAT/GST/sales tax, export zero-rating and reverse charge. |
 | | *Award analysis* | Inside the strategy stage: the whole bid is placed against estimated rival totals under the tender's award rule — L1 (with the MSE 15% / 25% purchase preference), QCBS combined score, reverse-auction floor. Under L1, free bundles earn no evaluation credit and are not offered. |
-| 6 | **Proposal Drafting Agent** | Writes the proposal from retrieved knowledge-base evidence: cover letter, executive summary, compliance matrix, delivery plan and terms. Renders a **client quotation**, a **compliance statement**, a **bid report** and a **confidential pricing memo** as PDFs. |
+| 6 | **Proposal Drafting Agent** | Writes the proposal from retrieved knowledge-base evidence: cover letter, executive summary, compliance matrix, delivery plan and terms (with Claude enabled, the letter and summary are written by the model and checked for leaks). Renders a ready-to-send **client quotation**, a **compliance statement**, a **bid report** and a **confidential pricing memo** as PDFs. |
 
 ### Long tenders (10–15 pages)
 
@@ -114,13 +123,14 @@ issues the final PDF without the draft watermark.
 
 | Required deliverable | Where it lives |
 |----------------------|----------------|
-| Multi-agent framework with separated roles | `backend/app/agents/` — five agents behind one `Agent` contract, communicating only through typed messages (`messages.py`), coordinated by `orchestrator.py` |
+| Multi-agent framework with separated roles | `backend/app/agents/` — six agents behind one `Agent` contract, communicating only through typed messages (`messages.py`), coordinated by `orchestrator.py`; the parser, pricing & competitor analysis and drafting agents use Claude through `backend/app/llm/` |
 | Mocked competitor database/API queried dynamically | `backend/app/market/service.py` — a separate FastAPI service (API-key auth, own data) queried over HTTP by `services/market_client.py`. Prices drift daily and include below-cost promotions |
-| Professional PDF quotation with line items and margins | `backend/app/services/pdf_renderer.py` — client quotation (schedule, taxes, totals, inclusions, compliance, delivery plan, terms, acceptance) and internal memo (cost, floor, margin, win probability, scenarios, rationale) |
+| Professional PDF quotation with line items and margins | `backend/app/services/pdf_renderer.py` — ready-to-send client quotation (letterhead, itemised schedule, taxes, totals in figures and words, terms, bank details, signatory) and internal memo (cost, floor, margin, win probability, scenarios, rationale) |
 | Approval UI showing pricing logic and strategy reasoning | `frontend/src/pages/request/` — pricing table, line sheet with numbered rationale, price-position scale, win/profit curve, alternatives, competitor offers, overrides, approve/decline |
 | Multi-currency and regional tax | `backend/app/finance/` — FX provider chain and tax engine (Indian GST split, US state sales tax with category brackets, Canadian GST/HST/PST/QST, EU/UK/Gulf/APAC VAT/GST, export zero-rating, reverse charge) |
 | Relational database for pricing data | SQLAlchemy models in `backend/app/db/models.py` (SQLite by default; any SQLAlchemy URL works) |
 | Currency conversion API | ECB rates via Frankfurter, then open.er-api.com, then a cached copy in the database, then a reference table |
+| Agentic LLM pipeline (recommended approach) | Claude via the Anthropic SDK: structured output for parsing and drafting, a tool-using loop for pricing; deterministic guard-rails and rule-based fallback |
 
 ## Architecture
 
@@ -130,7 +140,7 @@ flowchart LR
     API --> ORCH[Orchestrator<br/>worker pool]
     ORCH --> P[RFP Parser Agent]
     P --> C[Internal Pricing Agent]
-    C --> S[Competitive Strategy Agent]
+    C --> S[Pricing & Competitor<br/>Analysis Agent]
     S --> L[Currency & Tax Agent]
     L --> D[Proposal Drafting Agent]
     P -.-> ML1[(Clause classifier<br/>Category classifier)]
@@ -138,6 +148,9 @@ flowchart LR
     C -.-> DB[(Pricing database)]
     S -->|HTTP| MKT[Market API<br/>mock service]
     S -.-> ML2[(Win-probability model)]
+    P -.-> LLM{{Claude}}
+    S -.->|tools| LLM
+    D -.-> LLM
     L -.-> FX[FX providers]
     D -.-> KB[(Knowledge base index)]
     D --> PDF[Quotation PDF<br/>Pricing memo PDF]
@@ -169,17 +182,22 @@ Then open **http://127.0.0.1:8000**. On first start the database is seeded and
 the models are trained. This takes about ten seconds and happens once.
 
 The product website opens first; **Sign in** or **Get started** leads to the
-console at `/app`. Three sign-in methods are available:
+console at `/app`. Sign-in methods:
 
-* **Username and password.** Use the demo workspace (`priya` / `tenderdesk`) or
-  create an account.
-* **Continue with Google** and **Continue with SSO.** Federated sign-in; the
-  provider step is simulated locally and would be replaced by Google OAuth /
-  OpenID Connect or a SAML identity provider in production (see
-  `backend/app/api/auth.py`).
+* **Username and password.** Create an account on the sign-up page (or set
+  `TD_DEMO_USER=1` for the demo account `priya` / `tenderdesk`).
+* **Continue with Google / SSO** when a Firebase project is configured
+  ([`docs/SETUP.md`](docs/SETUP.md)). The server verifies the Firebase ID token's
+  signature, audience, issuer and expiry against Google's keys.
 
-Sessions are HMAC-signed, HTTP-only cookies. Passwords are stored as
-PBKDF2-SHA256 hashes.
+Sessions are HMAC-signed, HTTP-only cookies (secure-only in production).
+Passwords are stored as PBKDF2-SHA256 hashes; repeated failed logins are
+throttled.
+
+**Keys and configuration.** Copy `.env.example` to `.env`; `run.sh` / `run.ps1`
+load it. Without any keys everything works on rules. Add `ANTHROPIC_API_KEY` to
+switch on the Claude agents. Step-by-step instructions for every key, and for a
+production deployment (`TD_ENV=production`), are in [`docs/SETUP.md`](docs/SETUP.md).
 
 ### Company data set
 
@@ -217,11 +235,13 @@ Configuration options are listed in [`.env.example`](.env.example).
 
 ## Using the application
 
-1. **New request** — drag in PDF, DOCX or TXT files (several at once are
-   processed in parallel), or paste text. Seven sample requests are included in
-   [`samples/`](samples/), covering domestic India (intra- and inter-state), UAE,
-   United States, Germany, United Kingdom (PDF) and Singapore (DOCX). The text
-   samples can also be loaded from the New request page.
+1. **New request** — choose the **client region** (country, and state or
+   province where tax depends on it), then drag in PDF, DOCX or TXT files
+   (several at once are processed in parallel), or paste text. The region sets
+   the quotation currency and tax treatment and can be changed later on the
+   request. Sample requests are included in [`samples/`](samples/), covering
+   India (intra- and inter-state), UAE, United States, Germany, United Kingdom
+   (PDF) and Singapore (DOCX).
 2. **Request → Pricing** — the **award position** comes first: estimated
    whole-bid totals of the main rivals against ours and our margin floor, the
    total needed to become L1 (with one click to apply it), the MSE
@@ -249,9 +269,13 @@ Configuration options are listed in [`.env.example`](.env.example).
    27001 certification in risks”, “refresh the pricing decisions”, “undo”.
    Export to **PDF** or an editable **Word** document at any time; the edited
    report also replaces the generated one under *Documents*.
-6. **Quotation** — commercial schedule in the client's currency with taxes, cover
-   letter, delivery plan, inclusions and an embedded PDF preview. You can change
-   the quote currency or FX buffer here.
+6. **Quotation** — the client quotation is a ready-to-send commercial
+   document: letterhead, quotation number and validity, the buyer and their
+   reference, an itemised schedule (make, model, tax code, warranty, unit price,
+   tax, amount), totals with the tax breakdown and the amount in words, numbered
+   terms and conditions, bank details and the authorised signatory. It carries a
+   DRAFT watermark until approved. You can change the quote currency or FX
+   buffer here.
 7. **Adjustment workbench** (Pricing → *Adjust quotation*) — one panel for
    every manual change, with a live revenue, margin and below-floor preview:
    * **Line items:** inline price, quantity and service editing; include or
@@ -272,10 +296,17 @@ Configuration options are listed in [`.env.example`](.env.example).
 10. **Record outcome** — won, lost (with the winning price and winner) or
     cancelled. Outcomes are added to the deal ledger and the win-probability
     model retrains on them.
-11. **Teach the classifier** — in *Requirements*, correct any clause's type; the
-    sentence becomes a training label and the clause model retrains after a few
-    corrections. Swapping a line's product for another category teaches the
-    category model the same way.
+11. **Teach the agents** — in *Requirements*, correct any clause's type; the
+    sentence becomes a label. Swapping a line's product does the same for
+    products. The trained classifiers retrain after a few corrections, and the
+    Claude agents receive the corrections (and recorded outcomes and approved
+    letters) as examples on every new request.
+
+**Operating region** (*Tax & currency*): where your company is registered.
+Sales inside it are domestic supplies (the country's VAT, GST or sales tax; in
+India the CGST + SGST / IGST split); others are exports. India's MSE purchase
+preference, MSMED Act payment limit and EMD exemption apply only when both the
+company and the buyer are in India.
 
 **Company data** (*Catalogue → Import*): upload a CSV or Excel sheet, or a Tally
 stock-item XML export. Columns are recognised by name ("Item Name", "Stock
@@ -320,7 +351,21 @@ Every request produces these PDFs (under *Documents* in the request header):
 A condensed version follows. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) has
 the full detail and formulas.
 
-**Language processing (no LLM).** A deterministic analyser handles accent
+**Claude agents.** The RFP Parser reads the whole tender with Claude (structured
+output) and its item list is reconciled with the rule-based reading — every
+disagreement is shown to the reviewer; it types the requirement sentences using
+reviewers' past corrections and picks each product from the catalogue candidates
+that retrieval found (only listed SKUs are accepted). The Pricing & Competitor
+Analysis Agent reviews the engine's prices through tools — line economics,
+competitor offers, a price evaluator backed by the trained win-probability model,
+bid history and `set_price` — and the tools reject any price below the margin
+floor or against policy. The Drafting Agent writes the covering letter from
+client-safe facts and retrieved passages; text that mentions costs, margins,
+competitors or amounts not in the quotation is discarded. Requests stream, use
+server-side refusal fallback and fall back to the rules on any error.
+`python -m app.llm.evaluate [--llm]` scores the parser against reference tenders.
+
+**Language processing (rules).** A deterministic analyser handles accent
 folding, unit-aware tokenisation (`16GB` → `16 gb`), compound splitting
 (`ISO/IEC` → `iso`, `iec`), light stemming and English number words
 ("twenty-five", "a dozen", "2 lakh"). Header fields, addresses and headings are
@@ -341,7 +386,7 @@ their states and cities.
   coefficients recover the market's true behaviour. For example, bundling
   multiplies the odds of winning by ≈1.75.
 
-**Retrieval-augmented generation without an LLM.** A hybrid index fuses Okapi
+**Retrieval (the "R" in RAG).** A hybrid index fuses Okapi
 BM25, latent semantic vectors (TF-IDF + truncated SVD) and character n-grams
 into an absolute relevance score, with MMR for diversity. It is used twice:
 
@@ -388,6 +433,8 @@ backend/
     imports/       spreadsheet and Tally readers, catalogue import with preview
     intel/         competitor intelligence adapters and the per-bid market view
     learning/      reviewer labels, bid outcomes, real-data evaluation
+    llm/           Claude client, parser / pricing / drafting agent steps, memory
+                   of corrections and outcomes, parser evaluation
     pack/          submission pack builder
     finance/       currency provider chain, tax engine, money formatting
     market/        mock competitor market API (separate FastAPI app)
@@ -395,29 +442,31 @@ backend/
     nlp/           analyser, gazetteer, extractors, line-item extraction,
                    layout analysis, section tree, tender facts and eligibility
     pricing/       strategy engine, whole-bid award analysis, mandated-warranty rules
+    regions.py     selectable regions, operating region, regional conventions
     report/        editable report model, editing assistant, PDF/Word export
     rag/           hybrid index, knowledge and catalogue stores
     services/      document ingestion, market client, PDF renderers (quotation,
                    memo, bid report, compliance statement)
     assets/fonts/  Inter (OFL) for PDFs
-  tests/           unit, agent, API and end-to-end tests
+  tests/           unit, agent, API, security and end-to-end tests
+  evals/           reference answers for the parser evaluation
 frontend/          React + TypeScript + Tailwind review console
 samples/           seven short requests (TXT, PDF, DOCX) and three full tenders,
                    including the DES Pune University RFP
 scripts/           sample, tender and Data Care Corp data generators
-docs/              roadmap, architecture notes, screenshots
+docs/              setup (keys), SRS, roadmap, architecture notes, screenshots
 ```
 
 ## API
 
 Interactive documentation is served at **/docs** (Swagger UI) while the server
-is running. The main endpoints:
+is running in development. The main endpoints:
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `POST` | `/api/auth/login` · `register` · `federated` · `logout`, `GET /api/auth/me` | Sign-in and session |
-| `POST` | `/api/rfps` | Submit pasted text |
-| `POST` | `/api/rfps/upload` | Submit one or more PDF/DOCX/TXT files (originals are kept) |
+| `POST` | `/api/auth/login` · `register` · `firebase` · `logout`, `GET /api/auth/me` · `config` | Sign-in and session |
+| `POST` | `/api/rfps` | Submit pasted text with the selected `client_region` |
+| `POST` | `/api/rfps/upload` | Submit one or more PDF/DOCX/TXT files with `country` / `region` (originals are kept) |
 | `GET` · `POST` | `/api/rfps/samples`, `/api/rfps/samples/{file}` | List sample requests; process a sample tender file |
 | `GET` | `/api/rfps`, `/api/rfps/{id}` | List, and full detail (parsed data, pricing, proposal, stage logs, events) |
 | `POST` | `/api/rfps/{id}/reprice` | Apply reviewer overrides (line prices, services, quantities, products, exclusions, added items, client and terms corrections, currency) and re-run from costing |
@@ -435,6 +484,8 @@ is running. The main endpoints:
 | `GET` · `POST` | `/api/market/sources`, `/api/market/observations` (`/upload`, `/web`) | Competitor intelligence sources and observations |
 | `GET` · `POST` | `/api/rfps/{id}/outcome`, `/api/rfps/{id}/labels`, `/api/learning/status`, `/api/learning/evaluate` | Learning loop |
 | `GET` | `/api/rfps/{id}/pack` | Submission pack (ZIP) |
+| `GET` | `/api/regions` · `GET` / `PUT /api/workspace` | Selectable regions; the workspace's operating region |
+| `GET` | `/api/llm/status` | Whether the Claude agents are enabled, and the model |
 | `GET` | `/api/models` · `POST /api/models/retrain` · `GET /api/knowledge/search` | Models and retrieval |
 | `GET` | `/market-api/v1/...` | The mock market service (requires `X-Api-Key`) |
 
@@ -442,7 +493,8 @@ is running. The main endpoints:
 
 ```bash
 cd backend
-python -m pytest            # 77 tests: language core, parser, long tenders, compliance, award analysis, report editing, finance, pricing, drafting, API workflow, sign-in, reviewer edits, data import, competitor intelligence, learning loop, submission pack, and the Data Care Corp × DES Pune University trial
+python -m pytest            # 100 tests: language core, parser, long tenders, compliance, award analysis, report editing, finance, regions, pricing, drafting, API workflow, sign-in and security, reviewer edits, data import, competitor intelligence, learning loop, submission pack, the Claude agent steps (with a scripted client) and the Data Care Corp × DES Pune University trial
+python -m app.llm.evaluate  # parser against reference tenders (add --llm to include Claude; paid API calls)
 cd ../frontend
 npm run typecheck
 ```

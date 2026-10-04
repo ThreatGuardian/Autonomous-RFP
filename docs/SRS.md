@@ -3,7 +3,7 @@
 **Product:** Tenderdesk — Autonomous RFP Response & Competitive Quotation
 **Document type:** Software Requirements Specification (structured after IEEE 29148 / IEEE 830)
 **Repository:** `threatguardian/autonomous-rfp`
-**Status:** Describes the system as built (phases 0–15 complete, 77 automated tests passing)
+**Status:** Describes the system as built (phases 0–20 complete, 100 automated tests passing)
 
 ---
 
@@ -70,7 +70,8 @@ Doing this by hand takes days and is error-prone. Tenderdesk does it in seconds 
 
 **In scope**
 
-* Ingesting RFPs as pasted text, TXT, PDF (text layer, optional OCR) and DOCX.
+* Ingesting RFPs as pasted text, TXT, PDF (text layer, optional OCR) and DOCX, with the client region selected by the user.
+* Language-model agents (Claude) for parsing, pricing & competitor analysis and drafting, with deterministic guard-rails and a rule-based fallback.
 * Layout-aware parsing of long tenders (section tree, tables, key dates, eligibility, evaluation method).
 * Catalogue matching by hybrid retrieval and specification fit.
 * Cost lookup, margin floors, volume tiers, stock, lead times, warranty and bundle services.
@@ -79,8 +80,8 @@ Doing this by hand takes days and is error-prone. Tenderdesk does it in seconds 
 * Expected-profit price optimisation using a trained win-probability model, with a "value
   differentiation" pivot when a competitor is below the supplier's landed cost.
 * Whole-bid award analysis (L1, QCBS, MSE purchase preference, reverse-auction floor).
-* Currency conversion and jurisdictional tax (Indian GST, export zero-rating, reverse charge, foreign
-  VAT/sales tax).
+* Currency conversion and jurisdictional tax for a user-selected region (VAT, GST, US sales tax, Canadian
+  GST/HST/PST/QST, Indian CGST/SGST/IGST, export zero-rating, reverse charge).
 * Compliance analysis and bid/no-bid recommendation.
 * Document generation: client quotation, internal pricing memo, bid analysis report (editable), compliance
   statement, technical proposal, OEM authorisation request letters, submission index, ZIP pack.
@@ -91,7 +92,7 @@ Doing this by hand takes days and is error-prone. Tenderdesk does it in seconds 
 
 **Out of scope**
 
-* Any large language model or hosted generative AI. This is a hard design rule (see 2.5).
+* Fine-tuning language models. The agents learn from corrections in context (see 6.11), not by retraining Claude.
 * Electronic submission to a government procurement portal, digital signatures, e-stamping.
 * Live scraping of competitor websites. Web observations come only from pages a user saves and pastes.
 * Order management, invoicing, inventory management and accounting after the bid.
@@ -156,12 +157,13 @@ Browser (React)  ──REST/JSON──▶  FastAPI app ──▶ Orchestrator (t
                                       │              ├─ RFP Parser Agent        (stage "intake")
                                       │              ├─ Internal Pricing Agent  (stage "costing")
                                       │              ├─ Tender Compliance Agent (stage "compliance")
-                                      │              ├─ Competitive Strategy Agent (stage "strategy") ──HTTP──▶ Market API
+                                      │              ├─ Pricing & Competitor Analysis Agent (stage "strategy") ──HTTP──▶ Market API
                                       │              ├─ Currency & Tax Agent    (stage "localisation") ──▶ FX providers
                                       │              └─ Proposal Drafting Agent (stage "drafting")
                                       ├─ SQLite / SQLAlchemy  (catalogue, rfps, history, observations, labels)
                                       ├─ Model files (joblib)  var/<company>/models
-                                      └─ Document files        var/<company>/documents/<reference>/
+                                      ├─ Document files        var/<company>/documents/<reference>/
+                                      └─ Anthropic Messages API (Claude) — parser, pricing and drafting agents, when a key is set
 ```
 
 ### 2.2 The processing pipeline (central concept)
@@ -175,7 +177,7 @@ exactly one message.
 | 1 | `intake` | RFP Parser Agent | raw text, source file | `parsed` | Structure the document; extract entities, items, requirements; match items to SKUs |
 | 2 | `costing` | Internal Pricing Agent | `parsed` | `costing` | Cost, floor, tier discount, stock, lead time, warranty, bundle options per line |
 | 3 | `compliance` | Tender Compliance Agent | `parsed`, `costing` | `compliance` | Eligibility, clause matrix, risks, bid/no-bid |
-| 4 | `strategy` | Competitive Strategy Agent | `parsed`, `costing` | `strategy` | Competitor offers, price/bundle optimisation, award analysis |
+| 4 | `strategy` | Pricing & Competitor Analysis Agent | `parsed`, `costing` | `strategy` | Competitor offers, price/bundle optimisation, review by the pricing agent (Claude), award analysis |
 | 5 | `localisation` | Currency & Tax Agent | `parsed`, `costing`, `strategy` | `localisation` | FX conversion, tax by jurisdiction |
 | 6 | `drafting` | Proposal Drafting Agent | `parsed`, `strategy`, `localisation` | `proposal` | Compose text, render PDFs |
 
@@ -193,7 +195,7 @@ generated documents: the **client** (the issuing organisation) and **OEMs**.
 
 * Server: Python 3.10+, Linux/macOS/Windows. Dependencies in `backend/requirements.txt`
   (FastAPI, SQLAlchemy 2, Pydantic 2, scikit-learn, NumPy, joblib, ReportLab, PyMuPDF, pypdf, python-docx,
-  openpyxl, httpx, firebase-admin, PyJWT).
+  openpyxl, httpx, anthropic, google-auth).
 * Client: a current evergreen browser. Front end: React 19, TypeScript, Vite, Tailwind CSS 4,
   TanStack Query, motion, lucide-react, recharts.
 * Optional: Tesseract OCR for scanned PDF pages. Outbound internet for live FX rates (falls back offline).
@@ -203,13 +205,14 @@ generated documents: the **client** (the issuing organisation) and **OEMs**.
 
 | ID | Constraint |
 |---|---|
-| DC-1 | **No LLM or hosted generative model anywhere.** All logic is explicit rules, classical information retrieval (BM25, latent semantic analysis, character n-grams) and scikit-learn models trained in this repository. Every decision must be inspectable. |
+| DC-1 | **The model proposes, code decides.** Language-model output (Claude) is always schema-validated and checked by deterministic code before use: prices against the margin floor and policy, products against the retrieved catalogue candidates, client text against leaks. Rules, classical retrieval (BM25, LSA, character n-grams) and scikit-learn models trained here remain the fallback, so the system works without an API key. Every decision is logged. |
 | DC-2 | **Separated responsibilities.** One agent, one concern, typed messages only. |
 | DC-3 | **Explainability first.** Every price carries a machine-produced rationale: facts observed, rule applied, alternatives rejected. |
 | DC-4 | **Costs never reach the client.** Client-facing documents must not show landed cost, floor, margin or win probability. A test enforces this. |
 | DC-5 | **Human in the loop.** No document is final until a reviewer approves; drafts carry a DRAFT watermark. |
 | DC-6 | **Additive data migrations.** New columns are nullable and added automatically at start-up; the seeder is idempotent so user edits survive restarts. |
 | DC-7 | **Company data is data, not code.** Everything specific to the bidding company lives under `backend/app/data/companies/<name>/`. |
+| DC-9 | **Region-neutral core.** Currency, tax and procurement conventions follow the operating region and the client region the user selects; market-specific rules apply only inside their market. |
 | DC-8 | **Fictitious data.** The shipped companies, customers and all competitor prices are mock. Named retailers appear only as illustrative market participants. |
 
 ### 2.6 Assumptions and dependencies
@@ -219,6 +222,7 @@ generated documents: the **client** (the issuing organisation) and **OEMs**.
 * Competitor prices are estimates; their quality depends on the sources the user supplies.
 * Currency conversion needs internet for live rates; otherwise cached or reference rates are used and
   flagged **stale**.
+* The Claude agents need an Anthropic API key and internet access; without them the rule-based agents run.
 * Reviewer corrections are honest and consistent (the learning loop trusts them).
 
 ---
@@ -232,14 +236,14 @@ Section 9 says otherwise.
 
 | ID | Requirement | P |
 |---|---|---|
-| FR-AUTH-1 | The system shall let a user register (username, name, password) and sign in with username and password. Passwords are stored as PBKDF2-SHA256 hashes. | M |
-| FR-AUTH-2 | The system shall issue an HMAC-SHA256-signed, expiring (default 12 h), HTTP-only session cookie on sign-in and clear it on sign-out. | M |
+| FR-AUTH-1 | The system shall let a user register (username, name, optional email, password of at least 10 characters) when sign-up is allowed, and sign in with username or email and password. Passwords are stored as PBKDF2-SHA256 hashes. | M |
+| FR-AUTH-2 | The system shall issue an HMAC-SHA256-signed, expiring (default 12 h), HTTP-only, SameSite=Lax session cookie on sign-in (Secure in production) and clear it on sign-out. | M |
 | FR-AUTH-3 | The system shall protect every `/api/*` endpoint except `/api/auth/*` and `/api/health` by a middleware that requires a valid session (when `TD_REQUIRE_AUTH` is on). | M |
-| FR-AUTH-4 | The system shall support federated sign-in ("Continue with Google", "Continue with SSO") by creating or finding a user by email. The provider step is simulated locally. | S |
-| FR-AUTH-5 | The system shall accept a Firebase ID token at `/api/auth/firebase` and open a session for its email. | S |
-| FR-AUTH-6 | A demo user (`priya` / `tenderdesk`) shall be seeded; its email uses the active company's domain. | M |
+| FR-AUTH-4 | The system shall refuse further login attempts for 15 minutes after 8 failures from one address or for one account (HTTP 429). | M |
+| FR-AUTH-5 | The system shall accept a Firebase ID token at `/api/auth/firebase` only after verifying its RS256 signature against Google's keys, its audience (the configured project), issuer and expiry; it shall never accept an unverified token. An existing account may be linked only through a verified email. | M |
+| FR-AUTH-6 | `GET /api/auth/config` shall report which methods are available (sign-up, Firebase, demo). The demo account (`priya` / `tenderdesk`) is created only when `TD_DEMO_USER=1` and never in production. | M |
 
-Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the Firebase caveat.
+Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. Configuration: `docs/SETUP.md`.
 
 ### 3.2 Request intake
 
@@ -250,6 +254,7 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 | FR-IN-3 | The system shall assign each request a unique reference and queue it for background processing on a worker pool (`TD_PIPELINE_WORKERS`, default 4) so several requests run in parallel. | M |
 | FR-IN-4 | The system shall re-queue work interrupted by a server restart. | M |
 | FR-IN-5 | The system shall list requests with status, client, totals, margin and strategy summary (`GET /api/rfps`). | M |
+| FR-IN-6 | Every intake (paste, upload, sample) shall carry the **client region** selected by the user (country and, where tax depends on it, state or province). It is stored as a reviewer override with that region's currency, outranks the region detected in the document and can be changed later on the request. | M |
 
 ### 3.3 RFP Parser Agent (stage `intake`)
 
@@ -296,6 +301,10 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 |---|---|---|
 | FR-PA-18 | Each item shall be matched to catalogue products by hybrid retrieval (6.4) re-ranked by specification fit, brand adjustment and category coherence. Status: **matched** (score ≥ 0.42), **ambiguous** (≥ 0.30), **unmatched** (otherwise; excluded from pricing and flagged). | M |
 | FR-PA-19 | A requested measurable limit (e.g. ≥ 1000 DPI) shall steer matching to a product that meets it. | M |
+| FR-PA-20 | With the language model enabled, Claude shall read the whole document (passed as untrusted data) and return the client, terms, items with specifications and ambiguities as schema-validated structured output; missing client and term fields are filled from it. | M |
+| FR-PA-21 | The model's items shall be reconciled with the rule-based items: the model's list and quantities are used, enriched with the matching rule item's linked specification; quantity differences, items only the rules found and the model's ambiguities become reviewer warnings and are logged. | M |
+| FR-PA-22 | The model shall type the requirement sentences with the reviewer's most similar past corrections as examples. | M |
+| FR-PA-23 | The model shall choose each line's product from the retrieved candidates or none; an SKU that was not offered is discarded, and the choice must still pass the specification check to count as matched. | M |
 
 ### 3.4 Internal Pricing Agent (stage `costing`)
 
@@ -316,8 +325,9 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 | FR-CO-4 | Liability, indemnity and termination clauses shall be assessed against policy (liability capped at contract value). Other clauses shall be answered from knowledge-base evidence accepted only with real topical overlap; otherwise an undertaking. | M |
 | FR-CO-5 | The agent shall output: the clause-by-clause matrix, eligibility verdict (*Eligible*, *subject to documents*, *review required*, *not eligible*), risk flags, a bid-documents checklist, MSE benefits, and a recommendation: **Do not bid** (any criterion fails), **Bid with clarifications** (mandatory deviations, high risks or criteria needing review), else **Bid**. | M |
 | FR-CO-6 | Reviewer decisions per clause or criterion (`POST /api/rfps/{id}/compliance`) shall be stored in overrides, applied last, and shall re-run from `compliance`. | M |
+| FR-CO-7 | The MSMED Act payment check and the EMD exemption shall apply only when the company and the buyer are both in India; amounts are formatted in the catalogue currency. | M |
 
-### 3.6 Competitive Strategy Agent (stage `strategy`)
+### 3.6 Pricing & Competitor Analysis Agent (stage `strategy`)
 
 | ID | Requirement | P |
 |---|---|---|
@@ -331,6 +341,8 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 | FR-ST-8 | Under an L1 award, the win model shall see an award-adjusted price ratio, evaluation shall ignore warranty, lead-time and bundle effects, and **no free bundle shall be offered** (it earns no evaluation credit). | M |
 | FR-ST-9 | **Whole-bid award analysis** (6.7): rival totals, our rank, gap to L1, the smallest uniform reduction that undercuts L1 by 0.5% within every line's floor, the MSE purchase-preference option, QCBS combined-score analysis, and reverse-auction opening and walk-away totals. | M |
 | FR-ST-10 | When we are already L1, the award card shall offer "Submit as priced" and "Highest price that stays L1" (with headroom), and no MSE option. When not L1: "Price to become L1" and the MSE option. | M |
+| FR-ST-11 | With the language model enabled, the pricing agent (Claude) shall review every line through tools — `get_line`, `get_competitor_offers`, `evaluate_price`, `get_bid_history`, `set_price` — and `set_price` shall reject a price below the floor, a service the margin cannot fund or above the cost cap, a free service under L1, and any change to a reviewer-locked line. Accepted decisions are re-priced by the engine; the agent's rationale and bid summary are shown to the reviewer. | M |
+| FR-ST-12 | The MSE purchase preference shall be offered only when the company and the buyer are both in India. | M |
 
 ### 3.7 Currency & Tax Agent (stage `localisation`)
 
@@ -338,7 +350,7 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 |---|---|---|
 | FR-FX-1 | FX shall come from a provider chain: ECB rates via Frankfurter → open.er-api.com → database cache (TTL 12 h) → reference table. A fallback source shall be marked **stale** and a warning shown in the UI and memo. | M |
 | FR-FX-2 | Rates shall be stored against INR with cross rates derived. Non-INR quotations add a configurable FX buffer (default 1.5%). Currency decimals respect ISO exceptions (JPY 0, KWD 3 …). | M |
-| FR-TX-1 | Tax shall follow jurisdiction and product tax category: India same state → CGST+SGST; other state/unknown → IGST; export on EXW/FCA/FOB/CIF/CPT/CIP/DAP/DPU → zero-rated under LUT; DDP → destination VAT/GST/sales tax with regional and category brackets (e.g. California exempts software and services; Quebec GST+QST); cross-border B2B services/licences with a client tax ID (non-US) → reverse charge. A product's own `gst_rate_pct` overrides its category rate. | M |
+| FR-TX-1 | Tax shall follow the operating region, the client region and the product tax category: domestic supply → the country's VAT/GST/sales tax for the client's state or province (in India, CGST+SGST within the supplier's state, IGST otherwise); export on EXW/FCA/FOB/CIF/CPT/CIP/DAP/DPU → zero-rated (under LUT from India); DDP → destination VAT/GST/sales tax with regional and category brackets (e.g. California exempts software and services; Quebec GST+QST); cross-border B2B services/licences with a client tax ID (non-US) → reverse charge. A product's own `gst_rate_pct` overrides its category rate. | M |
 | FR-TX-2 | `POST /api/finance/tax-preview` shall compute tax for arbitrary inputs. | S |
 
 ### 3.8 Proposal Drafting Agent (stage `drafting`)
@@ -347,11 +359,12 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 |---|---|---|
 | FR-DR-1 | The agent shall compose, from structured facts and retrieved knowledge-base evidence: cover letter (acknowledgement, scope, company profile, closest case study by segment and scope, total, validity, included value), executive summary, highlights, compliance matrix, delivery plan (milestones from longest lead time + transit + installation), terms (validity, incoterm, payment, tax notes, exchange basis). | M |
 | FR-DR-2 | Authorised signatory, company name, bank details and quote-number prefix shall come from the active company profile (`quote_prefix`, else the initials of the short name). Quote numbers have the form `<prefix>-Q-…`. | M |
-| FR-DR-3 | It shall render a **client quotation PDF** (branded first page, summary strip, cover letter, commercial schedule with per-line tax, totals, inclusions, client-safe pricing basis, compliance matrix, delivery milestones, terms, acceptance block, bank details) with a DRAFT watermark until approval, and **no cost or margin figures** (DC-4). | M |
+| FR-DR-3 | It shall render a **ready-to-send client quotation PDF**: letterhead with tax registration, quotation number, date and validity, buyer and reference, subject and salutation, an itemised schedule (description with make, model and warranty; tax code; quantity; unit; unit price; tax rate; amount), totals with the tax breakdown, the amount in words, inclusions, numbered terms and conditions, bank details and the authorised signatory. A DRAFT watermark and footer notice remain until approval, and **no cost, margin or analysis** appears (DC-4). | M |
 | FR-DR-4 | It shall render a confidential **pricing memo PDF** (landscape): KPIs, line economics, rationale, scenario tables, FX/tax basis, approval stamp. | M |
 | FR-DR-5 | It shall render a **bid analysis report** (executive design) and a **compliance statement** (eligibility with documents, matrix grouped by tender section with page references, statement of deviations, declaration). | M |
 | FR-DR-6 | The report verdict shall read "Competitive bid · Recommend submitting as priced" when rank is L1 #1; "value-led" language appears only if something is bundled. | M |
 | FR-DR-7 | Proposal version shall increment on every re-draft. | M |
+| FR-DR-8 | With the language model enabled, Claude shall write the cover letter, executive summary and highlights from client-safe facts and retrieved passages (approved letters as house style). Text mentioning internal terms or competitors, or quoting an amount not in the quotation, shall be discarded in favour of the template. | M |
 
 ### 3.9 Review, override and approval workflow
 
@@ -424,6 +437,8 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 | FR-UI-6 | **Landing, Login, Sign-up, provider sign-in** pages. The company name shown in the shell comes from the API. | M |
 | FR-UI-7 | The legacy `/app/models` route redirects to `/app`; the former Models & data screen is removed. (Backend `GET /api/models`, `POST /api/models/retrain` remain as administrative endpoints.) | M |
 | FR-UI-8 | The visual design shall be professional and restrained; no generic "AI" badges or labels. | M |
+| FR-UI-9 | Interface motion (Motion library): page and tab transitions, spring sheets and dialogs with exit animations, animated stage tracker, staggered table rows, animated counters; all honour the operating system's reduced-motion setting. Pages load on first use. | S |
+| FR-UI-10 | **Tax & currency** shall show and set the operating region; **New request** shall require the client region; the request's client tab shall change it (with its currency). | M |
 
 ### 3.16 Mock market service
 
@@ -433,7 +448,15 @@ Code: `backend/app/api/auth.py`, `backend/app/services/auth.py`. See 9.2 for the
 | FR-MK-2 | Price for a competitor/product on day *d* = `street price × category factor (or promotion) × exp(weekly mean-reverting walk) × (1 − volume discount)`. Some promotions deliberately undercut reseller landed cost. | M |
 | FR-MK-3 | Competitors carry region served, category positioning, warranty, lead time, reliability, typical bundles, and (for brand stores) the brands they sell. | M |
 
-### 3.17 Multi-company data sets
+### 3.17 Regions
+
+| ID | Requirement | P |
+|---|---|---|
+| FR-RG-1 | `GET /api/regions` shall list every selectable country with its area, currency, states/provinces, tax name and regional conventions. | M |
+| FR-RG-2 | `GET/PUT /api/workspace` shall read and set the operating region (validated country and state), defaulting to the company profile; it applies to requests processed afterwards. | M |
+| FR-RG-3 | Unknown countries or states shall be rejected with 422. | M |
+
+### 3.18 Multi-company data sets
 
 | ID | Requirement | P |
 |---|---|---|
@@ -467,7 +490,7 @@ All JSON unless stated; cookie-authenticated; OpenAPI at `/docs`. Summary:
 
 | Group | Endpoints |
 |---|---|
-| Auth | `POST /api/auth/login`, `register`, `federated`, `firebase`, `logout`; `GET /api/auth/me` |
+| Auth | `POST /api/auth/login`, `register`, `firebase`, `logout`; `GET /api/auth/me`, `config` |
 | Requests | `GET/POST /api/rfps`; `POST /api/rfps/upload`; `GET /api/rfps/samples`; `POST /api/rfps/samples/{file}`; `GET /api/rfps/{id}`; `DELETE /api/rfps/{id}` |
 | Workflow | `POST /api/rfps/{id}/reprice`, `compliance`, `approve`, `reject`, `reopen`, `retry` |
 | Documents | `GET /api/rfps/{id}/documents/{quotation\|memo\|report\|compliance}`, `/original`, `/pack` |
@@ -476,10 +499,11 @@ All JSON unless stated; cookie-authenticated; OpenAPI at `/docs`. Summary:
 | Catalogue | `GET /api/catalog/products`; `PATCH /api/catalog/products/{sku}`; `GET …/{sku}/history`; `GET /api/catalog/value-adds`, `tiers`; import: `POST /api/catalog/import/preview`, `commit`; `GET /api/catalog/imports`, `/import/template` |
 | Market | `GET /api/market/competitors`, `offers`, `sources`, `observations`, `observations/template`; `POST /api/market/observations/upload`, `web`; `DELETE /api/market/observations/{id}` |
 | Finance | `GET /api/finance/fx`, `tax-rules`, `countries`; `POST /api/finance/fx/refresh`, `tax-preview` |
-| Other | `GET /api/dashboard`, `/api/company`, `/api/models`, `/api/knowledge/search`; `POST /api/models/retrain`; `GET /api/health` |
+| Regions | `GET /api/regions`; `GET`/`PUT /api/workspace` |
+| Other | `GET /api/dashboard`, `/api/company`, `/api/models`, `/api/knowledge/search`, `/api/llm/status`; `POST /api/models/retrain`; `GET /api/health` |
 | Market service | `GET /market-api/v1/health`, `competitors`, `offers`; `POST …/offers/batch` (header `X-Api-Key`) |
 
-Error conventions: 404 not found; 409 wrong state (e.g. pack before drafting; reprice before pricing);
+Error conventions: 403 cross-origin write, disabled sign-up or unverified account link; 429 too many failed logins; 503 Firebase not configured; 404 not found; 409 wrong state (e.g. pack before drafting; reprice before pricing);
 410 expired import preview; 413 file too large (RFP upload > 10 MB, data import > 8 MB); 422 validation or unreadable file; 401 unauthenticated.
 
 ### 4.3 File interfaces
@@ -497,11 +521,12 @@ Error conventions: 404 not found; 409 wrong state (e.g. pack before drafting; re
 | Service | Use | Failure behaviour |
 |---|---|---|
 | Frankfurter (ECB), open.er-api.com | live FX | falls back to cache then reference table; marked stale |
-| Firebase Auth | optional ID-token sign-in | see 9.2 |
+| Anthropic Messages API (Claude) | parser, pricing and drafting agents | agents fall back to rules; warning logged |
+| Firebase Authentication / Google public keys | optional Google and SSO sign-in | sign-in refused (503/401); passwords still work |
 | Tesseract | OCR of scanned pages | pages listed in warnings |
 
-No other network calls are made. In particular the system never calls a language-model API and never
-fetches competitor web pages.
+No other network calls are made. In particular the system never fetches competitor web pages, and the
+language-model API is called only when a key is configured.
 
 ---
 
@@ -511,7 +536,7 @@ fetches competitor web pages.
 
 | Table | Key columns | Purpose |
 |---|---|---|
-| `users` | username, name, email, title, provider (`password`/`google`/`sso`/`firebase`), password_hash | Accounts |
+| `users` | username, name, email, title, provider (`password`/`firebase`), password_hash, external_id (Firebase user id) | Accounts |
 | `products` | sku, mpn, name, brand, category, description, specs (JSON), keywords (JSON), unit_cost, list_price, min_margin_pct, stock_qty, lead_time_days, warranty_months, tax_category, active, hsn, gst_rate_pct, price_updated_at | Catalogue and pricing; `floor_price` is derived |
 | `price_tiers` | category, min_qty, discount_pct | Volume discounts |
 | `value_adds` | code, name, kind, categories, basis (`percent`/`flat`), cost_rate, value_rate, warranty_extension_months | Bundle services |
@@ -527,6 +552,7 @@ fetches competitor web pages.
 | `price_observations` | competitor_id, competitor, mpn, product, unit_price, currency, quantity, warranty_months, observed_on, adapter, source, reference, collected_by | Competitor intelligence |
 | `training_labels` | model (`clause`/`category`), text, label, predicted, rfp_id, source | Reviewer corrections |
 | `bid_outcomes` | rfp_id (unique), result, our_total, winning_total, winner, note, recorded_at | Bid results |
+| `workspace_settings` | key, value (JSON), updated_at | Workspace preferences (operating region) |
 
 New nullable columns are added to existing databases automatically at start-up (DC-6).
 
@@ -537,7 +563,8 @@ requirements, commercial terms, tender facts), `costing` (per-line cost, floor, 
 options), `compliance` (matrix, eligibility, risks, checklist, recommendation), `strategy` (per-line price,
 bundle, classification, rationale, scenarios, curve, market offers, award analysis), `localisation`
 (currency, FX rate/source/stale flag, per-line tax, totals), `proposal` (sections, documents, version).
-`MarketOffer` carries `equivalent`, `source` and `observed_on`.
+`MarketOffer` carries `equivalent`, `source` and `observed_on`. `CompetitiveAnalysis.agent_summary` holds the pricing
+agent's assessment; `ParsedRfp.stats.engine` records whether Claude took part.
 
 ### 5.3 Data files per company (`backend/app/data/companies/<name>/`)
 
@@ -653,6 +680,21 @@ strategy `available` if any observations exist.
 
 As FR-FX-* and FR-TX-*; rules are data in `tax_rules.json`.
 
+### 6.11 Language-model agents (`backend/app/llm/`)
+
+| Step | Call | Validation | Fallback |
+|---|---|---|---|
+| Parser extraction | Structured output (`RfpExtraction`), effort medium | Pydantic schema; reconciliation with rules; warnings for disagreements | Rule-based items and terms |
+| Clause typing | Structured output, effort low, reviewer corrections as examples | Only known labels; `line_item` ignored | Trained clause classifier |
+| Product choice | Structured output over retrieved candidates | SKU must be a listed candidate; specification check | Retrieval ranking |
+| Pricing review | Tool loop, effort high, history cached | `set_price` enforces floor, service funding and cap, L1 rule, reviewer locks | Engine optimum |
+| Drafting | Structured output from client-safe facts and passages | Leak check (internal terms, competitors, unknown amounts), structure | Template text |
+
+Learning is in context: reviewer clause and product corrections (most similar first), recorded bid outcomes and the
+last approved letters are included in each request. Requests stream, use `fallbacks: "default"` (server-side refusal
+fallback) and raise `LLMError` on refusal, truncation, schema mismatch or API errors. `python -m app.llm.evaluate
+[--llm]` scores the parser against `evals/parser_gold.json`.
+
 ---
 
 ## 7. Non-functional requirements
@@ -680,7 +722,10 @@ As FR-FX-* and FR-TX-*; rules are data in `tax_rules.json`.
 | NFR-S-1 | Authentication per FR-AUTH-*; secrets configurable (`TD_SECRET_KEY`); cookies HTTP-only. |
 | NFR-S-2 | Uploads shall be size-limited and parsed defensively; unreadable files return 422, not 500. |
 | NFR-S-3 | Client documents shall not leak cost or margin (DC-4). |
-| NFR-S-4 | No data leaves the installation except FX lookups (and Firebase token verification when used). |
+| NFR-S-4 | No data leaves the installation except FX lookups, Google signing-key fetches for Firebase sign-in, and — when a key is configured — requests to the Anthropic API (tender text, catalogue candidates and client-safe facts; never credentials). |
+| NFR-S-6 | Login throttling, same-origin check on state-changing calls, security headers, size-capped and validated uploads, DTD-free XML, and no internal error text in responses. |
+| NFR-S-7 | `TD_ENV=production` refuses to start with a weak or missing secret, a demo market key or authentication disabled; it enables secure cookies and HSTS and disables open sign-up, the demo account and the API docs. |
+| NFR-S-8 | Language-model output is untrusted: schema-validated and checked by code before use (DC-1). |
 | NFR-S-5 | Document paths shall be resolved without traversal (`document_path`). |
 
 ### 7.4 Reliability and recoverability
@@ -721,6 +766,14 @@ competitor figures are labelled estimates with source and date; stale FX is flag
 | `TD_REQUIRE_AUTH` | on | Session enforcement |
 | `TD_SESSION_HOURS` / `TD_SECRET_KEY` | 12 / generated | Session lifetime and signing key |
 | `TD_FRONTEND_DIST` | `frontend/dist` | Built web app served by FastAPI |
+| `TD_ENV` | `development` | `production` enforces safe settings (NFR-S-7) |
+| `TD_COOKIE_SECURE` / `TD_ALLOW_SIGNUP` / `TD_DEMO_USER` | by environment | Cookie flag, open sign-up, demo account |
+| `TD_FIREBASE_PROJECT_ID` | empty | Firebase project whose tokens are accepted |
+| `TD_ALLOWED_ORIGINS` | localhost:5173 | Extra browser origins allowed to call the API |
+| `ANTHROPIC_API_KEY` | empty | Enables the Claude agents |
+| `TD_LLM` / `TD_LLM_MODEL` / `TD_LLM_TIMEOUT` | `auto` / `claude-opus-5-5` / 300 s | Agent mode, model, request timeout |
+
+Keys and setup steps: `docs/SETUP.md`. `run.sh` / `run.ps1` load `.env`; the web build reads `frontend/.env.local`.
 
 ### 8.2 Run
 
@@ -730,7 +783,7 @@ competitor figures are labelled estimates with source and date; stale FX is flag
 
 ### 8.3 Test strategy
 
-`cd backend && python -m pytest` — 77 tests:
+`cd backend && python -m pytest` — 100 tests:
 
 | File | Covers |
 |---|---|
@@ -743,8 +796,12 @@ competitor figures are labelled estimates with source and date; stale FX is flag
 | `test_drafting.py`, `test_api.py` | document generation, end-to-end API workflow |
 | `test_auth_and_edits.py` | sign-in, reviewer edits |
 | `test_phases_12_15.py` | parsing helpers, warranty, attributes, CSV/Tally import, observations, web extraction, labels/retrain/outcomes, pack, and the Data Care × DES Pune University trial in a subprocess |
+| `test_security.py` | forged tokens rejected, verified-email linking, login throttling, cross-origin refusal, headers, sign-up switch, production checks, hostile uploads |
+| `test_regions.py` | region catalogue, client region → currency and tax, operating region → domestic supply, India-only rules |
+| `test_llm_agents.py` | Claude steps with a scripted client: request shape, refusals, tool loop, parser reconciliation and fallback, pricing guard-rails, drafting leak check |
 
-Front end: `npm run typecheck`. Tests run against `TD_COMPANY=meridian`.
+Front end: `npm run typecheck`. Tests run against `TD_COMPANY=meridian` with `TD_LLM=off`; the language-model steps are
+tested with a scripted client and never call the API.
 
 ### 8.4 Acceptance criteria (trial)
 
@@ -773,21 +830,21 @@ Bid; whole bid L1 with positive margin; quote number `DCC-Q-…`; pack contains 
 
 ### 9.2 Security items (honest list)
 
-* **Firebase sign-in verification fallback.** In `backend/app/api/auth.py` (`/api/auth/firebase`), if
-  `firebase_admin.verify_id_token` raises, the code falls back to
-  `jwt.decode(token, options={"verify_signature": False})` and trusts the email in the token. That allows
-  forged tokens to sign in as any email. It was flagged during development and **not changed**; it should be
-  removed (fail with 401) before any real deployment.
-* **Federated sign-in** ("Google"/"SSO") is simulated and trusts the email supplied by the provider step; it
-  is a demonstration, not production SSO.
+* **Resolved:** the Firebase endpoint no longer falls back to decoding unverified tokens; the simulated
+  federated sign-in that trusted any email has been removed; an unverified provider email can no longer claim
+  an existing account.
 * **No role-based access control**; all users can approve and edit.
-* The demo account (`priya` / `tenderdesk`) is seeded.
-* Import preview plans are held in process memory (30 min), so they do not survive a restart or span workers.
-* Default session secret is generated per install unless `TD_SECRET_KEY` is set.
+* **Sessions are stateless**: signing out clears the cookie, but a stolen cookie stays valid until it
+  expires (12 h by default). Rotating `TD_SECRET_KEY` invalidates all sessions.
+* Login throttling and import previews are held in process memory, so they reset on restart and are not
+  shared between several server processes.
+* With the language model enabled, tender text and catalogue data are sent to the Anthropic API. Prompt
+  injection inside a tender can at most influence proposals that the code then validates; it cannot move a
+  price below the floor, choose a product that was not offered or put internal figures into client text.
 
 ### 9.3 Possible future work
 
-Bulk labelled-data import; scheduled retraining service; role-based access; real OAuth/SAML; e-procurement
+Bulk labelled-data import; scheduled retraining service; role-based access; server-side session revocation; e-procurement
 portal integrations; additional document languages; richer competitor adapters (with permission to
 scrape); a PostgreSQL deployment profile.
 
@@ -804,7 +861,9 @@ scrape); a PostgreSQL deployment profile.
 | Multi-currency and regional tax | `finance/` — FX chain and tax engine |
 | Relational database for pricing data | `db/models.py` (SQLAlchemy/SQLite) |
 | Currency conversion API | Frankfurter → open.er-api.com → DB cache → reference table |
-| No LLM; own logic and trained models; RAG | Sections 2.5 (DC-1), 6.2, 6.4 |
+| Agentic LLM pipeline (recommended approach) | `backend/app/llm/` — Claude in the parser, pricing & competitor analysis and drafting agents with guard-rails (DC-1, 6.11) |
+| Own logic and trained models; RAG | Sections 6.2, 6.4 |
+| Region-neutral operation | Section 3.17, `app/regions.py` |
 | Professional front end without typical AI tags | `frontend/` (FR-UI-8) |
 
 ---
@@ -835,7 +894,10 @@ scrape); a PostgreSQL deployment profile.
 | OEM | Original equipment manufacturer |
 | P(win) | Predicted probability the bid wins |
 | QCBS | Quality and cost based selection |
-| RAG | Retrieval-augmented generation; here, extractive composition from retrieved text, without an LLM |
+| RAG | Retrieval-augmented generation: passages retrieved from the knowledge base and catalogue ground the text the agents write |
+| LLM | Large language model; here Claude (Anthropic), used by three agents |
+| In-context learning | Teaching a model by including examples (here, reviewer corrections and outcomes) in the request instead of retraining it |
+| Operating region / client region | Where the supplier is registered / where the buyer is; together they decide tax and conventions |
 | Rationale | Machine-produced explanation attached to a price |
 | Request | One RFP being processed (row in `rfps`) |
 | SKU / MPN | Supplier stock code / manufacturer part number |
@@ -863,13 +925,17 @@ backend/
     imports/                 tabular.py (CSV/XLSX), catalogue.py (mapping, preview, commit, Tally)
     intel/                   sources.py (adapters, market_view, web extraction)
     learning/                loop.py (labels, outcomes, evaluation, status)
+    llm/                     client.py (Claude client, tool loop), parser.py, pricing.py, drafting.py,
+                             memory.py (corrections, outcomes, approved letters), evaluate.py
+    regions.py               selectable regions, operating region, conventions
     pack/                    builder.py (technical proposal, MAF letters, index, ZIP)
     report/                  builder.py, assistant.py, export.py (PDF/DOCX)
     services/                documents, market_client, pdf_renderer, report_renderer,
                              compliance_renderer, auth
     market/service.py        Mock competitor API
     data/                    shared JSON + companies/<name>/ data sets
-  tests/                     77 tests
+  tests/                     100 tests
+  evals/parser_gold.json     reference answers for the parser evaluation
 frontend/src/
     main.tsx                 Routes
     lib/                     api.ts (typed client), types.ts, format.ts
@@ -880,7 +946,7 @@ frontend/src/
                                       QuotationTab, ActivityTab, AwardCard, LineSheet, Workbench, charts}
 samples/                     Seven short requests and three full tenders (incl. DES Pune University)
 scripts/                     make_samples.py, make_tenders.py, tender_content.py, des_rfp.py, make_datacare.py
-docs/                        ARCHITECTURE.md, ROADMAP.md, SRS.md, screenshots/, trial/
+docs/                        SETUP.md (keys), ARCHITECTURE.md, ROADMAP.md, SRS.md, screenshots/, trial/
 run.sh, run.ps1              One-command start
 ```
 
@@ -905,6 +971,9 @@ run.sh, run.ps1              One-command start
 | FR-LL-* | `learning/loop.py`, `ml/registry.py`, `ml/models.py`, `api/data.py` |
 | FR-PK-* | `pack/builder.py`, `api/data.py` |
 | FR-CD-* | `config.py`, `db/seed.py`, `scripts/make_datacare.py` |
+| FR-RG-*, FR-IN-6 | `regions.py`, `api/reference.py`, `api/rfps.py`, `components/RegionPicker.tsx` |
+| FR-PA-20…23, FR-ST-11, FR-DR-8 | `llm/parser.py`, `llm/pricing.py`, `llm/drafting.py`, `llm/client.py` |
+| FR-AUTH-4…6 | `api/auth.py`, `main.py` (middleware) |
 
 ## Appendix D. Worked trial: Data Care Corp × DES Pune University
 
@@ -932,7 +1001,9 @@ Generated documents are in `docs/trial/`. The trial runs as an automated test
 
 ## Appendix E. Guide for language models working on this repository
 
-1. **Never add an LLM call.** Design constraint DC-1. Prefer explicit rules, then a small scikit-learn model.
+1. **Language-model output is a proposal.** Any new Claude step must validate the answer (schema plus a code check
+   of what matters), log what it changed, and fall back to the rules on `LLMError` (DC-1). Keep tender text marked
+   as untrusted data. Test it with the scripted client in `tests/test_llm_agents.py`.
 2. **Where to change what.** Parsing → `nlp/`, `agents/parser_agent.py`. Pricing/strategy →
    `pricing/`, `agents/strategy_agent.py`. Compliance → `agents/compliance_agent.py`, `nlp/attributes.py`.
    Documents → `services/`, `report/`, `pack/`. Company facts → `data/companies/<name>/*.json`, not code.

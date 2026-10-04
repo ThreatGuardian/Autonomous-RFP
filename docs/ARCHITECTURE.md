@@ -225,11 +225,16 @@ with the same model. They are flagged, for example "Below margin floor" or
 
 `app/services/pdf_renderer.py` (ReportLab, Inter font)
 
-* **Quotation**: branded first page, summary strip, cover letter, commercial
-  schedule (per-line tax), totals, inclusions, client-safe pricing basis,
-  compliance matrix, delivery milestones, terms, acceptance block, bank
-  details. A DRAFT watermark stays until approval. Costs never appear; a test
-  enforces this.
+* **Quotation** — a ready-to-send commercial document: letterhead (company,
+  address, contacts, tax registration), quotation number, date and validity, the
+  buyer and their reference, subject and salutation, an itemised schedule (S.No,
+  description with make, model and warranty, tax code, quantity, unit, unit price,
+  tax rate, amount), totals with the tax breakdown, the amount in words (Indian
+  lakh/crore wording for INR, million/billion otherwise), numbered terms and
+  conditions (prices, taxes, delivery, payment, warranty, validity, exchange rate,
+  tender conditions, acceptance), bank details and the authorised signatory. A DRAFT
+  watermark and footer notice stay until approval. Costs, margins, win
+  probabilities and analysis never appear; a test enforces this.
 * **Pricing memo** (landscape, confidential): KPIs, line economics, rationale and
   scenario table per line, FX/tax basis, approval stamp.
 
@@ -392,12 +397,7 @@ user meant and the reply shows the exact phrasing that will work.
   idempotent: added lines are rebuilt from the override list on every run, and
   each keeps a stable line number. Costing, strategy, tax and drafting then
   re-run.
-* **Authentication** (`app/api/auth.py`, `app/services/auth.py`):
-  * PBKDF2-SHA256 password hashes;
-  * HMAC-SHA256-signed, expiring, HTTP-only session cookies;
-  * middleware protecting `/api/*`;
-  * federated sign-in for Google and SSO, which accepts the identity returned
-    by the provider step.
+* **Authentication** (`app/api/auth.py`, `app/services/auth.py`): see section 16.
 
 ## 11. Data model
 
@@ -504,3 +504,103 @@ renders to PDF and Word with the same exporter. It contains:
 `maf_letters` writes one authorisation request per OEM offered. The ZIP adds the compliance statement, the
 quotation (as the financial bid) and a submission index that separates the technical and financial
 envelopes.
+
+
+## 14. Claude agents (`app/llm/`)
+
+The parser, the pricing & competitor analysis agent and the drafting agent use
+Claude through the Anthropic Python SDK. The pattern is the same everywhere: **the
+model proposes, deterministic code validates, the rules remain the fallback.**
+
+### 14.1 Client (`client.py`)
+
+* `LLM.structured(system, user, schema)` asks for one JSON answer constrained by
+  `output_config.format` (a JSON Schema generated from a Pydantic model and made
+  strict: references inlined, `additionalProperties: false`, all properties
+  required) and validates it with Pydantic.
+* `LLM.run_tools(system, user, tools)` runs a manual agent loop: tool inputs are
+  validated against each tool's Pydantic model; a tool may raise `ToolRejected`,
+  which goes back to the model as an error result; whole assistant turns are
+  appended unchanged.
+* Requests stream, set `effort` explicitly, cache the system prompt (and, in agent
+  loops, the growing history), and opt into server-side refusal fallback
+  (`fallbacks: "default"`). A refusal, truncation, schema mismatch or API error
+  raises `LLMError`; the calling agent logs it and uses its rules.
+* `TD_LLM=auto|on|off`, `TD_LLM_MODEL` (default `claude-opus-5-5`); tests replace
+  the client with a scripted one (`set_llm_factory`).
+
+### 14.2 Parser (`parser.py`)
+
+1. **Extraction** — the whole document (marked as untrusted data) → client, terms,
+   items with specifications, ambiguities. Missing client and term fields are
+   filled from it.
+2. **Reconciliation** — model items are matched to rule items (stemmed-word
+   Jaccard ≥ 0.3, +0.2 for equal quantity). The model's list and quantities are
+   used, enriched with the rule item's linked specification and section; quantity
+   differences and items only one side found become reviewer warnings.
+3. **Clause typing** — requirement sentences are re-typed with the reviewer's
+   most similar past corrections as examples.
+4. **Product choice** — for each line, the top retrieval candidates with their
+   specifications; answers naming an SKU that was not offered are discarded, and a
+   chosen product must still pass the specification check.
+
+### 14.3 Pricing & competitor analysis (`pricing.py`)
+
+After the strategy engine prices every line, the model reviews the bid with tools:
+`get_line`, `get_competitor_offers`, `evaluate_price` (margin, P(win) from the
+trained model, expected profit, policy issues), `get_bid_history` (real outcomes)
+and `set_price`. `set_price` rejects prices below the floor, services that the
+margin cannot fund or that exceed the cost cap, free services under L1, and any
+change to a reviewer-locked line. Accepted decisions are re-priced through
+`StrategyEngine.price_line(agent_choice=…)`, so scenarios, curves and
+classification are computed exactly as for the engine's own choice; the model's
+rationale is prepended to the line's rationale and its summary is shown on the
+Pricing tab.
+
+### 14.4 Drafting (`drafting.py`)
+
+The model receives only client-safe facts (scope, totals, dates, inclusions,
+compliance counts, payment) and retrieved knowledge-base passages, plus the last
+approved letters as house style. Its text is rejected if it mentions internal
+terms (margin, cost, win probability, competitor …), names a competitor, quotes an
+amount of 10,000 or more that is not in the quotation, or lacks the expected
+structure.
+
+### 14.5 Learning (`memory.py`, `evaluate.py`)
+
+Claude models are not fine-tuned per customer; they learn in context. Reviewer
+clause and product corrections (most similar first), recorded bid outcomes and
+approved letters are placed in each request. `python -m app.llm.evaluate [--llm]`
+scores the parser against `evals/parser_gold.json` (items found with the right
+quantity, correct product, extra items) so prompt or rule changes are measured.
+
+## 15. Regions (`app/regions.py`)
+
+* `catalogue()` lists the selectable countries with their area, currency, states or
+  provinces, tax name and regional conventions.
+* The **operating region** (workspace setting, default from `company.json`) is
+  applied to the company profile at the start of each pipeline run
+  (`company_profile()`).
+* The **client region** chosen at intake is stored as reviewer-style overrides
+  (`client.country`, `client.region`, `currency`), so it outranks what the parser
+  detected and can be changed later.
+* Tax: domestic supply uses the destination rule for the country and region; India
+  additionally splits CGST + SGST within a state and charges IGST between states.
+  Exports are zero-rated (under LUT only from India).
+* `same_market(supplier, client, "IN")` gates India-only rules: MSE purchase
+  preference, the MSMED Act 45-day payment check and EMD exemption.
+
+## 16. Security
+
+| Area | Control |
+|---|---|
+| Passwords | PBKDF2-SHA256 (200,000 iterations), minimum 10 characters at sign-up |
+| Sessions | HMAC-SHA256-signed, expiring, HTTP-only, SameSite=Lax cookies; `Secure` in production |
+| Brute force | 8 failures per address or account in 15 minutes → 429 |
+| Google / SSO | Firebase ID token verified (RS256 signature against Google's keys, audience, issuer, expiry); no unverified fallback; an existing account is linked only through a verified email; sign-up switch respected |
+| Cross-site requests | State-changing API calls with a foreign `Origin` are refused; CORS limited to configured origins |
+| Headers | `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store` on the API, HSTS in production |
+| Uploads | Read in chunks with a size cap; at most 10 files; PDF signature and DOCX structure checked; DOCX expansion and PDF page count limited; DTDs refused in XML (entity expansion) |
+| Errors | Unexpected exceptions are logged, not echoed to clients |
+| Production mode | `TD_ENV=production` refuses to start without a strong secret and a non-demo market key; no demo account; API docs hidden |
+| Language model | Tender text is passed as untrusted data; every model output is schema-validated; prices, products and client text are checked by code; the model never sees credentials |

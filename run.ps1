@@ -3,6 +3,17 @@
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
+# Settings and keys (ANTHROPIC_API_KEY, TD_*) from .env, if present. See docs/SETUP.md.
+if (Test-Path ".env") {
+  Get-Content ".env" | ForEach-Object {
+    $line = $_.Trim()
+    if ($line -and -not $line.StartsWith("#") -and $line.Contains("=")) {
+      $name, $value = $line.Split("=", 2)
+      [Environment]::SetEnvironmentVariable($name.Trim(), $value.Trim().Trim('"'), "Process")
+    }
+  }
+}
+
 if (-not (Test-Path ".venv")) { python -m venv .venv }
 & .\.venv\Scripts\Activate.ps1
 python -m pip install --quiet --upgrade pip

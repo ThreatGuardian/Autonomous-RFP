@@ -27,6 +27,16 @@ increment and is committed separately so the history reads as the build log.
 | 14 | Learning loop *(done)* | Reviewer corrections (requirement type, product swaps) become labels and bid outcomes become real deals; models retrain automatically; leave-one-document-out evaluation and calibration (ECE) on real labels |
 | 15 | Full response pack *(done)* | Technical proposal (PDF + Word) with covering letter, bidder form, eligibility statement, item-by-item technical compliance, conditions, deviations, declarations and checklist; OEM authorisation request letters; submission index; bundled with the compliance statement and financial bid as one ZIP |
 
+## Stage 3 — the agentic pipeline, any region, ready to send
+
+| # | Phase | Outcome |
+|---|-------|---------|
+| 16 | Security hardening *(done)* | Firebase ID tokens verified against Google's keys (no unverified fallback); simulated federated sign-in removed; verified-email rule for account linking; login throttling; same-origin check, security headers, secure cookies and a production mode that refuses insecure defaults; size-capped uploads, PDF/DOCX validation, DTDs refused in XML; internal errors not echoed |
+| 17 | Selectable regions *(done)* | Client region chosen per request and operating region per workspace; currency, VAT / GST / sales tax and regional procurement rules follow; India-only rules apply only inside India |
+| 18 | Ready-to-send quotation *(done)* | The client quotation is a commercial document: letterhead, itemised schedule with make, model and tax code, totals in figures and words, terms, bank details and signatory |
+| 19 | Claude agents *(done)* | Parser, pricing & competitor analysis and drafting agents on Claude (structured output and tool use) with deterministic guard-rails, rule-based fallback, in-context learning from corrections and outcomes, and a parser evaluation against reference tenders |
+| 20 | Motion and loading *(done)* | Animated sheets, dialogs, tab content, stage tracker and lists (reduced-motion aware); pages and the Firebase SDK load on demand |
+
 ### Trial: Data Care Corp answers DES Pune University
 
 Data Care Corp (a Pune wholesale dealer of computers, components and electronics) is the default
@@ -38,9 +48,11 @@ mandatory clauses, recommends *Bid*, ranks the whole bid L1 and produces the ful
 
 ## Design principles
 
-* **No large language model.** Every decision is made by explicit rules,
-  classical information retrieval, or models trained in this repository
-  (scikit-learn). All reasoning is inspectable.
+* **The model proposes, code decides.** Claude reads, reasons and writes;
+  every value it returns is validated by deterministic code (margin floors,
+  catalogue membership, schemas, leak checks) before it is used, and the rules,
+  retrieval and models trained in this repository (scikit-learn) remain the
+  fallback. All decisions are logged.
 * **Separated responsibilities.** Each agent owns one concern and communicates
   only through typed messages on the shared pipeline context.
 * **Explainability first.** Every price carries a machine-produced rationale:

@@ -4,6 +4,14 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Settings and keys (ANTHROPIC_API_KEY, TD_*) from .env, if present. See docs/SETUP.md.
+if [ -f .env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env
+  set +a
+fi
+
 if [ ! -d .venv ]; then
   python3 -m venv .venv
 fi

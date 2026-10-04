@@ -19,7 +19,7 @@ from app.api.uploads import read_upload
 from app.config import BACKEND_ROOT
 from app.db.models import Rfp
 from app.db.session import get_db, session_scope
-from app.services.documents import SUPPORTED, UnsupportedDocument, extract_text
+from app.services.documents import UnsupportedDocument, extract_text
 
 router = APIRouter(prefix="/api/rfps", tags=["rfps"])
 SAMPLES_DIR = BACKEND_ROOT.parent / "samples"

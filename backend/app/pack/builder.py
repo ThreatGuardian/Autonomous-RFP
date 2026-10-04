@@ -82,7 +82,7 @@ def technical_proposal(company: dict, parsed: ParsedRfp, costing: InternalPricin
            f"supply, install and commission the equipment in conformity with the said document. Our financial bid is "
            f"submitted separately in the prescribed format. We undertake, if our proposal is accepted, to deliver and "
            f"commission the goods within the period specified and to furnish the performance security required."),
-        _p(f"We agree to abide by this proposal for the validity period stated in the RFP"
+        _p("We agree to abide by this proposal for the validity period stated in the RFP"
            + (f" ({validity})" if validity else "")
            + " and it shall remain binding upon us. We confirm that we have no conflict of interest and that the "
              "information given in this proposal is true and correct."),

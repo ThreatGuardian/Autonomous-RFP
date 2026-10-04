@@ -176,7 +176,7 @@ def _clean_description(text: str, span: tuple[int, int] | None) -> str:
     if span:
         desc = (text[: span[0]] + " " + text[span[1]:]).strip()
     desc = _BULLET.sub("", desc)
-    desc = re.sub(rf"^\s*(?:x|×|\*)\s+", "", desc, flags=re.I)
+    desc = re.sub(r"^\s*(?:x|×|\*)\s+", "", desc, flags=re.I)
     desc = re.sub(r"\b(?:qty|quantity)\s*[:=\-–]?\s*$", "", desc, flags=re.I)
     desc = re.sub(rf"^\s*{UNIT_WORDS}\s+(?:of\s+)?", "", desc, flags=re.I)
     desc = re.sub(r"^(?:supply of|provide|procurement of|procure|we require|we need|need|require)\s+", "", desc, flags=re.I)
