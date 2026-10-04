@@ -36,8 +36,9 @@ def test_session_required_and_sign_in_methods():
             client.post("/api/auth/logout")
             client.cookies.clear()
             assert client.get("/api/rfps").status_code == 401
-            g = client.post("/api/auth/federated", json={"provider": "google", "email": "arjun.mehta@gmail.com"})
-            assert g.status_code == 200 and g.json()["provider"] == "google" and g.json()["name"] == "Arjun Mehta"
+            # Without a configured Firebase project, token sign-in is unavailable rather than trusted.
+            assert client.post("/api/auth/firebase", json={"token": "x" * 40}).status_code == 503
+            assert client.post("/api/auth/federated", json={"provider": "google", "email": "a@b.co"}).status_code in (404, 405)
             reg = client.post("/api/auth/register", json={"name": "Neha Rao", "username": "neha", "password": "s3cure-pass"})
             assert reg.status_code in (201, 409)
     finally:

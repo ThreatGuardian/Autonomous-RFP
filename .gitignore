@@ -21,3 +21,10 @@ frontend/dist/
 .idea/
 .vscode/
 *.tsbuildinfo
+
+# Secrets and local configuration — never commit
+.env
+.env.*
+!.env.example
+frontend/.env.local
+backend/.env

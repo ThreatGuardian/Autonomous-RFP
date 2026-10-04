@@ -60,13 +60,14 @@ export interface Observation {
   warranty_months: number | null; observed_on: string; adapter: "quotes" | "awards" | "web" | "feed"; source: string; reference: string | null; collected_by: string | null;
 }
 
-export interface User { id: number; username: string; name: string; email: string | null; title: string; provider: "password" | "google" | "sso" }
+export interface User { id: number; username: string; name: string; email: string | null; title: string; provider: "password" | "firebase" }
+export interface AuthConfig { signup: boolean; firebase: boolean; demo: boolean }
 
 export const auth = {
   me: () => request<User | null>("/api/auth/me"),
   login: (username: string, password: string) => post<User>("/api/auth/login", { username, password }),
   register: (body: { name: string; username: string; email?: string; password: string }) => post<User>("/api/auth/register", body),
-  federated: (provider: "google" | "sso", email: string, name?: string) => post<User>("/api/auth/federated", { provider, email, name }),
+  config: () => request<AuthConfig>("/api/auth/config"),
   firebaseLogin: (token: string) => post<User>("/api/auth/firebase", { token }),
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),
 };

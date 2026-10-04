@@ -14,6 +14,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.agents.orchestrator import STAGES, document_path, get_orchestrator, record_event, source_path
+from app.api.uploads import read_upload
 from app.config import BACKEND_ROOT
 from app.db.models import Rfp
 from app.db.session import get_db, session_scope
@@ -22,6 +23,7 @@ from app.services.documents import SUPPORTED, UnsupportedDocument, extract_text
 router = APIRouter(prefix="/api/rfps", tags=["rfps"])
 SAMPLES_DIR = BACKEND_ROOT.parent / "samples"
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_FILES = 10
 
 
 class CreateRfp(BaseModel):
@@ -164,10 +166,12 @@ def _ingest(filename: str, data: bytes) -> tuple[int | None, str | None]:
 
 @router.post("/upload", status_code=201)
 async def upload_rfps(files: list[UploadFile] = File(...)) -> list[dict[str, Any]]:
+    if len(files) > MAX_FILES:
+        raise HTTPException(status_code=422, detail=f"Upload at most {MAX_FILES} files at a time")
     created: list[int] = []
     errors: list[str] = []
     for f in files:
-        rfp_id, error = _ingest(f.filename or "upload.txt", await f.read())
+        rfp_id, error = _ingest(f.filename or "upload.txt", await read_upload(f, MAX_UPLOAD_BYTES))
         if rfp_id is not None:
             created.append(rfp_id)
         if error:

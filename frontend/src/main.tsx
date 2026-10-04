@@ -9,7 +9,6 @@ import { Shell } from "./components/layout/Shell";
 import { AuthProvider, RequireAuth } from "./lib/auth";
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
-import ProviderSignIn from "./pages/public/ProviderSignIn";
 import Catalogue from "./pages/Catalogue";
 import Finance from "./pages/Finance";
 import Market from "./pages/Market";
@@ -30,7 +29,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<Landing />} />
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Login mode="signup" />} />
-            <Route path="login/:provider" element={<ProviderSignIn />} />
+            <Route path="login/:provider" element={<Navigate to="/login" replace />} />
             <Route path="app" element={<RequireAuth><Shell /></RequireAuth>}>
               <Route index element={<Overview />} />
               <Route path="requests" element={<Requests />} />

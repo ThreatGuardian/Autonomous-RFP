@@ -97,6 +97,9 @@ def _dehyphenate(lines: list[str]) -> str:
 # --------------------------------------------------------------------------- PDF
 
 
+MAX_PAGES = 400
+
+
 def analyse_pdf(data: bytes) -> Layout:
     try:
         import pymupdf  # noqa: F401
@@ -111,6 +114,8 @@ def _pdf_pymupdf(data: bytes) -> Layout:
     if hasattr(pymupdf, "no_recommend_layout"):
         pymupdf.no_recommend_layout()
     doc = pymupdf.open(stream=data, filetype="pdf")
+    if doc.page_count > MAX_PAGES:
+        raise ValueError(f"The PDF has {doc.page_count} pages; the limit is {MAX_PAGES}.")
     raw: list[dict[str, Any]] = []  # candidate lines with geometry, before header/footer removal
     size_chars: Counter[float] = Counter()
     scanned: list[int] = []

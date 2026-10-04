@@ -121,7 +121,11 @@ def _keywords(name: str, category: str | None) -> list[str]:
 
 def tally_to_table(data: bytes) -> Table:
     """Flatten a Tally ERP / TallyPrime stock-item XML export into rows."""
-    root = ET.fromstring(data.decode("utf-8-sig", errors="replace").encode())
+    text = data.decode("utf-8-sig", errors="replace")
+    if re.search(r"<!(?:DOCTYPE|ENTITY)", text, re.I):
+        # Tally exports never carry a DTD; refusing one rules out entity-expansion attacks.
+        raise ValueError("XML files with a DOCTYPE or ENTITY declaration are not accepted")
+    root = ET.fromstring(text.encode())
     rows: list[dict[str, str]] = []
     for item in root.iter("STOCKITEM"):
         def txt(tag: str) -> str:

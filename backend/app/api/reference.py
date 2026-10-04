@@ -156,7 +156,7 @@ def competitors() -> list[dict[str, Any]]:
     try:
         return MarketClient().competitors()
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=502, detail=f"Market API unavailable: {exc}") from exc
+        raise HTTPException(status_code=502, detail="The competitor market service is unavailable") from exc
 
 
 @router.get("/market/offers")

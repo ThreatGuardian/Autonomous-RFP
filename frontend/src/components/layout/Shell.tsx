@@ -118,7 +118,7 @@ function UserMenu() {
     return () => document.removeEventListener("mousedown", h);
   }, []);
   if (!user) return null;
-  const via = { password: "Username and password", google: "Google account", sso: "Single sign-on" }[user.provider];
+  const via = { password: "Username and password", firebase: "Google or single sign-on" }[user.provider];
   return (
     <div ref={ref} className="relative mt-auto">
       {open && (

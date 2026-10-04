@@ -1,14 +1,21 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { type FirebaseOptions, initializeApp } from "firebase/app";
+import { type Auth, getAuth } from "firebase/auth";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCpfmXKg0bVw7wv4foDi897ILpWKLJtkgA",
-  authDomain: "autonomous-rfp.firebaseapp.com",
-  projectId: "autonomous-rfp",
-  storageBucket: "autonomous-rfp.firebasestorage.app",
-  messagingSenderId: "663761083176",
-  appId: "1:663761083176:web:0674547dbc76f8b10e0e1d"
+/**
+ * Firebase is optional. It is used only for "Continue with Google" and "Continue with SSO".
+ * The web configuration comes from build-time environment variables (frontend/.env.local);
+ * when they are missing those buttons are hidden and username/password sign-in still works.
+ */
+const env = import.meta.env;
+const options: FirebaseOptions = {
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const firebaseAuth: Auth | null =
+  options.apiKey && options.authDomain && options.projectId && options.appId ? getAuth(initializeApp(options)) : null;
+
+/** Firebase provider id of the organisation's SAML or OIDC identity provider, e.g. "saml.acme". */
+export const ssoProviderId: string | undefined = env.VITE_FIREBASE_SSO_PROVIDER || undefined;

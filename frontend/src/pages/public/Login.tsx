@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { ArrowLeft, ArrowRight, Building2, Eye, EyeOff, KeyRound } from "lucide-react";
 import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../../components/layout/Shell";
 import { Spinner } from "../../components/ui";
-import { auth as apiAuth } from "../../lib/api";
+import { auth as apiAuth, type User } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
-import { auth as fbAuth } from "../../lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, OAuthProvider } from "firebase/auth";
+import { firebaseAuth, ssoProviderId } from "../../lib/firebase";
+import { type AuthProvider, GoogleAuthProvider, OAuthProvider, SAMLAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 export function GoogleMark({ className }: { className?: string }) {
   return (
@@ -89,57 +89,42 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
   const [error, setError] = useState<string | null>(null);
   const signup = mode === "signup";
 
+  const config = useQuery({ queryKey: ["auth-config"], queryFn: apiAuth.config, staleTime: Infinity });
+  const firebaseReady = Boolean(firebaseAuth && config.data?.firebase);
+  const canSignUp = config.data?.signup ?? true;
+
+  const finish = (u: User) => {
+    qc.setQueryData(["me"], u);
+    navigate(next, { replace: true });
+  };
+
   const submit = useMutation({
-    mutationFn: async () => {
-      let fbUser;
-      if (signup) {
-        const email = form.email || `${form.username}@example.com`;
-        const cred = await createUserWithEmailAndPassword(fbAuth, email, form.password);
-        fbUser = cred.user;
-      } else {
-        const email = form.username.includes('@') ? form.username : `${form.username}@example.com`;
-        const cred = await signInWithEmailAndPassword(fbAuth, email, form.password);
-        fbUser = cred.user;
-      }
-      const token = await fbUser.getIdToken();
-      return apiAuth.firebaseLogin(token);
-    },
-    onSuccess: (u) => {
-      qc.setQueryData(["me"], u);
-      navigate(next, { replace: true });
-    },
+    mutationFn: () => signup
+      ? apiAuth.register({ name: form.name, username: form.username, email: form.email || undefined, password: form.password })
+      : apiAuth.login(form.username, form.password),
+    onSuccess: finish,
     onError: (e: Error) => setError(e.message),
   });
 
-  const goGoogle = async () => {
+  // Google and SSO: the browser signs in with Firebase, the server verifies the ID token
+  // and opens its own session. The Firebase session itself is not kept.
+  const viaFirebase = async (provider: AuthProvider) => {
+    if (!firebaseAuth) return;
+    setError(null);
     try {
-      const cred = await signInWithPopup(fbAuth, new GoogleAuthProvider());
+      const cred = await signInWithPopup(firebaseAuth, provider);
       const token = await cred.user.getIdToken();
-      const u = await apiAuth.firebaseLogin(token);
-      qc.setQueryData(["me"], u);
-      navigate(next, { replace: true });
-    } catch (e: any) {
-      setError(e.message);
+      finish(await apiAuth.firebaseLogin(token));
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") setError((e as Error).message);
+    } finally {
+      await signOut(firebaseAuth).catch(() => undefined);
     }
   };
-
-  const goSSO = async () => {
-    try {
-      const provider = new OAuthProvider('saml.tenderdesk');
-      const cred = await signInWithPopup(fbAuth, provider);
-      const token = await cred.user.getIdToken();
-      const u = await apiAuth.firebaseLogin(token);
-      qc.setQueryData(["me"], u);
-      navigate(next, { replace: true });
-    } catch (e: any) {
-      // If SAML is not configured, fallback to the mock provider signin
-      if (e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/invalid-provider-id') {
-         navigate(`/login/sso?next=${encodeURIComponent(next)}`);
-      } else {
-         setError(e.message);
-      }
-    }
-  };
+  const goGoogle = () => viaFirebase(new GoogleAuthProvider());
+  const goSSO = () => ssoProviderId && viaFirebase(
+    ssoProviderId.startsWith("saml.") ? new SAMLAuthProvider(ssoProviderId) : new OAuthProvider(ssoProviderId));
 
   if (!loading && user) return <Navigate to={next} replace />;
   const onSubmit = (e: FormEvent) => { e.preventDefault(); setError(null); submit.mutate(); };
@@ -159,14 +144,17 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
             {signup ? "Start quoting RFPs with your team in minutes." : "Sign in to your bid desk to continue."}
           </p>
 
-          <div className="animate-rise mt-8 space-y-2.5" style={{ animationDelay: ".1s" }}>
-            <Provider icon={<GoogleMark className="size-[18px]" />} onClick={goGoogle}>Continue with Google</Provider>
-            <Provider icon={<Building2 className="size-[18px] text-ink-soft" />} onClick={goSSO}>Continue with SSO</Provider>
-          </div>
-
-          <div className="my-6 flex items-center gap-3 text-[11.5px] uppercase tracking-[0.1em] text-subtle">
-            <span className="h-px flex-1 bg-line" /> or {signup ? "sign up" : "sign in"} with username <span className="h-px flex-1 bg-line" />
-          </div>
+          {firebaseReady ? (
+            <>
+              <div className="animate-rise mt-8 space-y-2.5" style={{ animationDelay: ".1s" }}>
+                <Provider icon={<GoogleMark className="size-[18px]" />} onClick={goGoogle}>Continue with Google</Provider>
+                {ssoProviderId && <Provider icon={<Building2 className="size-[18px] text-ink-soft" />} onClick={goSSO}>Continue with SSO</Provider>}
+              </div>
+              <div className="my-6 flex items-center gap-3 text-[11.5px] uppercase tracking-[0.1em] text-subtle">
+                <span className="h-px flex-1 bg-line" /> or {signup ? "sign up" : "sign in"} with username <span className="h-px flex-1 bg-line" />
+              </div>
+            </>
+          ) : <div className="mt-8" />}
 
           <form onSubmit={onSubmit} className="animate-rise space-y-3.5" style={{ animationDelay: ".15s" }}>
             {signup && (
@@ -181,10 +169,10 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
             )}
             <label className="block">
               <span className="mb-1.5 flex justify-between text-[12.5px] font-medium text-ink-soft">Password
-                {signup && <span className="font-normal text-subtle">At least 8 characters</span>}</span>
+                {signup && <span className="font-normal text-subtle">At least 10 characters</span>}</span>
               <div className="relative">
                 <input className="input h-11 rounded-xl pr-10" type={show ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"}
-                  required minLength={signup ? 8 : 1} value={form.password} onChange={set("password")} placeholder="••••••••" />
+                  required minLength={signup ? 10 : 1} value={form.password} onChange={set("password")} placeholder="••••••••" />
                 <button type="button" onClick={() => setShow(!show)} aria-label={show ? "Hide password" : "Show password"}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-subtle transition hover:text-ink">{show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
               </div>
@@ -196,14 +184,14 @@ export default function Login({ mode = "signin" }: { mode?: "signin" | "signup" 
             </button>
           </form>
 
-          <p className="mt-6 text-center text-[13px] text-muted">
+          {(canSignUp || signup) && <p className="mt-6 text-center text-[13px] text-muted">
             {signup ? "Already have an account? " : "New to Tenderdesk? "}
             <Link to={`${signup ? "/login" : "/signup"}${next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""}`} className="font-medium text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-ink">
               {signup ? "Sign in" : "Create an account"}
             </Link>
-          </p>
+          </p>}
 
-          {!signup && (
+          {!signup && config.data?.demo && (
             <button type="button" onClick={() => setForm({ ...form, username: "priya", password: "tenderdesk" })}
               className="mt-8 flex items-center gap-3 rounded-xl border border-dashed border-line-strong px-4 py-3 text-left text-[12.5px] text-muted transition hover:border-[#e2cfa6] hover:bg-[#fffcf5]">
               <KeyRound className="size-4 shrink-0 text-accent" />

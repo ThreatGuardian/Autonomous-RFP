@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import zipfile
 from pathlib import Path
 
 
@@ -11,13 +12,35 @@ class UnsupportedDocument(ValueError):
 
 
 SUPPORTED = {".pdf", ".docx", ".txt", ".md", ".text"}
+MAX_DOCX_EXPANDED_BYTES = 80 * 1024 * 1024
+MAX_DOCX_ENTRIES = 3000
+
+
+def _check_pdf(data: bytes) -> None:
+    if not data.lstrip()[:5].startswith(b"%PDF-"):
+        raise UnsupportedDocument("The file is not a valid PDF.")
+
+
+def _check_docx(data: bytes) -> None:
+    """Reject files that are not Word documents, and archives that expand to an unreasonable size."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            infos = z.infolist()
+    except zipfile.BadZipFile:
+        raise UnsupportedDocument("The file is not a valid Word document.") from None
+    if len(infos) > MAX_DOCX_ENTRIES or sum(i.file_size for i in infos) > MAX_DOCX_EXPANDED_BYTES:
+        raise UnsupportedDocument("The Word document is too large to process.")
+    if not any(i.filename == "word/document.xml" for i in infos):
+        raise UnsupportedDocument("The file is not a valid Word document.")
 
 
 def extract_text(filename: str, data: bytes) -> str:
     suffix = Path(filename).suffix.lower()
     if suffix == ".pdf":
+        _check_pdf(data)
         return _pdf(data)
     if suffix == ".docx":
+        _check_docx(data)
         return _docx(data)
     if suffix in {".txt", ".md", ".text", ""}:
         for enc in ("utf-8", "utf-16", "cp1252", "latin-1"):
@@ -31,7 +54,12 @@ def extract_text(filename: str, data: bytes) -> str:
 def _pdf(data: bytes) -> str:
     from app.nlp.layout import analyse_pdf
 
-    layout = analyse_pdf(data)
+    try:
+        layout = analyse_pdf(data)
+    except ValueError as exc:
+        raise UnsupportedDocument(str(exc)) from None
+    except RuntimeError:  # PyMuPDF raises RuntimeError subclasses for damaged or encrypted files
+        raise UnsupportedDocument("The PDF could not be read; it may be damaged or password-protected.") from None
     text = layout.to_text().strip()
     if not text.replace("\f", "").strip():
         raise UnsupportedDocument("The PDF contains no extractable text (it may be a scanned image without OCR).")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 import uuid
@@ -15,6 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.agents.orchestrator import _load_messages, document_dir, document_path
+from app.api.uploads import read_upload
 from app.db.models import BidOutcome, ImportBatch, PriceObservation, PriceVersion, Product, Rfp
 from app.db.seed import load_json
 from app.db.session import get_db, session_scope
@@ -23,6 +25,7 @@ from app.intel import sources
 from app.learning import loop
 from app.rag.stores import invalidate_catalogue
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["data"])
 MAX_BYTES = 8 * 1024 * 1024
 
@@ -32,12 +35,7 @@ _plans_lock = threading.Lock()
 
 
 async def _read(file: UploadFile) -> bytes:
-    data = await file.read()
-    if len(data) > MAX_BYTES:
-        raise HTTPException(status_code=413, detail="File is larger than 8 MB")
-    if not data:
-        raise HTTPException(status_code=422, detail="The file is empty")
-    return data
+    return await read_upload(file, MAX_BYTES)
 
 
 # --------------------------------------------------------------------------- phase 12: company data import
@@ -48,8 +46,11 @@ async def import_preview(file: UploadFile = File(...), db: Session = Depends(get
     data = await _read(file)
     try:
         plan = cat_import.preview(db, file.filename or "upload.csv", data)
-    except Exception as exc:  # malformed spreadsheet or XML
+    except ValueError as exc:  # a problem we can explain (no header row, DTD in XML, ...)
         raise HTTPException(status_code=422, detail=f"Could not read the file: {exc}") from exc
+    except Exception as exc:  # malformed spreadsheet or XML
+        log.warning("Catalogue import failed: %s", exc)
+        raise HTTPException(status_code=422, detail="Could not read the file; check it is a CSV, Excel or Tally XML export") from exc
     token = uuid.uuid4().hex
     with _plans_lock:
         now = time.time()
@@ -143,8 +144,11 @@ async def upload_observations(adapter: str = Form(..., pattern="^(quotes|awards)
     with session_scope() as db:
         try:
             return sources.ingest_table(db, adapter, file.filename or "upload.csv", data, replace=replace)
-        except Exception as exc:
+        except ValueError as exc:
             raise HTTPException(status_code=422, detail=f"Could not read the file: {exc}") from exc
+        except Exception as exc:
+            log.warning("Observation upload failed: %s", exc)
+            raise HTTPException(status_code=422, detail="Could not read the file; check it is a CSV or Excel sheet") from exc
 
 
 class WebPageBody(BaseModel):

@@ -26,8 +26,10 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(120))
     email: Mapped[str | None] = mapped_column(String(160), nullable=True)
     title: Mapped[str] = mapped_column(String(80), default="Bid manager")
-    provider: Mapped[str] = mapped_column(String(16), default="password")  # password | google | sso
+    provider: Mapped[str] = mapped_column(String(16), default="password")  # password | firebase
     password_hash: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # Identity-provider subject (the Firebase user id) for accounts that sign in with Google or SSO.
+    external_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
