@@ -15,7 +15,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as rl_canvas
 from reportlab.platypus import (
-    BaseDocTemplate, CondPageBreak, Frame, KeepTogether, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle,
+    BaseDocTemplate, CondPageBreak, Frame, KeepTogether, PageTemplate, Paragraph, Spacer, Table, TableStyle,
 )
 
 from app.agents.messages import CompetitiveAnalysis, Localisation, ParsedRfp, Proposal
@@ -189,225 +189,219 @@ def _kv_block(title: str, rows: list[tuple[str, str]], st, width: float) -> Tabl
 # =============================================================================== quotation
 
 
+def _catalogue_details(skus: list[str]) -> dict[str, dict[str, Any]]:
+    """Make, model and tax code of the quoted products, for the item description."""
+    from sqlalchemy import select
+
+    from app.db.models import Product
+    from app.db.session import session_scope
+
+    with session_scope() as s:
+        return {p.sku: {"brand": p.brand, "mpn": p.mpn, "hsn": p.hsn}
+                for p in s.scalars(select(Product).where(Product.sku.in_(skus)))}
+
+
+def _quotation_terms(company: dict, parsed: ParsedRfp, strat: CompetitiveAnalysis, loc: Localisation,
+                     proposal: Proposal) -> list[tuple[str, str]]:
+    """Numbered terms and conditions of the quotation, as (heading, text)."""
+    valid = date.fromisoformat(proposal.valid_until).strftime("%d %B %Y")
+    delivered = next((m for m in proposal.milestones if m.label == "Delivered to site"), None)
+    installed = next((m for m in proposal.milestones if m.label.startswith("Installation")), None)
+    place = ", ".join(x for x in (parsed.client.city, parsed.client.region, parsed.client.country_name) if x) or "the delivery address"
+    terms = parsed.terms
+    hardware = [l for l in strat.lines if l.category not in ("software", "service")]
+    warranty = sorted({l.warranty_months for l in hardware})
+    out = [
+        ("Prices", f"All prices are in {loc.currency} per unit as itemised above"
+                   + (f", {terms.incoterm} {place}" if terms.incoterm else f", delivered to {place}") + "."),
+        ("Taxes", loc.tax_summary + "." + (" " + " ".join(loc.tax_notes) if loc.tax_notes else "")),
+        ("Delivery", (f"Within {delivered.day} days of receipt of a purchase order" if delivered else "As agreed in the purchase order")
+                     + (f"; installation and hand-over completed by day {installed.day}." if installed else ".")),
+        ("Payment", f"{terms.payment_days or 30} days from the date of invoice"
+                    + (f", with {terms.advance_pct:g}% advance against the purchase order" if terms.advance_pct else "") + "."),
+    ]
+    if warranty:
+        span = f"{warranty[0]} months" if len(warranty) == 1 else f"{warranty[0]} to {warranty[-1]} months as stated per item"
+        out.append(("Warranty", f"Manufacturer's warranty of {span}, registered in the purchaser's name. "
+                                "Units found dead on arrival and reported within seven days are replaced at no cost."))
+    out.append(("Validity", f"This quotation is valid until {valid}."))
+    if loc.currency != loc.base_currency:
+        out.append(("Exchange rate", f"Prices are fixed in {loc.currency}; currency movements during the validity period are borne by us."))
+    if parsed.document is not None and parsed.document.long_form:
+        out.append(("Tender conditions", "This offer is made against the tender referenced above and accepts its conditions "
+                                         "except as stated in our compliance statement."))
+    out.append(("Acceptance", "Please issue the purchase order in the name of "
+                              f"{company['name']}, quoting the quotation number above."))
+    return out
+
+
 def render_quotation(path: Path, *, company: dict, parsed: ParsedRfp, strat: CompetitiveAnalysis,
                      loc: Localisation, proposal: Proposal, approved: bool) -> Path:
+    """A commercial quotation ready to send: letterhead, items, totals, terms, bank details and signature.
+
+    Internal figures (cost, margin, win probability, competitor prices) never appear here.
+    """
+    from app.finance.money import amount_in_words
+
     st = _styles()
     page_w, page_h = A4
-    doc = BaseDocTemplate(str(path), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=20 * mm,
-                          bottomMargin=20 * mm, title=f"Quotation {proposal.quote_number}", author=company["name"],
+    margin = 16 * mm
+    content_w = page_w - 2 * margin
+    doc = BaseDocTemplate(str(path), pagesize=A4, leftMargin=margin, rightMargin=margin, topMargin=40 * mm,
+                          bottomMargin=22 * mm, title=f"Quotation {proposal.quote_number}", author=company["name"],
                           subject=parsed.title)
-    content_w = page_w - 36 * mm
-    money = lambda v: fmt(v, loc.currency, loc.decimals)  # noqa: E731
-    footer_left = f"{company['name']}  ·  {company['tax_id_label']} {company['tax_id']}  ·  {company['website']}"
+    money = lambda v: fmt(v, loc.currency, loc.decimals, symbol=False)  # noqa: E731
+    issued = date.fromisoformat(proposal.issue_date).strftime("%d %b %Y")
+    valid = date.fromisoformat(proposal.valid_until).strftime("%d %b %Y")
+    tax_id = f"{company['tax_id_label']} {company['tax_id']}" if company.get("tax_id") else ""
 
-    def first_page(c, _doc):
+    def letterhead(c, _doc):
         c.saveState()
-        c.setFillColor(BRAND)
-        c.rect(0, page_h - 46 * mm, page_w, 46 * mm, stroke=0, fill=1)
-        c.setFillColor(ACCENT)
-        c.rect(0, page_h - 47.2 * mm, page_w, 1.2 * mm, stroke=0, fill=1)
-        _wordmark(c, 18 * mm, page_h - 25 * mm, company, 1.1, light=True)
-        c.setFillColor(colors.white)
-        c.setFont("Inter-SemiBold", 22)
-        c.drawRightString(page_w - 18 * mm, page_h - 21 * mm, "Quotation")
-        c.setFont("Inter-Regular", 8.5)
-        c.setFillColor(colors.HexColor("#CBD5E1"))
-        c.drawRightString(page_w - 18 * mm, page_h - 27.5 * mm, f"{proposal.quote_number}  ·  Version {proposal.version}")
-        c.setFont("Inter-Regular", 7.5)
-        y = page_h - 36 * mm
-        c.drawString(18 * mm, y, "  ·  ".join([*company["address_lines"][:2]]))
-        c.drawString(18 * mm, y - 4 * mm, f"{company['email']}  ·  {company['phone']}")
-        if not approved:
-            _watermark(c, "DRAFT")
-        _footer(c, company, footer_left)
-        c.restoreState()
-
-    def later_pages(c, _doc):
-        c.saveState()
-        _wordmark(c, 18 * mm, page_h - 14 * mm, company, 0.62)
-        c.setFont("Inter-Regular", 7.5)
+        top = page_h - 14 * mm
+        _wordmark(c, margin, top - 9 * mm, company, 1.0)
+        c.setFont("Inter-Regular", 7.4)
         c.setFillColor(MUTED)
-        c.drawRightString(page_w - 18 * mm, page_h - 11 * mm, f"Quotation {proposal.quote_number} · {parsed.client.name or ''}")
-        c.setStrokeColor(LINE)
-        c.line(18 * mm, page_h - 16.5 * mm, page_w - 18 * mm, page_h - 16.5 * mm)
+        address = company["address_lines"]
+        lines = [", ".join(address[:2]), ", ".join(address[2:]),
+                 "  ·  ".join(x for x in (company.get("phone"), company.get("email"), company.get("website")) if x)]
+        y = top - 13 * mm
+        for line in (x for x in lines if x):
+            c.drawString(margin, y, line)
+            y -= 3.4 * mm
+        c.setFillColor(INK)
+        c.setFont("Inter-SemiBold", 20)
+        c.drawRightString(page_w - margin, top - 5 * mm, "QUOTATION")
+        c.setFont("Inter-Regular", 8)
+        c.setFillColor(BODY)
+        c.drawRightString(page_w - margin, top - 10.5 * mm, f"No. {proposal.quote_number}")
+        c.drawRightString(page_w - margin, top - 14.5 * mm, f"Date {issued}")
+        if tax_id:
+            c.drawRightString(page_w - margin, top - 18.5 * mm, tax_id)
+        c.setStrokeColor(BRAND)
+        c.setLineWidth(1.4)
+        c.line(margin, page_h - 35 * mm, page_w - margin, page_h - 35 * mm)
         if not approved:
             _watermark(c, "DRAFT")
-        _footer(c, company, footer_left)
+        c.setStrokeColor(LINE)
+        c.setLineWidth(0.6)
+        c.line(margin, 15 * mm, page_w - margin, 15 * mm)
+        c.setFont("Inter-Regular", 6.8)
+        c.setFillColor(MUTED)
+        c.drawString(margin, 11 * mm, f"{company['name']}  ·  {tax_id}" if tax_id else company["name"])
+        if not approved:
+            c.setFillColor(WARN)
+            c.drawCentredString(page_w / 2, 17 * mm, "Draft for internal review — not valid until approved")
         c.restoreState()
 
-    doc.addPageTemplates([
-        PageTemplate("first", [Frame(18 * mm, 20 * mm, content_w, page_h - 72 * mm, id="f1", showBoundary=0)], onPage=first_page),
-        PageTemplate("later", [Frame(18 * mm, 20 * mm, content_w, page_h - 42 * mm, id="f2", showBoundary=0)], onPage=later_pages),
-    ])
-    from reportlab.platypus.doctemplate import NextPageTemplate
+    doc.addPageTemplates([PageTemplate("page", [Frame(margin, 22 * mm, content_w, page_h - 62 * mm, id="body",
+                                                      leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)],
+                                       onPage=letterhead)])
+    story: list = []
 
-    story: list = [NextPageTemplate("later")]
-    c = parsed.client
-    half = (content_w - 10 * mm) / 2
-    prepared = _kv_block("Prepared for", [
-        ("", c.name or "—"), ("Attn.", c.contact_name or ""), ("", c.email or ""),
-        ("", ", ".join(x for x in [c.region, c.country_name] if x)), ("Tax ID", c.tax_id or ""),
+    # ---- parties and reference
+    cl = parsed.client
+    half = (content_w - 8 * mm) / 2
+    location = ", ".join(x for x in (cl.city, cl.region, cl.country_name) if x)
+    bill_to = _kv_block("Quotation to", [
+        ("", cl.name or "—"), ("Attn.", cl.contact_name or ""), ("", location), ("", cl.email or ""),
+        ("Tax ID", cl.tax_id or ""),
     ], st, half)
-    details = _kv_block("Quotation details", [
-        ("Issued", date.fromisoformat(proposal.issue_date).strftime("%d %b %Y")),
-        ("Valid until", date.fromisoformat(proposal.valid_until).strftime("%d %b %Y")),
+    reference = _kv_block("Reference", [
         ("Your reference", parsed.client_reference or "—"),
-        ("Currency", loc.currency), ("Delivery terms", parsed.terms.incoterm or "Delivered to site"),
+        ("Quotation no.", proposal.quote_number), ("Date", issued), ("Valid until", valid),
+        ("Currency", loc.currency), ("Version", str(proposal.version)),
     ], st, half)
-    meta = Table([[prepared, details]], colWidths=[half + 10 * mm, half])
-    meta.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
-    story += [meta, Spacer(1, 6 * mm)]
+    parties = Table([[bill_to, reference]], colWidths=[half + 8 * mm, half])
+    parties.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                                 ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    story += [parties, Spacer(1, 5 * mm)]
 
-    # Summary strip
-    strip = Table([[
-        Paragraph("TOTAL (INCL. TAX)", st["label"]), Paragraph("LINE ITEMS", st["label"]),
-        Paragraph("INCLUDED VALUE", st["label"]), Paragraph("DELIVERY", st["label"]),
-    ], [
-        Paragraph(f"<font name='Inter-SemiBold' size='12' color='#0F172A'>{esc(money(loc.grand_total))}</font>", st["body"]),
-        Paragraph(f"<font name='Inter-SemiBold' size='12' color='#0F172A'>{len(loc.lines)}</font>", st["body"]),
-        Paragraph(f"<font name='Inter-SemiBold' size='12' color='#0F172A'>{esc(money(loc.bundled_value))}</font>", st["body"]),
-        Paragraph(f"<font name='Inter-SemiBold' size='12' color='#0F172A'>Day {proposal.milestones[2].day if len(proposal.milestones) > 2 else '—'}</font>", st["body"]),
-    ]], colWidths=[content_w * 0.34, content_w * 0.18, content_w * 0.26, content_w * 0.22])
-    strip.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), SOFT), ("BOX", (0, 0), (-1, -1), 0.6, LINE),
-        ("LINEBEFORE", (1, 0), (-1, -1), 0.6, LINE), ("LEFTPADDING", (0, 0), (-1, -1), 8),
-        ("TOPPADDING", (0, 0), (-1, 0), 7), ("BOTTOMPADDING", (0, 1), (-1, 1), 8),
-    ]))
-    story += [strip, Spacer(1, 7 * mm)]
-
-    # Cover letter
+    story.append(Paragraph(f"<font name='Inter-SemiBold' color='#0F172A'>Subject:</font> Quotation for {esc(parsed.title)}",
+                           st["body"]))
+    story.append(Spacer(1, 2.5 * mm))
     story.append(Paragraph(esc(proposal.salutation), st["body"]))
-    story.append(Spacer(1, 3))
-    for p in proposal.cover_letter:
-        story += [Paragraph(esc(p), st["body"]), Spacer(1, 4)]
-    story += [Spacer(1, 4), Paragraph("Yours sincerely,", st["body"]), Spacer(1, 8),
-              Paragraph(f"<font name='Inter-SemiBold' color='#0F172A'>{esc(proposal.signatory['name'])}</font><br/>"
-                        f"{esc(proposal.signatory['title'])}, {esc(company['name'])}<br/>{esc(proposal.signatory['email'])}", st["body"]),
-              PageBreak()]
+    story.append(Spacer(1, 1.5 * mm))
+    story.append(Paragraph(
+        "Thank you for your enquiry. We are pleased to quote for the goods and services below on the terms and "
+        "conditions set out in this quotation.", st["body"]))
+    story.append(Spacer(1, 4 * mm))
 
-    # Executive summary
-    story.append(Paragraph("Executive summary", st["h2"]))
-    for p in proposal.executive_summary:
-        story.append(Paragraph(esc(p), st["bullet"], bulletText="•"))
-    if proposal.highlights:
-        story.append(Paragraph("Highlights", st["h3"]))
-        for h in proposal.highlights:
-            story.append(Paragraph(esc(h), st["bullet"], bulletText="–"))
-
-    # Commercial schedule
-    story.append(Paragraph("Commercial schedule", st["h2"]))
-    head = ["#", "Item", "Qty", "Unit price", "Net", "Tax", "Total"]
-    rows = [[Paragraph(h, st["th_r"] if i >= 2 else st["th"]) for i, h in enumerate(head)]]
+    # ---- items
+    info = _catalogue_details([l.sku for l in loc.lines])
+    warranty = {l.line_no: l.warranty_months for l in strat.lines}
+    category = {l.line_no: l.category for l in strat.lines}
+    show_code = any(info.get(l.sku, {}).get("hsn") for l in loc.lines)
+    head = ["S.No", "Description"] + (["Tax code"] if show_code else []) + ["Qty", "Unit", "Unit price", "Tax", "Amount"]
+    right_from = 2 + (1 if show_code else 0)
+    rows = [[Paragraph(h, st["th_r"] if i >= right_from else st["th"]) for i, h in enumerate(head)]]
     for l in loc.lines:
-        desc = f"<font name='Inter-Medium'>{esc(l.name)}</font><br/><font color='#64748B' size='7'>{esc(l.sku)} · {esc(_short(l.description))}</font>"
+        d = info.get(l.sku, {})
+        desc = f"<font name='Inter-Medium' color='#0F172A'>{esc(l.name)}</font>"
+        make = " · ".join(x for x in (f"Make: {d['brand']}" if d.get("brand") else "", f"Model: {d['mpn']}" if d.get("mpn") else "") if x)
+        if make:
+            desc += f"<br/><font color='#64748B' size='7'>{esc(make)}</font>"
+        desc += f"<br/><font color='#64748B' size='7'>{esc(_short(l.description, 110))}</font>"
+        if category.get(l.line_no) not in ("software", "service") and warranty.get(l.line_no):
+            desc += f"<br/><font color='#64748B' size='7'>Warranty: {warranty[l.line_no]} months</font>"
         if l.bundle_name:
-            desc += f"<br/><font color='#B8862B' size='7'>Includes {esc(l.bundle_name)} at no charge</font>"
-        tax = f"{l.tax_rate_pct:g}%" if l.tax_rate_pct else ("0%" if l.taxes else "—")
-        rows.append([
-            Paragraph(str(l.line_no), st["cell"]), Paragraph(desc, st["cell"]),
-            Paragraph(f"{l.quantity:,}", st["cell_r"]), Paragraph(esc(money(l.unit_price)), st["cell_r"]),
-            Paragraph(esc(money(l.net)), st["cell_r"]), Paragraph(tax, st["cell_r"]), Paragraph(esc(money(l.gross)), st["cell_r"]),
-        ])
-    widths = [7 * mm, content_w - 7 * mm - 12 * mm - 25 * mm - 27 * mm - 11 * mm - 27 * mm, 12 * mm, 25 * mm, 27 * mm, 11 * mm, 27 * mm]
-    story.append(_table(rows, widths))
+            desc += f"<br/><font color='#8A5A0B' size='7'>Includes {esc(l.bundle_name)} at no extra charge</font>"
+        tax = f"{l.tax_rate_pct:g}%" if l.tax_rate_pct else "0%"
+        row = [Paragraph(str(l.line_no), st["cell"]), Paragraph(desc, st["cell"])]
+        if show_code:
+            row.append(Paragraph(esc(d.get("hsn") or "—"), st["cell"]))
+        row += [Paragraph(f"{l.quantity:,}", st["cell_r"]), Paragraph(esc(l.unit or "unit"), st["cell_r"]),
+                Paragraph(esc(money(l.unit_price)), st["cell_r"]), Paragraph(tax, st["cell_r"]),
+                Paragraph(esc(money(l.net)), st["cell_r"])]
+        rows.append(row)
+    fixed = [10 * mm] + ([16 * mm] if show_code else []) + [12 * mm, 12 * mm, 24 * mm, 11 * mm, 26 * mm]
+    widths = [fixed[0], content_w - sum(fixed)] + fixed[1:]
+    story.append(_table(rows, widths, zebra=False))
 
-    totals = [[Paragraph("Subtotal (net)", st["total_label"]), Paragraph(esc(money(loc.subtotal)), st["total_value"])]]
+    # ---- totals and amount in words
+    totals = [[Paragraph("Subtotal", st["total_label"]), Paragraph(esc(money(loc.subtotal)), st["total_value"])]]
     for t in loc.tax_breakdown:
         totals.append([Paragraph(f"{esc(t.name)} @ {t.rate_pct:g}%", st["total_label"]), Paragraph(esc(money(t.amount)), st["total_value"])])
-    totals.append([Paragraph(f"Total due ({loc.currency})", st["grand_label"]), Paragraph(esc(money(loc.grand_total)), st["grand_value"])])
-    tt = Table(totals, colWidths=[52 * mm, 36 * mm], hAlign="RIGHT")
+    totals.append([Paragraph(f"Total ({loc.currency})", st["grand_label"]), Paragraph(esc(money(loc.grand_total)), st["grand_value"])])
+    tt = Table(totals, colWidths=[56 * mm, 34 * mm], hAlign="RIGHT")
     tt.setStyle(TableStyle([
-        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("LINEABOVE", (0, 0), (-1, 0), 0.6, LINE),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.6), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("BACKGROUND", (0, -1), (-1, -1), BRAND), ("TOPPADDING", (0, -1), (-1, -1), 6), ("BOTTOMPADDING", (0, -1), (-1, -1), 6),
     ]))
-    story += [Spacer(1, 3 * mm), tt]
-    notes = [loc.tax_summary + "."] + loc.tax_notes + sorted({l.tax_note for l in loc.lines if l.tax_note})
-    story += [Spacer(1, 3 * mm)] + [Paragraph(esc(n), st["small"]) for n in notes]
+    words = Paragraph(f"<font name='Inter-SemiBold' color='#0F172A'>Amount in words:</font> "
+                      f"{esc(amount_in_words(loc.grand_total, loc.currency))}", st["body"])
+    story += [Spacer(1, 2 * mm), KeepTogether([tt, Spacer(1, 3 * mm), words])]
 
     if proposal.inclusions:
-        story.append(CondPageBreak(50 * mm))
-        story.append(Paragraph("Included at no additional charge", st["h2"]))
-        rows = [[Paragraph(h, st["th"]) for h in ("Service", "Applies to", "Scope")] + [Paragraph("Value", st["th_r"])]]
+        story += [Spacer(1, 5 * mm), Paragraph("Included at no extra charge", st["h3"])]
         for inc in proposal.inclusions:
-            rows.append([Paragraph(f"<font name='Inter-Medium'>{esc(inc['service'])}</font>", st["cell"]),
-                         Paragraph(f"{esc(inc['item'])} × {inc['quantity']:,}", st["cell"]),
-                         Paragraph(esc(inc["description"]), st["cell_muted"]),
-                         Paragraph(esc(money(inc["value"])), st["cell_r"])])
-        story.append(_table(rows, [40 * mm, 45 * mm, content_w - 115 * mm, 30 * mm]))
+            story.append(Paragraph(f"<font name='Inter-Medium' color='#0F172A'>{esc(inc['service'])}</font> for "
+                                   f"{esc(inc['item'])} × {inc['quantity']:,} — {esc(inc['description'])}", st["bullet"], bulletText="•"))
 
-    # Pricing basis (client-appropriate rationale)
-    story.append(CondPageBreak(40 * mm))
-    story.append(Paragraph("Pricing basis", st["h2"]))
-    story.append(Paragraph(
-        "Prices reflect current distributor costs, volume pricing for the quantities requested and the service levels "
-        "described in this proposal. Where a value-added service is included, it is provided at no charge rather than "
-        "reducing product quality or support.", st["body"]))
-    for pl, ll in zip(strat.lines, loc.lines):
-        disc = f"{pl.discount_pct:.1f}% below list price" if pl.discount_pct > 0.05 else "list price"
-        extra = f"; includes {pl.bundle.name.lower()}" if pl.bundle else ""
-        wty = f"; {pl.warranty_months}-month warranty" if pl.category not in ("software", "service") else ""
-        story.append(Paragraph(f"<font name='Inter-Medium' color='#0F172A'>{esc(pl.name)}</font> — {disc}{esc(extra)}{wty}.",
-                               st["bullet"], bulletText="•"))
+    # ---- terms and conditions
+    story += [CondPageBreak(45 * mm), Spacer(1, 4 * mm), Paragraph("Terms and conditions", st["h3"])]
+    for i, (heading, text) in enumerate(_quotation_terms(company, parsed, strat, loc, proposal), 1):
+        story.append(Paragraph(f"<font name='Inter-Medium' color='#0F172A'>{i}. {esc(heading)}.</font> {esc(text)}", st["body"]))
+        story.append(Spacer(1, 1.2 * mm))
 
-    # Compliance matrix
-    if proposal.compliance:
-        story.append(CondPageBreak(60 * mm))
-        story.append(Paragraph("Requirement compliance", st["h2"]))
-        colour = {"Complies": GOOD, "Complies with note": WARN, "Clarification required": BAD, "Deviation": BAD, "Noted": MUTED}
-        shown = [r for r in proposal.compliance if r.status != "Noted"]
-        limit = 18
-        if len(shown) > limit:
-            # Long tenders: the quotation carries the exceptions; the full statement is a separate document.
-            order = {"Deviation": 0, "Clarification required": 1, "Complies with note": 2, "Complies": 3}
-            shown = sorted(shown, key=lambda r: order.get(r.status, 4))[:limit]
-            story.append(Paragraph(
-                f"The {len(proposal.compliance)} clauses of the tender are answered in the enclosed compliance statement. "
-                "Deviations, clarifications and qualified responses are summarised below.", st["body"]))
-            story.append(Spacer(1, 2 * mm))
-        rows = [[Paragraph(h, st["th"]) for h in ("Ref", "Requirement", "Status", "Response")]]
-        for r in shown:
-            resp = esc(r.response)
-            for e in r.evidence[:1]:
-                resp += f"<br/><font color='#64748B' size='6.8'>“{esc(e.text)}” — {esc(e.section)}</font>"
-            rows.append([
-                Paragraph(esc(r.ref), st["cell_muted"]), Paragraph(esc(r.requirement), st["cell"]),
-                Paragraph(f"<font name='Inter-SemiBold' color='{colour[r.status].hexval()}'>{esc(r.status)}</font>", st["cell"]),
-                Paragraph(resp, st["cell"]),
-            ])
-        story.append(_table(rows, [15 * mm, (content_w - 45 * mm) * 0.45, 30 * mm, (content_w - 45 * mm) * 0.55]))
-
-    # Delivery plan
-    story.append(CondPageBreak(55 * mm))
-    story.append(Paragraph("Delivery and implementation", st["h2"]))
-    rows = [[Paragraph(h, st["th"]) for h in ("Milestone", "Day", "Detail")]]
-    for m_ in proposal.milestones:
-        rows.append([Paragraph(f"<font name='Inter-Medium'>{esc(m_.label)}</font>", st["cell"]),
-                     Paragraph(f"Day {m_.day}", st["cell"]), Paragraph(esc(m_.detail), st["cell"])])
-    story.append(_table(rows, [42 * mm, 18 * mm, content_w - 60 * mm]))
-    story.append(Spacer(1, 3 * mm))
-    for p in proposal.delivery_plan:
-        story += [Paragraph(esc(p), st["body"]), Spacer(1, 3)]
-
-    # Terms and acceptance
-    story.append(CondPageBreak(60 * mm))
-    story.append(Paragraph("Terms", st["h2"]))
-    for t in proposal.terms:
-        story.append(Paragraph(esc(t), st["bullet"], bulletText="•"))
-    story.append(Spacer(1, 8 * mm))
+    # ---- bank details and signature
+    bank = company.get("bank") or {}
+    bank_rows = [(k, v) for k, v in (("Account name", company["name"]), ("Bank", bank.get("name")),
+                                     ("Account no.", bank.get("account")), ("IFSC", bank.get("ifsc")),
+                                     ("Sort / routing code", bank.get("routing")), ("SWIFT", bank.get("swift"))) if v]
+    bank_block = _kv_block("Bank details for payment", bank_rows, st, half)
+    signer = proposal.signatory
     sign = Table([
-        [Paragraph("ACCEPTED ON BEHALF OF THE CLIENT", st["label"]), Paragraph(f"FOR {esc(company['name']).upper()}", st["label"])],
-        [Spacer(1, 16 * mm), Spacer(1, 16 * mm)],
-        [Paragraph("Name, title, signature and date", st["small"]),
-         Paragraph(f"{esc(proposal.signatory['name'])}, {esc(proposal.signatory['title'])}", st["small"])],
-    ], colWidths=[half, half], hAlign="LEFT")
-    sign.setStyle(TableStyle([("LINEBELOW", (0, 1), (0, 1), 0.6, MUTED), ("LINEBELOW", (1, 1), (1, 1), 0.6, MUTED),
-                              ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (0, -1), 10 * mm)]))
-    story.append(KeepTogether([sign]))
-    bank = company["bank"]
-    story += [Spacer(1, 6 * mm), Paragraph(
-        f"Bank details: {esc(bank['name'])} · A/C {esc(bank['account'])} · IFSC {esc(bank['ifsc'])} · SWIFT {esc(bank['swift'])}",
-        st["small"])]
+        [Paragraph(f"FOR {esc(company['name']).upper()}", st["label"])],
+        [Spacer(1, 17 * mm)],
+        [Paragraph(f"<font name='Inter-SemiBold' color='#0F172A'>{esc(signer['name'])}</font><br/>"
+                   f"{esc(signer['title'])}<br/>Authorised signatory", st["value"])],
+    ], colWidths=[half])
+    sign.setStyle(TableStyle([("LINEBELOW", (0, 1), (0, 1), 0.6, MUTED), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
+    closing = Table([[bank_block, sign]], colWidths=[half + 8 * mm, half])
+    closing.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                                 ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    story += [Spacer(1, 6 * mm), KeepTogether([closing])]
 
     doc.build(story, canvasmaker=NumberedCanvas)
     return path

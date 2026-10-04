@@ -42,7 +42,10 @@ def test_pdfs_render_with_correct_totals(tmp_path):
                        loc=m["localisation"], proposal=m["proposal"], approval=None)
     text = "\n".join(page.extract_text() for page in PdfReader(q).pages)
     assert f"{m['localisation'].grand_total:,.2f}" in text
-    assert "Requirement compliance" in text and "Harbourline Freight LLC" in text
-    assert "Landed cost" not in text  # costs never leak into the client document
+    assert "QUOTATION" in text and "Harbourline Freight LLC" in text and m["proposal"].quote_number in text
+    assert "Amount in words: UAE Dirhams" in text and "Terms and conditions" in text and "Authorised signatory" in text
+    # The quotation is a commercial document: no internal economics or analysis.
+    for internal in ("Landed cost", "margin", "Win probability", "Requirement compliance", "Executive summary"):
+        assert internal not in text
     memo_text = "\n".join(page.extract_text() for page in PdfReader(memo).pages)
     assert "CONFIDENTIAL" in memo_text and "Rationale by line" in memo_text
