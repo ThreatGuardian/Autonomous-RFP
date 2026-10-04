@@ -67,8 +67,8 @@ class Settings:
     cookie_secure: bool = field(default_factory=lambda: _flag("COOKIE_SECURE", _production()))
     # Whether anyone who can reach the server may create an account.
     allow_signup: bool = field(default_factory=lambda: _flag("ALLOW_SIGNUP", not _production()))
-    # Seed the demo account (priya / tenderdesk). Never in production.
-    demo_user: bool = field(default_factory=lambda: _flag("DEMO_USER", not _production()) and not _production())
+    # Seed the demo account (priya / tenderdesk) when explicitly asked to. Never in production.
+    demo_user: bool = field(default_factory=lambda: _flag("DEMO_USER", False) and not _production())
     # Firebase project used to verify Google / SSO sign-in tokens. Empty disables Firebase sign-in.
     firebase_project_id: str = field(default_factory=lambda: _env("FIREBASE_PROJECT_ID", ""))
     # Extra browser origins allowed to call the API (comma-separated), besides the server's own.

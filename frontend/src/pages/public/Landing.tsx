@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "motion/react";
 import { Logo } from "../../components/layout/Shell";
 import { useAuth } from "../../lib/auth";
 
@@ -29,8 +30,11 @@ function Nav() {
     return () => window.removeEventListener("scroll", h);
   }, []);
   return (
-    <header className={clsx("fixed inset-x-0 top-0 z-40 transition-all duration-300", scrolled ? "border-b border-line bg-white/80 backdrop-blur-xl" : "bg-transparent")}>
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
+    <header className={clsx("fixed inset-x-0 z-50 transition-all duration-500", scrolled ? "top-4 px-4" : "top-0 px-0")}>
+      <div className={clsx(
+        "mx-auto flex items-center justify-between transition-all duration-500",
+        scrolled ? "h-14 max-w-[1000px] rounded-full border border-white/50 bg-white/30 px-6 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-lg backdrop-saturate-150" : "h-16 max-w-[1200px] border border-transparent px-6"
+      )}>
         <Link to="/" className="flex items-center gap-2.5"><Logo className="size-7" /><span className="text-[15px] font-semibold tracking-[-0.01em]">Tenderdesk</span></Link>
         <nav className="hidden items-center gap-1 md:flex">
           {[["Product", "#product"], ["How it works", "#how"], ["Pricing logic", "#pricing"], ["Trust", "#trust"]].map(([l, h]) => (
@@ -78,10 +82,10 @@ function HeroVisual() {
   return (
     <div className="relative mx-auto mt-16 max-w-[1040px] px-4 md:px-0">
       <div className="absolute -inset-x-10 -top-10 bottom-0 -z-10 rounded-[40px] bg-[radial-gradient(60%_60%_at_50%_30%,rgba(224,164,58,0.18),transparent_70%)]" />
-      <div className="animate-rise overflow-hidden rounded-2xl border border-line bg-white shadow-[0_40px_80px_-24px_rgb(11_18_32/0.28),0_8px_24px_-8px_rgb(11_18_32/0.12)]" style={{ animationDelay: ".25s" }}>
+      <div className="animate-rise overflow-hidden rounded-2xl border border-white/50 bg-white/60 shadow-[0_40px_80px_-24px_rgba(31,38,135,0.15),0_8px_24px_-8px_rgba(31,38,135,0.1)] backdrop-blur-xl backdrop-saturate-150" style={{ animationDelay: ".25s" }}>
         <div className="flex items-center gap-2 border-b border-line bg-[#fafbfc] px-4 py-2.5">
           <span className="size-2.5 rounded-full bg-[#e5e7eb]" /><span className="size-2.5 rounded-full bg-[#e5e7eb]" /><span className="size-2.5 rounded-full bg-[#e5e7eb]" />
-          <div className="mx-auto rounded-md bg-white px-3 py-0.5 text-[11px] text-subtle ring-1 ring-line">tenderdesk · requests · RFP-2026-0003</div>
+          <div className="mx-auto rounded-md bg-white px-3 py-0.5 text-[11px] text-subtle ring-1 ring-line">tenderdesk · requests · DES-PU-2026</div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[180px_1fr]">
           <div className="hidden border-r border-line bg-[#f7f8f9] p-3 md:block">
@@ -92,8 +96,8 @@ function HeroVisual() {
           <div className="p-4 text-left">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-[10.5px] text-subtle">Harbourline Freight LLC · Dubai</div>
-                <div className="text-[15px] font-semibold tracking-[-0.01em]">Regional office fit-out</div>
+                <div className="text-[10.5px] text-subtle">DES Pune University · Pune</div>
+                <div className="text-[15px] font-semibold tracking-[-0.01em]">IT Infrastructure Upgrade</div>
               </div>
               <div className="flex gap-1.5">
                 <span className="rounded-md border border-line px-2 py-1 text-[10.5px] text-ink-soft">Quotation</span>
@@ -119,12 +123,12 @@ function HeroVisual() {
       </div>
 
       {/* floating insight cards */}
-      <div className="animate-float-a absolute -left-4 top-[46%] hidden w-[270px] rounded-xl border border-line bg-white p-4 text-left shadow-[var(--shadow-pop)] lg:block xl:-left-20">
+      <div className="animate-float-a absolute -left-4 top-[46%] hidden w-[270px] rounded-xl border border-white/60 bg-white/70 p-4 text-left shadow-[var(--shadow-pop)] backdrop-blur-md backdrop-saturate-150 lg:block xl:-left-20">
         <div className="flex items-center gap-2 text-[11px] font-medium text-rose-700"><span className="size-1.5 rounded-full bg-rose-600" />Competitor 6.8% below our cost</div>
         <div className="mt-2 text-[12.5px] font-semibold leading-snug text-ink">Matching would lose ₹2,10,095 on this line.</div>
         <div className="mt-1.5 text-[11.5px] leading-relaxed text-muted">Held at ₹82,900 and included on-site deployment, worth ₹2,500 a unit, instead.</div>
       </div>
-      <div className="animate-float-b absolute -right-4 top-[16%] hidden w-[210px] rounded-xl border border-line bg-white p-4 text-left shadow-[var(--shadow-pop)] lg:block xl:-right-16">
+      <div className="animate-float-b absolute -right-4 top-[16%] hidden w-[210px] rounded-xl border border-white/60 bg-white/70 p-4 text-left shadow-[var(--shadow-pop)] backdrop-blur-md backdrop-saturate-150 lg:block xl:-right-16">
         <div className="text-[10.5px] font-medium uppercase tracking-[0.06em] text-muted">Win probability</div>
         <div className="mt-2 flex items-center gap-3">
           <svg viewBox="0 0 36 36" className="size-12 -rotate-90">
@@ -134,9 +138,9 @@ function HeroVisual() {
           <div><div className="text-[20px] font-semibold tnum">70%</div><div className="text-[11px] text-muted">revenue-weighted</div></div>
         </div>
       </div>
-      <div className="animate-float-a absolute -bottom-6 right-10 hidden items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 text-left shadow-[var(--shadow-pop)] md:flex" style={{ animationDelay: "1.2s" }}>
+      <div className="animate-float-a absolute -bottom-6 right-10 hidden items-center gap-3 rounded-xl border border-white/60 bg-white/70 px-4 py-3 text-left shadow-[var(--shadow-pop)] backdrop-blur-md backdrop-saturate-150 md:flex" style={{ animationDelay: "1.2s" }}>
         <span className="grid size-8 place-items-center rounded-full bg-emerald-50 text-emerald-700"><FileText className="size-4" /></span>
-        <div><div className="text-[12.5px] font-semibold">Quotation ready · AED 343,881</div><div className="text-[11px] text-muted">5% VAT applied · drafted in 3.1 s</div></div>
+        <div><div className="text-[12.5px] font-semibold">Quotation ready · ₹83,50,860</div><div className="text-[11px] text-muted">18% GST applied · drafted in 3.1 s</div></div>
       </div>
     </div>
   );
@@ -210,6 +214,8 @@ export default function Landing() {
   useReveal();
   const { user } = useAuth();
   const primary = user ? "/app" : "/signup";
+  const { scrollY } = useScroll();
+  const yHero = useTransform(scrollY, [0, 800], [0, 200]);
   return (
     <div className="min-h-screen bg-white text-ink">
       <Nav />
@@ -222,25 +228,49 @@ export default function Landing() {
             <span className="size-1.5 rounded-full bg-accent" /> Built for SMEs that win business through RFPs
             <ArrowRight className="size-3 text-muted transition group-hover:translate-x-0.5" />
           </Link>
-          <h1 className="animate-rise text-balance mx-auto mt-6 max-w-[900px] text-[44px] font-semibold leading-[1.05] tracking-[-0.035em] md:text-[64px]" style={{ animationDelay: ".05s" }}>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, type: "spring", bounce: 0.2 }}
+            className="text-balance mx-auto mt-6 max-w-[900px] text-[44px] font-semibold leading-[1.05] tracking-[-0.035em] md:text-[64px]"
+          >
             Answer every RFP with a quotation that <span className="gold-text">wins on value</span>, in minutes.
-          </h1>
-          <p className="animate-rise text-balance mx-auto mt-6 max-w-[640px] text-[17px] leading-relaxed text-muted" style={{ animationDelay: ".12s" }}>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, type: "spring", bounce: 0.2 }}
+            className="text-balance mx-auto mt-6 max-w-[640px] text-[17px] leading-relaxed text-muted"
+          >
             Tenderdesk reads the request, checks your cost and stock, studies competitor prices and drafts a branded quotation — with the reasoning behind every price. You review, adjust and send.
-          </p>
-          <div className="animate-rise mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row" style={{ animationDelay: ".18s" }}>
-            <Link to={primary} className="group inline-flex h-11 items-center gap-2 rounded-xl bg-ink px-6 text-[14px] font-medium text-white shadow-[0_8px_24px_-8px_rgb(11_18_32/0.6)] transition hover:-translate-y-0.5 hover:bg-ink-soft">
-              {user ? "Open the console" : "Get started"} <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-            </Link>
-            <a href="#how" className="inline-flex h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-6 text-[14px] font-medium text-ink transition hover:-translate-y-0.5 hover:bg-[#fafbfc]">See how it works</a>
-          </div>
-          <div className="animate-rise mt-5 flex items-center justify-center gap-5 text-[12.5px] text-muted" style={{ animationDelay: ".22s" }}>
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, type: "spring", bounce: 0.2 }}
+            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link to={primary} className="group inline-flex h-11 items-center gap-2 rounded-xl bg-ink px-6 text-[14px] font-medium text-white shadow-[0_8px_24px_-8px_rgb(11_18_32/0.6)] transition hover:bg-ink-soft">
+                {user ? "Open the console" : "Get started"} <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+              </Link>
+            </motion.div>
+            <motion.a whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} href="#how" className="inline-flex h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-6 text-[14px] font-medium text-ink transition hover:bg-[#fafbfc]">See how it works</motion.a>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, type: "spring", bounce: 0.2 }}
+            className="mt-5 flex items-center justify-center gap-5 text-[12.5px] text-muted"
+          >
             {["PDF, Word or pasted text", "Every price explained", "You approve before anything is sent"].map((t) => (
               <span key={t} className="hidden items-center gap-1.5 sm:inline-flex"><Check className="size-3.5 text-emerald-600" />{t}</span>
             ))}
-          </div>
+          </motion.div>
         </div>
-        <HeroVisual />
+        <motion.div style={{ y: yHero }}>
+          <HeroVisual />
+        </motion.div>
       </section>
 
       {/* CLIENTS */}
