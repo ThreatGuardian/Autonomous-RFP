@@ -11,6 +11,11 @@ Turns an unstructured request into a structured :class:`ParsedRfp`:
    classifiers so "within 30 days" is never read as thirty units;
 5. each item resolved to a catalogue SKU by hybrid retrieval (with a category
    prior from the trained category classifier) re-ranked by specification fit.
+
+When the language model is enabled (``app.llm``), Claude also reads the whole document:
+its item list and terms are reconciled with the rules above, it types the requirement
+sentences using reviewers' past corrections, and it chooses each product from the
+retrieved candidates. The rules remain the fallback and the cross-check.
 """
 
 from __future__ import annotations
@@ -27,6 +32,8 @@ from app.agents.messages import (
 )
 from app.db.models import Customer, Product
 from app.db.session import session_scope
+from app.llm import parser as llm_parser
+from app.llm.client import LLM, LLMError, get_llm
 from app.ml.registry import registry
 from app.nlp import extractors as ex
 from app.nlp.gazetteer import countries, country_currency
@@ -311,11 +318,23 @@ class RfpParserAgent(Agent):
         log.info("Clauses classified", sentences=len(text_units), requirements=len(requirements), by_type=counts,
                  mandatory=sum(r.modality == "mandatory" for r in requirements))
 
+        # --- the parser model reads the whole document and cross-checks the rules
+        llm = get_llm()
+        if llm is not None:
+            raw_items = self._model_reading(llm, text, raw_items, client, terms, dates, log, warnings)
+            self._model_clause_types(llm, requirements, req_units, long_form, log)
+            counts = {}
+            for r in requirements:
+                counts[r.type] = counts.get(r.type, 0) + 1
+
         # --- specifications linked from technical sections ("as per specification 5.1")
         spec_links = self._link_specs(raw_items, sections, units, category_model, log) if long_form else {}
 
         # --- product resolution
         items = self._resolve_items(raw_items, category_model, log)
+        if llm is not None:
+            self._model_products(llm, items, log)
+            log.info("Language model usage", model=llm.model, **llm.usage.as_dict())
         for raw, item in zip(self._dedupe(raw_items), items):
             sid = spec_links.get(id(raw))
             if sid:
@@ -358,6 +377,7 @@ class RfpParserAgent(Agent):
                 "pages": layout.pages,
                 "sections": len(sections),
                 "mandatory": sum(r.modality == "mandatory" for r in requirements),
+                "engine": f"{llm.model} with rules" if llm is not None else "rules",
             },
             document=document,
         )
@@ -529,6 +549,118 @@ class RfpParserAgent(Agent):
             sections=out, facts=facts, key_dates=key_dates, eligibility=eligibility, evaluation=evaluation, forms=forms,
             notes=layout.notes,
         )
+
+    # ------------------------------------------------------------------ language model
+
+    def _model_reading(self, llm: LLM, text: str, rule_items: list[RawItem], client: ClientInfo,
+                       terms: CommercialTerms, dates: dict[str, str | None], log: StageLog,
+                       warnings: list[str]) -> list[RawItem]:
+        """Read the document with the parser model; reconcile its items and fill gaps in client and terms."""
+        try:
+            found = llm_parser.extract(llm, text)
+        except LLMError as exc:
+            log.warn("Parser model unavailable; items and terms from rules only", error=str(exc))
+            return rule_items
+        c = found.client
+        filled = {}
+        for key, value in (("name", c.name), ("contact_name", c.contact_name), ("email", c.email), ("phone", c.phone),
+                           ("city", c.city)):
+            if value and not getattr(client, key):
+                setattr(client, key, value.strip()[:160])
+                filled[key] = value
+        code = (c.country_code or "").upper()
+        if not client.country and code in countries():
+            client.country, client.country_name = code, countries()[code].name
+            client.region = c.region if c.region in countries()[code].regions else None
+            filled["country"] = code
+        t = found.terms
+        for key, value in (("delivery_days", t.delivery_days), ("payment_days", t.payment_days),
+                           ("advance_pct", t.advance_pct), ("warranty_months_required", t.warranty_months)):
+            if value is not None and value >= 0 and getattr(terms, key, None) is None:
+                setattr(terms, key, value)
+                filled[key] = value
+        if t.incoterm and not terms.incoterm and t.incoterm.upper() in ex.INCOTERMS:
+            terms.incoterm, terms.incoterm_source = t.incoterm.upper(), "read by the parser model"
+            filled["incoterm"] = terms.incoterm
+        if not dates.get("due") and llm_parser.due_date(found.due_date):
+            dates["due"] = found.due_date
+            filled["due_date"] = found.due_date
+        if filled:
+            log.info("Parser model filled fields the rules missed", **filled)
+
+        model_items = [llm_parser.to_raw_item(i) for i in found.items if i.quantity > 0 and i.description.strip()]
+        if not model_items:
+            log.warn("Parser model listed no items; using the rule-based item list")
+            return rule_items
+        rec = llm_parser.reconcile(rule_items, model_items)
+        log.decision("Items read by the parser model and reconciled with the rules", model_items=len(model_items),
+                     rule_items=len(rule_items), agreed=rec.agreed, quantity_differences=rec.quantity_changes or None,
+                     only_model=rec.model_only or None, only_rules=rec.rules_only or None)
+        for change in rec.quantity_changes:
+            warnings.append(f"Quantity differs between readings ({change}); the parser model's value is used — please confirm.")
+        for desc in rec.rules_only:
+            warnings.append(f"'{desc}' looked like an item to the rules but not to the parser model; it is not priced.")
+        for note in found.ambiguities[:5]:
+            warnings.append(f"To confirm: {note}")
+        return rec.items
+
+    def _model_clause_types(self, llm: LLM, requirements: list[Requirement], req_units: list[Unit], long_form: bool,
+                            log: StageLog) -> None:
+        """Re-type requirement sentences with the parser model (table rows keep their section's type)."""
+        labels = [str(l) for l in registry.clause_classifier().labels if str(l) != "line_item"]
+        clauses = [(r.id, r.text) for r in requirements if r.source == "text"]
+        try:
+            typed = llm_parser.classify(llm, clauses, labels)
+        except LLMError as exc:
+            log.warn("Parser model could not type the requirements; trained classifier used", error=str(exc))
+            return
+        changed = 0
+        for r, u in zip(requirements, req_units):
+            label = typed.get(r.id)
+            if label is None or label == r.type:
+                continue
+            r.type, r.confidence = label, 0.9
+            r.category = categorise(u.text, u.kind, label, 0.9, long_form)
+            changed += 1
+        log.info("Requirement types reviewed by the parser model", typed=len(typed), changed_from_classifier=changed)
+
+    def _model_products(self, llm: LLM, items: list[RequestedItem], log: StageLog) -> None:
+        """Let the parser model choose each product among the retrieved candidates."""
+        store = catalogue_store()
+        lines = []
+        for it in items:
+            if not it.candidates:
+                continue
+            cands = []
+            for c in it.candidates[:4]:
+                p = store.products.get(c.sku)
+                if p is not None:
+                    cands.append({"sku": p.sku, "name": p.name, "brand": p.brand, "category": p.category,
+                                  "specs": llm_parser.spec_summary(p.specs or {}) or p.description[:200]})
+            lines.append({"line": it.line_no, "request": it.description[:300], "specs": llm_parser.spec_summary(it.specs),
+                          "candidates": cands})
+        try:
+            choices = llm_parser.choose(llm, lines)
+        except LLMError as exc:
+            log.warn("Parser model could not choose products; retrieval ranking used", error=str(exc))
+            return
+        for it in items:
+            choice = choices.get(it.line_no)
+            if choice is None:
+                continue
+            if choice.sku is None:
+                if it.status == "matched":
+                    it.status = "ambiguous"
+                log.decision(f"Line {it.line_no}: no candidate meets the request", reason=choice.reason)
+                continue
+            cand = next(c for c in it.candidates if c.sku == choice.sku)
+            cand.reasons.insert(0, f"Chosen by the parser model: {choice.reason}")
+            changed = choice.sku != it.selected_sku
+            it.selected_sku, it.match_confidence = cand.sku, round(cand.score, 3)
+            # The model's choice still has to pass the specification check and the retrieval floor.
+            weak = (cand.spec_fit is not None and cand.spec_fit < 0.5) or cand.score < UNMATCHED_THRESHOLD
+            it.status = "ambiguous" if weak else "matched"
+            log.decision(f"Line {it.line_no}: {'changed to' if changed else 'confirmed'} {cand.sku}", reason=choice.reason)
 
     def summarize(self, output: ParsedRfp) -> str:  # type: ignore[override]
         s = output.stats

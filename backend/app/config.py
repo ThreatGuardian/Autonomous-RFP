@@ -53,6 +53,12 @@ class Settings:
 
     pipeline_workers: int = field(default_factory=lambda: int(_env("PIPELINE_WORKERS", "4")))
 
+    # Language-model agents (Claude). "auto" uses them when ANTHROPIC_API_KEY is set,
+    # "on" requires them, "off" runs the rule-based agents only.
+    llm_mode: str = field(default_factory=lambda: _env("LLM", "auto").strip().lower())
+    llm_model: str = field(default_factory=lambda: _env("LLM_MODEL", "claude-opus-5-5"))
+    llm_timeout_s: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT", "300")))
+
     # Authentication: session cookies signed with a per-install secret.
     require_auth: bool = field(default_factory=lambda: _env("REQUIRE_AUTH", "1") not in ("0", "false", "no"))
     session_hours: int = field(default_factory=lambda: int(_env("SESSION_HOURS", "12")))

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { AlertTriangle, ChevronDown, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, MessageSquareQuote, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { StrategyBadge, WarningList } from "../../components/domain";
 import { Badge, Button, Card, Meter, Stat, StatGrid } from "../../components/ui";
@@ -29,6 +29,16 @@ export function PricingTab({ rfp, editable }: { rfp: RfpDetail; editable: boolea
         <Stat label="Win probability" value={<AnimatedNumber value={strat.win_probability * 100} format={(v) => `${Math.round(v)}%`} />} hint={`${strat.below_cost_competitors} line(s) with below-cost rivals`} />
         <Stat label="Expected profit" value={<AnimatedNumber value={strat.expected_profit} format={(v) => money(v, base, { compact: true })} />} hint="Margin × win probability" />
       </StatGrid>
+
+      {strat.agent_summary && (
+        <div className="flex gap-3 rounded-2xl border border-line bg-white px-5 py-4 shadow-[var(--shadow-card)]">
+          <MessageSquareQuote className="mt-0.5 size-4 shrink-0 text-accent" />
+          <div>
+            <div className="text-[11.5px] font-semibold uppercase tracking-[0.06em] text-muted">Pricing analyst's assessment</div>
+            <p className="mt-1 text-[13px] leading-[1.6] text-ink-soft">{strat.agent_summary}</p>
+          </div>
+        </div>
+      )}
 
       {strat.award && <AwardCard rfpId={rfp.id} award={strat.award} currency={base} editable={editable} />}
 

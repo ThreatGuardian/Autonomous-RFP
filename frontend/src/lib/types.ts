@@ -95,7 +95,7 @@ export interface ParsedRfp {
     price_weight_pct: number | null; lowest_price_award: boolean;
   };
   line_items: RequestedItem[]; requirements: Requirement[]; requirement_counts: Record<string, number>;
-  warnings: string[]; stats: Record<string, number>; document?: TenderDocument | null;
+  warnings: string[]; stats: Record<string, number> & { engine?: string }; document?: TenderDocument | null;
 }
 
 export interface ValueAddOption { code: string; name: string; kind: string; description: string; unit_cost: number; unit_value: number; warranty_extension_months: number }
@@ -125,6 +125,8 @@ export interface CompetitiveAnalysis {
   lines: PricedLine[]; revenue: number; cost: number; bundle_cost: number; margin: number; margin_pct: number;
   expected_profit: number; win_probability: number; strategy_counts: Record<string, number>; below_cost_competitors: number;
   summary: string; warnings: string[]; award?: AwardAnalysis | null;
+  /** The pricing agent's assessment of the bid, when the language model is enabled. */
+  agent_summary?: string | null;
 }
 export interface AwardAnalysis {
   rule: "L1" | "QCBS" | "Weighted"; our_total: number; cost_total: number; floor_total: number;

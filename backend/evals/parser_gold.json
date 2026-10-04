@@ -1,0 +1,460 @@
+{
+ "note": "Expected line items per sample (description, quantity, catalogue SKU). Produced by the rule-based parser and checked by the automated tests and by hand; review before relying on new entries.",
+ "samples": [
+  {
+   "file": "01_sahyadri_campus_refresh.txt",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Business laptops for faculty, Intel Core i5 or better, 16GB RAM, 512GB SSD, 14 inch display",
+     "quantity": 60,
+     "sku": "MSS-LT-101"
+    },
+    {
+     "description": "Desktop computers (tower), Core i5, 16GB RAM, 512GB SSD, Windows 11 Pro",
+     "quantity": 120,
+     "sku": "MSS-DT-201"
+    },
+    {
+     "description": "24-inch Full HD monitors with height adjustable stand",
+     "quantity": 120,
+     "sku": "MSS-MN-401"
+    },
+    {
+     "description": "48-port PoE+ managed switches with Layer 3 support",
+     "quantity": 4,
+     "sku": "MSS-NW-502"
+    },
+    {
+     "description": "Wi-Fi 6 ceiling access points",
+     "quantity": 24,
+     "sku": "MSS-NW-504"
+    },
+    {
+     "description": "Online UPS 3kVA",
+     "quantity": 4,
+     "sku": "MSS-PW-802"
+    },
+    {
+     "description": "Cat6 cable, 305 m",
+     "quantity": 30,
+     "sku": "MSS-CB-902"
+    },
+    {
+     "description": "Wireless keyboard and mouse combos",
+     "quantity": 120,
+     "sku": "MSS-PR-111"
+    }
+   ]
+  },
+  {
+   "file": "02_kaveri_network_upgrade.txt",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Cisco Catalyst 24-port PoE+ access switch",
+     "quantity": 10,
+     "sku": "MSS-NW-501"
+    },
+    {
+     "description": "Next generation firewall, 10 Gbps throughput",
+     "quantity": 2,
+     "sku": "MSS-NW-506"
+    },
+    {
+     "description": "Rack server, 2x Xeon Silver, 64GB RAM, dual power supply",
+     "quantity": 3,
+     "sku": "MSS-SV-601"
+    },
+    {
+     "description": "8-bay rackmount NAS for backup",
+     "quantity": 1,
+     "sku": "MSS-ST-701"
+    },
+    {
+     "description": "42U server rack",
+     "quantity": 2,
+     "sku": "MSS-RK-901"
+    },
+    {
+     "description": "Backup software subscription, 5 instances",
+     "quantity": 2,
+     "sku": "MSS-SW-123"
+    },
+    {
+     "description": "Network design and deployment engineer days",
+     "quantity": 8,
+     "sku": "MSS-SV-132"
+    }
+   ]
+  },
+  {
+   "file": "03_harbourline_dubai.txt",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Dell Latitude business laptops, Core i5, 16GB RAM, 512GB SSD",
+     "quantity": 45,
+     "sku": "MSS-LT-101"
+    },
+    {
+     "description": "USB-C docking stations",
+     "quantity": 45,
+     "sku": "MSS-PR-114"
+    },
+    {
+     "description": "27\" Full HD monitors",
+     "quantity": 45,
+     "sku": "MSS-MN-402"
+    },
+    {
+     "description": "Video conferencing bars for small meeting rooms",
+     "quantity": 4,
+     "sku": "MSS-PR-116"
+    },
+    {
+     "description": "Microsoft 365 Business Standard licences (annual)",
+     "quantity": 60,
+     "sku": "MSS-SW-121"
+    },
+    {
+     "description": "USB headsets for Teams calls",
+     "quantity": 60,
+     "sku": "MSS-PR-113"
+    },
+    {
+     "description": "Endpoint protection licences",
+     "quantity": 60,
+     "sku": "MSS-SW-124"
+    }
+   ]
+  },
+  {
+   "file": "04_cedar_valley_school.txt",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Student laptops, Core i5, 8GB RAM, 512GB SSD",
+     "quantity": 150,
+     "sku": "MSS-LT-105"
+    },
+    {
+     "description": "27 inch 4K monitors, USB-C",
+     "quantity": 40,
+     "sku": "MSS-MN-403"
+    },
+    {
+     "description": "Wi-Fi 6 access points",
+     "quantity": 60,
+     "sku": "MSS-NW-504"
+    },
+    {
+     "description": "24-port PoE switches, smart managed",
+     "quantity": 12,
+     "sku": "MSS-NW-503"
+    },
+    {
+     "description": "Network laser printers",
+     "quantity": 20,
+     "sku": "MSS-PR-115"
+    },
+    {
+     "description": "Interactive whiteboards, 75 inch",
+     "quantity": 12,
+     "sku": null
+    }
+   ]
+  },
+  {
+   "file": "05_rheinland_engineering.txt",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "CAD workstation, Core i9, 64GB RAM, RTX GPU, 2TB SSD",
+     "quantity": 8,
+     "sku": "MSS-WS-301"
+    },
+    {
+     "description": "32 inch 4K monitors",
+     "quantity": 16,
+     "sku": "MSS-MN-404"
+    },
+    {
+     "description": "Online UPS 1500VA",
+     "quantity": 8,
+     "sku": "MSS-PW-802"
+    },
+    {
+     "description": "4-bay NAS for project files",
+     "quantity": 2,
+     "sku": "MSS-ST-702"
+    },
+    {
+     "description": "8TB NAS hard drives",
+     "quantity": 8,
+     "sku": "MSS-ST-703"
+    }
+   ]
+  },
+  {
+   "file": "06_brightwater_medical_london.pdf",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Business laptops, Core i7, 32GB RAM, 1TB SSD",
+     "quantity": 30,
+     "sku": "MSS-LT-102"
+    },
+    {
+     "description": "27 inch 4K USB-C monitors",
+     "quantity": 30,
+     "sku": "MSS-MN-403"
+    },
+    {
+     "description": "USB-C docking stations",
+     "quantity": 30,
+     "sku": "MSS-PR-114"
+    },
+    {
+     "description": "Wi-Fi 6 access points for clinic floors",
+     "quantity": 18,
+     "sku": "MSS-NW-504"
+    },
+    {
+     "description": "Video conferencing bar for meeting rooms",
+     "quantity": 3,
+     "sku": "MSS-PR-116"
+    },
+    {
+     "description": "Endpoint protection licences",
+     "quantity": 120,
+     "sku": "MSS-SW-124"
+    }
+   ]
+  },
+  {
+   "file": "07_lionsgate_singapore.docx",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Business laptops Core i5, 16GB RAM, 512GB SSD",
+     "quantity": 25,
+     "sku": "MSS-LT-101"
+    },
+    {
+     "description": "24 inch monitors Full HD, height adjustable",
+     "quantity": 25,
+     "sku": "MSS-MN-401"
+    },
+    {
+     "description": "Wireless keyboard and mouse sets",
+     "quantity": 25,
+     "sku": "MSS-PR-111"
+    },
+    {
+     "description": "Microsoft 365 Business Standard annual subscription",
+     "quantity": 25,
+     "sku": "MSS-SW-121"
+    },
+    {
+     "description": "Network switch 24-port PoE, smart managed",
+     "quantity": 2,
+     "sku": "MSS-NW-503"
+    },
+    {
+     "description": "On-site installation and configuration per device",
+     "quantity": 25,
+     "sku": "MSS-SV-131"
+    }
+   ]
+  },
+  {
+   "file": "08_godavari_smart_city_tender.pdf",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Desktop Computer as per specification 5.1 (Core i5, 16 GB RAM, 512 GB SSD, tower)",
+     "quantity": 85,
+     "sku": "MSS-DT-201"
+    },
+    {
+     "description": "24 inch Full HD IPS Monitor as per specification 5.2",
+     "quantity": 85,
+     "sku": "MSS-MN-405"
+    },
+    {
+     "description": "Laptop as per specification 5.3 (Core i5, 16 GB RAM, 512 GB SSD, 14 inch)",
+     "quantity": 20,
+     "sku": "MSS-LT-101"
+    },
+    {
+     "description": "24-port Layer 3 PoE+ Access Switch as per specification 5.4",
+     "quantity": 12,
+     "sku": "MSS-NW-501"
+    },
+    {
+     "description": "48-port Layer 3 PoE+ Core Switch as per specification 5.5",
+     "quantity": 2,
+     "sku": "MSS-NW-502"
+    },
+    {
+     "description": "Wi-Fi 6 ceiling mount Access Point as per specification 5.6",
+     "quantity": 36,
+     "sku": "MSS-NW-504"
+    },
+    {
+     "description": "Next Generation Firewall, 1U, as per specification 5.7",
+     "quantity": 1,
+     "sku": "MSS-NW-507"
+    },
+    {
+     "description": "3 kVA Online UPS as per specification 5.8",
+     "quantity": 12,
+     "sku": "MSS-PW-802"
+    },
+    {
+     "description": "Network monochrome laser printer with duplex as per specification 5.9",
+     "quantity": 12,
+     "sku": "MSS-PR-115"
+    },
+    {
+     "description": "8-bay rack mount NAS as per specification 5.10",
+     "quantity": 1,
+     "sku": "MSS-ST-701"
+    },
+    {
+     "description": "Cat6 UTP cable box of 305 m",
+     "quantity": 40,
+     "sku": "MSS-CB-902"
+    }
+   ]
+  },
+  {
+   "file": "09_konkan_university_rfp.docx",
+   "company": "meridian",
+   "items": [
+    {
+     "description": "Faculty notebook, Core Ultra 7, 32 GB RAM, 1 TB SSD, 14 inch",
+     "quantity": 40,
+     "sku": "MSS-LT-102"
+    },
+    {
+     "description": "Research workstation, Core i9, 64 GB RAM, RTX A2000",
+     "quantity": 6,
+     "sku": "MSS-WS-301"
+    },
+    {
+     "description": "27 inch 4K USB-C monitor",
+     "quantity": 12,
+     "sku": "MSS-MN-403"
+    },
+    {
+     "description": "2U rack server, dual Xeon Silver, 128 GB RAM",
+     "quantity": 2,
+     "sku": "MSS-SV-603"
+    },
+    {
+     "description": "8-bay rack NAS",
+     "quantity": 1,
+     "sku": "MSS-ST-701"
+    },
+    {
+     "description": "8 TB NAS hard drives",
+     "quantity": 8,
+     "sku": "MSS-ST-703"
+    },
+    {
+     "description": "Backup software, 5 instances, annual subscription",
+     "quantity": 1,
+     "sku": "MSS-SW-123"
+    },
+    {
+     "description": "Windows Server 2022 Standard 16-core licence",
+     "quantity": 2,
+     "sku": "MSS-SW-122"
+    },
+    {
+     "description": "48-port PoE+ Layer 3 distribution switch",
+     "quantity": 6,
+     "sku": "MSS-NW-502"
+    },
+    {
+     "description": "Wi-Fi 6 ceiling access point, 4x4",
+     "quantity": 40,
+     "sku": "MSS-NW-504"
+    },
+    {
+     "description": "Next generation firewall, 1U, 20 Gbps",
+     "quantity": 2,
+     "sku": "MSS-NW-507"
+    },
+    {
+     "description": "Video collaboration bar, 4K, Teams certified",
+     "quantity": 10,
+     "sku": "MSS-PR-116"
+    },
+    {
+     "description": "Microsoft 365 Business Standard, annual, per user",
+     "quantity": 150,
+     "sku": "MSS-SW-121"
+    }
+   ]
+  },
+  {
+   "file": "10_des_pune_university_rfp.pdf",
+   "company": "datacare",
+   "items": [
+    {
+     "description": "Desktop Computer as per specification 5.1 (Core i5, 16 GB RAM, 512 GB SSD, tower)",
+     "quantity": 50,
+     "sku": "DCC-DT-201"
+    },
+    {
+     "description": "24 inch Full HD IPS Monitor as per specification 5.2",
+     "quantity": 50,
+     "sku": "DCC-MN-403"
+    },
+    {
+     "description": "USB Keyboard, wired, 104 keys, as per specification 5.3",
+     "quantity": 50,
+     "sku": "DCC-PR-501"
+    },
+    {
+     "description": "USB Optical Mouse, wired, as per specification 5.4",
+     "quantity": 50,
+     "sku": "DCC-PR-512"
+    },
+    {
+     "description": "USB Headset with noise-cancelling microphone as per specification 5.5",
+     "quantity": 50,
+     "sku": "DCC-AU-601"
+    },
+    {
+     "description": "Over-ear wired Headphones as per specification 5.6",
+     "quantity": 50,
+     "sku": "DCC-AU-606"
+    },
+    {
+     "description": "Full HD 1080p Webcam as per specification 5.7",
+     "quantity": 50,
+     "sku": "DCC-PR-523"
+    },
+    {
+     "description": "Laptop for faculty as per specification 5.8 (Core i5, 16 GB RAM, 512 GB SSD, 15.6 inch)",
+     "quantity": 50,
+     "sku": "DCC-LT-103"
+    },
+    {
+     "description": "Graphics Card, NVIDIA RTX 4060 8 GB, as per specification 5.9",
+     "quantity": 50,
+     "sku": "DCC-CP-701"
+    },
+    {
+     "description": "600 VA line interactive UPS as per specification 5.10",
+     "quantity": 50,
+     "sku": "DCC-PW-901"
+    }
+   ]
+  }
+ ]
+}

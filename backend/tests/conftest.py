@@ -17,6 +17,7 @@ os.environ["TD_VAR_DIR"] = str(_VAR)
 os.environ["TD_COMPANY"] = "meridian"
 os.environ["TD_FX_MODE"] = "offline"
 os.environ["TD_REQUIRE_AUTH"] = "0"
+os.environ["TD_LLM"] = "off"  # agents run on rules; language-model steps are tested with a scripted client
 (_VAR / "tenderdesk.sqlite3").unlink(missing_ok=True)
 
 

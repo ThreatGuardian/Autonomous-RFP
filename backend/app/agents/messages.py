@@ -380,6 +380,8 @@ class CompetitiveAnalysis(BaseModel):
     summary: str
     warnings: list[str] = Field(default_factory=list)
     award: AwardAnalysis | None = None
+    #: The pricing agent's summary of the bid strategy (when the language model is enabled).
+    agent_summary: str | None = None
 
 
 # --------------------------------------------------------------------------- localisation

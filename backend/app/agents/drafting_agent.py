@@ -1,10 +1,12 @@
-"""Proposal Drafting Agent — retrieval-augmented, template-driven composition.
+"""Proposal Drafting Agent — retrieval-augmented composition.
 
-No free-form text generation is used. The agent plans each section from the
-structured facts produced upstream, fills curated sentence templates, and
-grounds every claim about the company in passages retrieved from the knowledge
-base (with the source recorded). The resulting proposal is rendered into a
-client-facing quotation PDF and an internal pricing memo PDF.
+The agent plans each section from the structured facts produced upstream and
+grounds every claim about the company in passages retrieved from the knowledge base
+(with the source recorded). Curated sentence templates produce a complete draft;
+when the language model is enabled, Claude rewrites the cover letter, executive
+summary and highlights from the same client-safe facts and passages, and the text is
+checked for internal figures before it replaces the template. The proposal is
+rendered into the client quotation and the internal pricing memo.
 """
 
 from __future__ import annotations
@@ -17,6 +19,9 @@ from app.agents.messages import (
     CompetitiveAnalysis, ComplianceRow, Evidence, Localisation, Milestone, ParsedRfp, Proposal,
 )
 from app.finance.money import fmt
+from app.llm import drafting as llm_drafting
+from app.llm.client import LLMError, get_llm
+from app.llm.memory import approved_letters
 from app.rag.stores import Passage, knowledge_store
 
 CATEGORY_LABELS = {
@@ -188,6 +193,43 @@ class ProposalDraftingAgent(Agent):
             terms.append(f"Exchange basis: 1 {loc.currency} = {1 / loc.fx_effective_rate:,.4f} {loc.base_currency}; "
                          "we absorb currency movements of up to 3% during the validity period.")
         terms.append("Dead-on-arrival units reported within seven days are replaced at no cost.")
+
+        llm = get_llm()
+        if llm is not None:
+            facts = {
+                "supplier": company["name"], "client": client, "contact": contact, "request_title": parsed.title,
+                "client_reference": parsed.client_reference, "delivery_location": location,
+                "scope": "; ".join(f"{l.name} × {l.quantity:,}" for l in strat.lines),
+                "total_including_tax": money(loc.grand_total), "total_before_tax": money(loc.subtotal),
+                "tax_treatment": loc.tax_summary, "valid_until": valid_until.strftime("%d %B %Y"),
+                "delivery": f"within {milestones[2].day} days of the purchase order",
+                "installation_completed_by_day": completion if has_services else None,
+                "minimum_hardware_warranty_months": warranty_min or None,
+                "included_services": "; ".join(f"{i['service']} for {i['item']} (worth {money(i['value'])})" for i in inclusions),
+                "requirements_met": (f"{counts.get('Complies', 0) + counts.get('Complies with note', 0)} of "
+                                     f"{sum(v for k, v in counts.items() if k != 'Noted')}") if counts else None,
+                "payment": f"{parsed.terms.payment_days or 30} days from invoice",
+            }
+            passages = [p.text for p in (profile + case)] + [p.text for p in retrieve(
+                "drafting context", f"{parsed.client.segment} {scope_phrase} support warranty delivery", k=3)]
+            amounts = [loc.grand_total, loc.subtotal, loc.tax_total, loc.bundled_value,
+                       *(i["value"] for i in inclusions), *(l.net for l in loc.lines), *(l.unit_price for l in loc.lines)]
+            amounts += [float(n.replace(",", "")) for v in facts.values() if isinstance(v, str)
+                        for n in re.findall(r"\d[\d,]*(?:\.\d+)?", v)]
+            competitors = sorted({o.competitor for l in strat.lines for o in l.market.offers})
+            try:
+                drafted = llm_drafting.write(llm, facts, passages, approved_letters())
+                issues = llm_drafting.problems(drafted, amounts, competitors)
+            except LLMError as exc:
+                log.warn("Drafting model unavailable; template text kept", error=str(exc))
+            else:
+                if issues:
+                    log.warn("Drafted text failed the client-safety check; template text kept", issues=issues)
+                else:
+                    salutation, cover = drafted.salutation.strip(), [p.strip() for p in drafted.cover_letter]
+                    exec_summary, highlights = drafted.executive_summary, drafted.highlights or highlights
+                    log.decision("Cover letter and summary written by the drafting model", model=llm.model,
+                                 paragraphs=len(cover), **llm.usage.as_dict())
 
         proposal = Proposal(
             quote_number=quote_number, version=version, issue_date=issued.isoformat(), valid_until=valid_until.isoformat(),

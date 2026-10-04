@@ -123,8 +123,37 @@ class StrategyEngine:
 
     # ------------------------------------------------------------------ public
 
+    def assess(self, line: CostedLine, offers: list[MarketOffer], buyer: BuyerContext, price: float,
+               bundle_code: str | None) -> dict:
+        """Metrics and policy checks for one proposed price (used by the pricing agent's tools)."""
+        view = market_view(offers)
+        bundle = next((b for b in line.value_adds if b.code == bundle_code), None) if bundle_code else None
+        issues = []
+        if bundle_code and bundle is None:
+            issues.append(f"'{bundle_code}' is not an eligible service for this line")
+        if price < line.floor_price - 1e-6:
+            issues.append(f"below the margin floor {self._m(line.floor_price)}")
+        if bundle is not None:
+            if buyer.award == "L1":
+                issues.append("a free service earns no credit under a lowest-price (L1) award")
+            elif price - bundle.unit_cost < line.floor_price - 1e-6:
+                issues.append("the service cost would take the price below the margin floor")
+            elif bundle.unit_cost > price * self.policy["max_bundle_cost_share_pct"] / 100:
+                issues.append(f"the service costs more than {self.policy['max_bundle_cost_share_pct']:g}% of the price")
+        out = {"unit_price": round(price, 2), "bundle": bundle.code if bundle else None,
+               "margin_pct": round(100 * (price - line.unit_cost - (bundle.unit_cost if bundle else 0)) / price, 2) if price else 0.0,
+               "feasible": not issues, "issues": issues}
+        if view.best is not None:
+            c = self._evaluate(line, view.best, price, bundle, buyer)
+            out.update(win_probability=round(c.p_win, 4), expected_profit=round(c.expected, 2),
+                       vs_best_competitor_pct=round(100 * (price / view.best.unit_price_base - 1), 2),
+                       classification=self._classify(line, view.best, c, view.best.unit_price_base < line.unit_cost, False))
+        return out
+
     def price_line(self, line: CostedLine, offers: list[MarketOffer], buyer: BuyerContext,
-                   override: dict | None = None) -> PricedLine:
+                   override: dict | None = None, agent_choice: dict | None = None) -> PricedLine:
+        """Price one line. A reviewer ``override`` wins; otherwise a feasible ``agent_choice``
+        (unit_price, bundle, rationale) from the pricing agent replaces the grid optimum."""
         view = market_view(offers)
         if view.best is None:
             return self._no_market(line, view, override)
@@ -155,6 +184,14 @@ class StrategyEngine:
             chosen = max(candidates, key=lambda c: (round(c.p_win, 4), c.expected))
             self._best_effort = True
 
+        agent_note = None
+        if agent_choice and not override:
+            bundle = next((b for b in line.value_adds if b.code == agent_choice.get("bundle")), None)
+            price = float(agent_choice["unit_price"])
+            if self._feasible(line, price, bundle) and not (bundle is not None and buyer.award == "L1"):
+                chosen = self._evaluate(line, best, price, bundle, buyer)
+                agent_note = agent_choice.get("rationale")
+
         overridden = False
         if override and (override.get("unit_price") is not None or "bundle" in override):
             bundle_code = override.get("bundle", chosen.bundle.code if chosen.bundle else None)
@@ -167,6 +204,8 @@ class StrategyEngine:
         scenarios = self._scenarios(line, best, buyer, chosen, grid)
         curve = self._curve(line, best, chosen.bundle, buyer, grid)
         rationale, headline = self._explain(line, view, chosen, strategy, buyer, scenarios, below_cost)
+        if agent_note:
+            rationale.insert(0, f"Pricing agent: {agent_note}")
         return self._assemble(line, view, chosen, strategy, headline, rationale, scenarios, curve, overridden)
 
     # ------------------------------------------------------------------ classification & narrative

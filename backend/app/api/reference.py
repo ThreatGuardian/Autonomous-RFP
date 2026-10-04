@@ -286,3 +286,11 @@ def set_workspace(body: OperatingRegion) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from None
     return workspace()
+
+
+@router.get("/llm/status")
+def llm_status() -> dict[str, Any]:
+    """Whether the agents use the language model, and which one."""
+    from app.llm.client import status
+
+    return status()
