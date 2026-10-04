@@ -1,11 +1,16 @@
 """Indirect-tax determination by jurisdiction, supply type and product tax category.
 
+The supplier's operating region and the client region (both chosen in the app) decide
+which rules apply. Rates come from ``tax_rules.json``.
+
 Rules implemented
 -----------------
-* **India, domestic** – GST split into CGST + SGST when the place of supply is
-  in the supplier's state, IGST otherwise.
-* **Export, non-DDP incoterms** – zero-rated export of goods/services under LUT;
-  destination taxes are borne by the importer and shown for information.
+* **Domestic supply** – the country's VAT / GST / sales tax for the client's state or
+  province where it differs. India additionally splits GST into CGST + SGST within the
+  supplier's state and charges IGST between states.
+* **Export, non-DDP incoterms** – zero-rated export of goods and services; destination
+  taxes are borne by the importer and shown for information (under a Letter of
+  Undertaking when exporting from India).
 * **Export, DDP** – the supplier is importer of record, so destination indirect
   tax (VAT/GST/sales tax, with regional and category brackets) is charged.
 * **Cross-border B2B services and licences** – where the client provides a tax
@@ -77,10 +82,33 @@ def _lookup(country: str, region: str | None, category: str) -> TaxRule | None:
 
 
 def assess(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
-    domestic = ctx.client_country == ctx.supplier_country
-    if domestic:
-        return _domestic_india(ctx, categories)
+    if ctx.client_country == ctx.supplier_country:
+        if ctx.supplier_country == "IN":
+            return _domestic_india(ctx, categories)
+        return _domestic(ctx, categories)
     return _international(ctx, categories)
+
+
+def _domestic(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
+    """Domestic supply outside India: the destination rule for the client's country and region."""
+    where = ctx.client_country + (f" — {ctx.client_region}" if ctx.client_region else "")
+    out = TaxAssessment(jurisdiction=where, summary="Domestic supply")
+    if ctx.client_country in ("US", "CA") and not ctx.client_region:
+        out.notes.append("State or province not selected; regional tax cannot be determined and is excluded.")
+    names = set()
+    for cat in categories:
+        rule = _lookup(ctx.client_country, ctx.client_region, cat)
+        if rule is None:
+            out.treatments[cat] = TaxTreatment(cat, "No rule", [{"name": "Not determined", "rate_pct": 0.0}], True,
+                                               "No tax rule configured for this jurisdiction.")
+            continue
+        names.add(rule.name)
+        note = (f"{cat.replace('_', ' ').capitalize()} is exempt in this jurisdiction."
+                if sum(c["rate_pct"] for c in rule.components) == 0 else None)
+        out.treatments[cat] = TaxTreatment(cat, rule.name, list(rule.components), True, note)
+    if names:
+        out.summary = f"Domestic supply — {' / '.join(sorted(names))}"
+    return out
 
 
 def _domestic_india(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
@@ -108,12 +136,15 @@ def _international(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
     incoterm = (ctx.incoterm or "DDP").upper()
     where = ctx.client_country + (f" — {ctx.client_region}" if ctx.client_region else "")
     ddp = incoterm not in NON_DDP_EXPORT_TERMS
+    from_india = ctx.supplier_country == "IN"
     out = TaxAssessment(
         jurisdiction=where,
-        summary=f"Destination taxes charged under {incoterm}" if ddp else f"Zero-rated export under LUT, {incoterm} terms",
+        summary=(f"Destination taxes charged under {incoterm}" if ddp else
+                 f"Zero-rated export under LUT, {incoterm} terms" if from_india else f"Zero-rated export, {incoterm} terms"),
     )
-    if ctx.client_country == "US" and not ctx.client_region:
-        out.notes.append("US state not identified; sales tax cannot be determined and is excluded.")
+    if ctx.client_country in ("US", "CA") and not ctx.client_region:
+        out.notes.append("State or province not selected; regional tax cannot be determined and is excluded.")
+    export_component = "IGST (export, LUT)" if from_india else "Zero-rated export"
     for cat in categories:
         rule = _lookup(ctx.client_country, ctx.client_region, cat)
         dest_components = list(rule.components) if rule else []
@@ -121,7 +152,7 @@ def _international(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
         if not ddp:
             note = (f"Destination {dest_name} of {sum(c['rate_pct'] for c in dest_components):g}% is payable by the importer."
                     if dest_components else "Destination import taxes are payable by the importer.")
-            out.treatments[cat] = TaxTreatment(cat, "Zero-rated export", [{"name": "IGST (export, LUT)", "rate_pct": 0.0}], True, note)
+            out.treatments[cat] = TaxTreatment(cat, "Zero-rated export", [{"name": export_component, "rate_pct": 0.0}], True, note)
             continue
         if cat in SERVICE_CATEGORIES and ctx.client_tax_id and ctx.client_country != "US":
             out.treatments[cat] = TaxTreatment(
@@ -141,5 +172,6 @@ def _international(ctx: TaxContext, categories: set[str]) -> TaxAssessment:
     if any(t.regime == "Reverse charge" for t in out.treatments.values()):
         out.notes.append("Services and licences are invoiced without VAT/GST under the reverse-charge mechanism.")
     if not ddp:
-        out.notes.append("Export of goods and services from India is zero-rated under Letter of Undertaking (LUT).")
+        out.notes.append("Exports of goods and services are zero-rated" +
+                         (" under a Letter of Undertaking (LUT)." if from_india else "; the importer accounts for import taxes."))
     return out

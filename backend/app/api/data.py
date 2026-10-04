@@ -18,12 +18,12 @@ from sqlalchemy.orm import Session
 from app.agents.orchestrator import _load_messages, document_dir, document_path
 from app.api.uploads import read_upload
 from app.db.models import BidOutcome, ImportBatch, PriceObservation, PriceVersion, Product, Rfp
-from app.db.seed import load_json
 from app.db.session import get_db, session_scope
 from app.imports import catalogue as cat_import
 from app.intel import sources
 from app.learning import loop
 from app.rag.stores import invalidate_catalogue
+from app.regions import company_profile
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["data"])
@@ -279,7 +279,7 @@ def submission_pack(rfp_id: int):
             if path.exists():
                 existing[kind] = path
         out_dir = document_dir(rfp.reference) / "pack"
-        zpath = build_pack(out_dir, company=load_json("company.json"), parsed=m["parsed"], costing=m["costing"],
+        zpath = build_pack(out_dir, company=company_profile(), parsed=m["parsed"], costing=m["costing"],
                            strategy=m["strategy"], compliance=m.get("compliance"), proposal=m["proposal"],
                            existing=existing)
     return FileResponse(zpath, media_type="application/zip", filename=zpath.name)

@@ -6,12 +6,13 @@ from app.agents.base import Agent, PipelineContext, StageLog
 from app.agents.messages import CompetitiveAnalysis, InternalPricing, MarketOffer, ParsedRfp
 from app.db.seed import load_json
 from app.db.session import session_scope
-from app.intel.sources import ADAPTERS, market_view
 from app.finance.currency import UnknownCurrency, fx
 from app.finance.money import fmt
+from app.intel.sources import ADAPTERS, market_view
 from app.ml.registry import registry
 from app.pricing.award import analyse
 from app.pricing.strategy import VALUE_DIFFERENTIATION, BuyerContext, StrategyEngine
+from app.regions import same_market
 from app.services.market_client import MarketClient, MarketUnavailable
 
 
@@ -112,7 +113,9 @@ class CompetitiveStrategyAgent(Agent):
         profile = ctx.company.get("profile", {})
         facts = {f.key for f in doc.facts} if doc is not None else set()
         award = analyse(
-            rule, priced, costing, policy, base, msme=bool(profile.get("msme", {}).get("valid")),
+            rule, priced, costing, policy, base,
+            # The MSE purchase preference is an Indian public-procurement rule.
+            msme=bool(profile.get("msme", {}).get("valid")) and same_market(ctx.company.get("country"), country, "IN"),
             reverse_auction="reverse_auction" in facts,
             technical_weight=doc.evaluation.technical_weight if doc is not None else None,
             financial_weight=(doc.evaluation.financial_weight if doc is not None else None) or parsed.terms.price_weight_pct,

@@ -6,7 +6,7 @@ import { Page, PageHeader } from "../components/layout/Shell";
 import { Badge, Button, Card, Field, Segmented, Sheet, Skeleton } from "../components/ui";
 import { api, type ImportPreview } from "../lib/api";
 import type { Product } from "../lib/types";
-import { CATEGORY_LABEL, date, money, pct, titleCase } from "../lib/format";
+import { CATEGORY_LABEL, date, getBaseCurrency, money, pct, titleCase } from "../lib/format";
 
 export default function Catalogue() {
   const [view, setView] = useState<"products" | "services" | "tiers">("products");
@@ -47,7 +47,7 @@ export default function Catalogue() {
                   <tbody>
                     {products.data?.map((p) => (
                       <tr key={p.sku} className={clsx("hover:bg-[#fafbfc]", !p.active && "opacity-50")}>
-                        <td className="max-w-[360px]"><div className="truncate font-medium">{p.name}</div><div className="text-[11.5px] text-muted"><span className="font-mono">{p.sku}</span> · {p.mpn}{p.hsn && <> · HSN {p.hsn}</>}</div></td>
+                        <td className="max-w-[360px]"><div className="truncate font-medium">{p.name}</div><div className="text-[11.5px] text-muted"><span className="font-mono">{p.sku}</span> · {p.mpn}{p.hsn && <> · Tax code {p.hsn}</>}</div></td>
                         <td><Badge>{CATEGORY_LABEL[p.category] ?? p.category}</Badge></td>
                         <td className="text-right tnum">{money(p.unit_cost)}</td>
                         <td className="text-right tnum">{money(p.list_price)}</td>
@@ -83,8 +83,8 @@ function EditProduct({ product, onClose }: { product: Product; onClose: () => vo
       footer={<div className="flex justify-end gap-2"><Button onClick={onClose}>Cancel</Button><Button variant="primary" loading={save.isPending} onClick={() => save.mutate()}>Save changes</Button></div>}>
       <p className="mb-5 text-[12.5px] leading-[1.6] text-muted">{product.description}</p>
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Landed cost (INR)"><input className="input tnum" type="number" value={form.unit_cost} onChange={num("unit_cost")} /></Field>
-        <Field label="List price (INR)"><input className="input tnum" type="number" value={form.list_price} onChange={num("list_price")} /></Field>
+        <Field label={`Landed cost (${getBaseCurrency()})`}><input className="input tnum" type="number" value={form.unit_cost} onChange={num("unit_cost")} /></Field>
+        <Field label={`List price (${getBaseCurrency()})`}><input className="input tnum" type="number" value={form.list_price} onChange={num("list_price")} /></Field>
         <Field label="Minimum margin %" hint={`Floor ${money(form.unit_cost * (1 + form.min_margin_pct / 100))}`}><input className="input tnum" type="number" value={form.min_margin_pct} onChange={num("min_margin_pct")} /></Field>
         <Field label="Stock on hand"><input className="input tnum" type="number" value={form.stock_qty} onChange={num("stock_qty")} /></Field>
         <Field label="Lead time (days)"><input className="input tnum" type="number" value={form.lead_time_days} onChange={num("lead_time_days")} /></Field>
@@ -127,9 +127,9 @@ function PriceHistory({ sku }: { sku: string }) {
 }
 
 const FIELD_LABEL: Record<string, string> = {
-  sku: "SKU", mpn: "Part number", name: "Item name", brand: "Brand", category: "Category", hsn: "HSN/SAC", gst: "GST rate",
+  sku: "SKU", mpn: "Part number", name: "Item name", brand: "Brand", category: "Category", hsn: "Tax code (HSN/SAC)", gst: "Tax rate",
   unit_cost: "Landed cost", list_price: "List price", stock_qty: "Stock", lead_time_days: "Lead time", warranty_months: "Warranty",
-  min_margin_pct: "Min. margin", unit: "Unit", description: "Description", gst_rate_pct: "GST rate",
+  min_margin_pct: "Min. margin", unit: "Unit", description: "Description", gst_rate_pct: "Tax rate",
 };
 const ACTION_TONE = { create: "blue", update: "gold", unchanged: "neutral", skip: "red" } as const;
 const ACTION_LABEL = { create: "New", update: "Update", unchanged: "No change", skip: "Skipped" } as const;
@@ -158,7 +158,7 @@ function ImportSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet open onClose={onClose} width={880} title="Import company data"
-      subtitle="Catalogue, prices, stock, HSN and GST from a CSV or Excel sheet, or a Tally stock-item export (XML)"
+      subtitle="Catalogue, prices, stock, tax codes and rates from a CSV or Excel sheet, or a Tally stock-item export (XML)"
       footer={<div className="flex items-center justify-between">
         <span className="text-[12px] text-muted">{plan ? `${applicable} product(s) will change. Every price change is kept in the price history.` : "Nothing is changed until you apply the import."}</span>
         <div className="flex gap-2"><Button onClick={onClose}>Close</Button>

@@ -7,12 +7,13 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app import regions
 from app.agents.orchestrator import STAGES, document_path, get_orchestrator, record_event, source_path
 from app.api.uploads import read_upload
 from app.config import BACKEND_ROOT
@@ -26,9 +27,31 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_FILES = 10
 
 
+class ClientRegion(BaseModel):
+    """The buyer's region chosen by the user; it sets the quotation currency and tax treatment."""
+
+    country: str = Field(min_length=2, max_length=2)
+    region: str | None = Field(default=None, max_length=48)
+
+
 class CreateRfp(BaseModel):
     text: str = Field(min_length=40, max_length=400_000)
-    filename: str | None = None
+    filename: str | None = Field(default=None, max_length=240)
+    client_region: ClientRegion | None = None
+
+
+def _region_overrides(region: ClientRegion | None) -> dict[str, Any]:
+    """Overrides that pin the client region (and its currency) chosen at intake."""
+    if region is None:
+        return {}
+    try:
+        place = regions.validate(regions.Place(region.country, region.region))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    client: dict[str, Any] = {"country": place.country}
+    if place.region:  # without a state, keep the one found in the document (if it is in the same country)
+        client["region"] = place.region
+    return {"client": client, "currency": regions.currency_of(place.country)}
 
 
 class LineOverride(BaseModel):
@@ -112,11 +135,11 @@ def _stage_dict(st) -> dict[str, Any]:
             "duration_ms": st.duration_ms, "summary": st.summary, "log": st.log}
 
 
-def _create(db: Session, text: str, filename: str | None) -> Rfp:
+def _create(db: Session, text: str, filename: str | None, overrides: dict[str, Any] | None = None) -> Rfp:
     year = datetime.now(timezone.utc).year
     next_id = (db.scalar(select(func.max(Rfp.id))) or 0) + 1
     rfp = Rfp(reference=f"RFP-{year}-{next_id:04d}", raw_text=text, source_filename=filename, status="queued",
-              title=(filename or "Pasted request").rsplit(".", 1)[0][:240])
+              title=(filename or "Pasted request").rsplit(".", 1)[0][:240], overrides=overrides or {})
     db.add(rfp)
     db.flush()
     return rfp
@@ -136,15 +159,16 @@ def list_rfps(status: str | None = None, q: str | None = None, db: Session = Dep
 
 @router.post("", status_code=201)
 def create_rfp(body: CreateRfp) -> dict[str, Any]:
+    overrides = _region_overrides(body.client_region)
     with session_scope() as db:
-        rfp = _create(db, body.text, body.filename)
+        rfp = _create(db, body.text, body.filename, overrides)
         rfp_id = rfp.id
     get_orchestrator().submit(rfp_id)
     with session_scope() as db:
         return _summary(db.get(Rfp, rfp_id), True)
 
 
-def _ingest(filename: str, data: bytes) -> tuple[int | None, str | None]:
+def _ingest(filename: str, data: bytes, overrides: dict[str, Any] | None = None) -> tuple[int | None, str | None]:
     """Create an RFP from an uploaded file, keeping the original next to its documents."""
     if len(data) > MAX_UPLOAD_BYTES:
         return None, f"{filename}: file exceeds 10 MB"
@@ -155,7 +179,7 @@ def _ingest(filename: str, data: bytes) -> tuple[int | None, str | None]:
     if len(text.strip()) < 40:
         return None, f"{filename}: not enough readable text"
     with session_scope() as db:
-        rfp = _create(db, text, filename)
+        rfp = _create(db, text, filename, overrides)
         rfp_id = rfp.id
         original = source_path(rfp.reference, filename)
     if original is not None:
@@ -165,13 +189,15 @@ def _ingest(filename: str, data: bytes) -> tuple[int | None, str | None]:
 
 
 @router.post("/upload", status_code=201)
-async def upload_rfps(files: list[UploadFile] = File(...)) -> list[dict[str, Any]]:
+async def upload_rfps(files: list[UploadFile] = File(...), country: str | None = Form(default=None, max_length=2),
+                      region: str | None = Form(default=None, max_length=48)) -> list[dict[str, Any]]:
     if len(files) > MAX_FILES:
         raise HTTPException(status_code=422, detail=f"Upload at most {MAX_FILES} files at a time")
+    overrides = _region_overrides(ClientRegion(country=country, region=region or None) if country else None)
     created: list[int] = []
     errors: list[str] = []
     for f in files:
-        rfp_id, error = _ingest(f.filename or "upload.txt", await read_upload(f, MAX_UPLOAD_BYTES))
+        rfp_id, error = _ingest(f.filename or "upload.txt", await read_upload(f, MAX_UPLOAD_BYTES), overrides)
         if rfp_id is not None:
             created.append(rfp_id)
         if error:
@@ -212,12 +238,16 @@ def samples() -> list[dict[str, Any]]:
     return out
 
 
+class SampleRequest(BaseModel):
+    client_region: ClientRegion | None = None
+
+
 @router.post("/samples/{filename}", status_code=201)
-def process_sample(filename: str) -> list[dict[str, Any]]:
+def process_sample(filename: str, body: SampleRequest | None = None) -> list[dict[str, Any]]:
     path = (SAMPLES_DIR / filename).resolve()
     if path.parent != SAMPLES_DIR.resolve() or not path.is_file() or path.suffix.lower() not in (".pdf", ".docx", ".txt"):
         raise HTTPException(status_code=404, detail="Sample not found")
-    rfp_id, error = _ingest(path.name, path.read_bytes())
+    rfp_id, error = _ingest(path.name, path.read_bytes(), _region_overrides(body.client_region if body else None))
     if rfp_id is None:
         raise HTTPException(status_code=422, detail=error)
     get_orchestrator().submit(rfp_id)

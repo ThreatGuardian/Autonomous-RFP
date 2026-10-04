@@ -60,6 +60,12 @@ export interface Observation {
   warranty_months: number | null; observed_on: string; adapter: "quotes" | "awards" | "web" | "feed"; source: string; reference: string | null; collected_by: string | null;
 }
 
+export interface ClientRegion { country: string; region?: string | null }
+export interface Region {
+  code: string; name: string; currency: string; eu: boolean; area: string; regions: string[]; tax: string; conventions: string[];
+}
+export interface Workspace { operating_region: { country: string; region: string | null }; base_currency: string; company: string }
+
 export interface User { id: number; username: string; name: string; email: string | null; title: string; provider: "password" | "firebase" }
 export interface AuthConfig { signup: boolean; firebase: boolean; demo: boolean }
 
@@ -105,14 +111,21 @@ export const api = {
     return request<RfpSummary[]>(`/api/rfps${qs ? `?${qs}` : ""}`);
   },
   rfp: (id: number) => request<RfpDetail>(`/api/rfps/${id}`),
-  createRfp: (text: string, filename?: string) => post<RfpSummary>("/api/rfps", { text, filename }),
-  uploadRfps: (files: File[]) => {
+  createRfp: (text: string, region: ClientRegion, filename?: string) =>
+    post<RfpSummary>("/api/rfps", { text, filename, client_region: region }),
+  uploadRfps: (files: File[], region: ClientRegion) => {
     const form = new FormData();
     files.forEach((f) => form.append("files", f));
+    form.append("country", region.country);
+    if (region.region) form.append("region", region.region);
     return request<(RfpSummary & { upload_errors: string[] })[]>("/api/rfps/upload", { method: "POST", body: form });
   },
   samples: () => request<{ filename: string; title: string; text: string; kind: "text" | "file"; pages?: number; format?: string }[]>("/api/rfps/samples"),
-  processSample: (filename: string) => post<RfpSummary[]>(`/api/rfps/samples/${encodeURIComponent(filename)}`),
+  processSample: (filename: string, region: ClientRegion) =>
+    post<RfpSummary[]>(`/api/rfps/samples/${encodeURIComponent(filename)}`, { client_region: region }),
+  regions: () => request<Region[]>("/api/regions"),
+  workspace: () => request<Workspace>("/api/workspace"),
+  setOperatingRegion: (place: ClientRegion) => request<Workspace>("/api/workspace", { method: "PUT", body: JSON.stringify(place) }),
   updateCompliance: (id: number, body: ComplianceBody) => post<{ status: string }>(`/api/rfps/${id}/compliance`, body),
   originalUrl: (id: number) => `/api/rfps/${id}/original`,
   reprice: (id: number, body: RepriceBody) =>

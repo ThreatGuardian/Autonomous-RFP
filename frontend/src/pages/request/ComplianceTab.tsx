@@ -11,7 +11,7 @@ import { api } from "../../lib/api";
 import type {
   ComplianceItem, ComplianceReport, ComplianceStatus, EligibilityCheck, EligibilityStatus, RfpDetail, TenderDocument, TenderSection,
 } from "../../lib/types";
-import { date, daysUntil, money } from "../../lib/format";
+import { date, daysUntil, getBaseCurrency, money } from "../../lib/format";
 
 type Tone = "neutral" | "blue" | "amber" | "green" | "red" | "violet" | "gold";
 
@@ -52,7 +52,7 @@ export function ComplianceTab({ rfp, editable }: { rfp: RfpDetail; editable: boo
       {doc?.long_form && (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
           <KeyDates doc={doc} />
-          <TenderData doc={doc} report={report} />
+          <TenderData doc={doc} report={report} currency={rfp.parsed?.currency.code ?? getBaseCurrency()} />
           <Evaluation doc={doc} />
         </div>
       )}
@@ -166,7 +166,7 @@ function KeyDates({ doc }: { doc: TenderDocument }) {
   );
 }
 
-function TenderData({ doc, report }: { doc: TenderDocument; report: ComplianceReport }) {
+function TenderData({ doc, report, currency }: { doc: TenderDocument; report: ComplianceReport; currency: string }) {
   const facts = doc.facts.filter((f) => !["reference", "payment", "local_content", "msme"].includes(f.key));
   const payment = doc.facts.find((f) => f.key === "payment");
   return (
@@ -176,7 +176,7 @@ function TenderData({ doc, report }: { doc: TenderDocument; report: ComplianceRe
           <div key={f.key} className="flex items-baseline justify-between gap-4">
             <dt className="shrink-0 text-[12px] text-muted">{f.label}</dt>
             <dd className="min-w-0 text-right text-[12.5px] text-ink" title={f.evidence ?? undefined}>
-              {f.amount && ["estimated_value", "emd", "tender_fee"].includes(f.key) ? money(f.amount, "INR", { compact: f.amount >= 1e5 }) : f.value}
+              {f.amount && ["estimated_value", "emd", "tender_fee"].includes(f.key) ? money(f.amount, currency, { compact: f.amount >= 1e5 }) : f.value}
               {f.key === "emd" && f.value.includes("exempt") && <span className="ml-1.5"><Badge tone="green">MSE exempt</Badge></span>}
             </dd>
           </div>
@@ -189,7 +189,7 @@ function TenderData({ doc, report }: { doc: TenderDocument; report: ComplianceRe
         )}
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-2.5">
           <dt className="text-[12px] text-muted">Our estimate at standard price</dt>
-          <dd className="text-[12.5px] font-medium text-ink tnum">{money(report.contract_value_estimate, "INR", { compact: true })}</dd>
+          <dd className="text-[12.5px] font-medium text-ink tnum">{money(report.contract_value_estimate, getBaseCurrency(), { compact: true })}</dd>
         </div>
       </dl>
     </Card>

@@ -38,7 +38,8 @@ from app.db.models import Product
 from app.db.session import session_scope
 from app.nlp.attributes import check as attribute_check
 from app.nlp.line_items import extract_specs
-from app.nlp.tender import fmt_inr
+from app.finance.money import fmt_amount
+from app.regions import same_market
 from app.nlp.text import analyze, fold
 from app.pricing.warranty import months_in
 from app.rag.stores import knowledge_store
@@ -96,6 +97,11 @@ class ComplianceAgent(Agent):
         costing: InternalPricing = ctx.require("costing")
         company = ctx.company
         profile = {"short_name": company.get("short_name", "local"), **company.get("profile", {})}
+        base = company.get("base_currency", "INR")
+        self._money = lambda amount: fmt_amount(amount, base)
+        # Indian MSE protections (MSMED Act payment limit, EMD exemption) apply only to Indian buyers and suppliers.
+        self._indian_mse = bool(profile.get("msme", {}).get("valid")) and same_market(
+            company.get("country"), parsed.client.country or company.get("country"), "IN")
         doc = parsed.document
         long_form = bool(doc and doc.long_form)
         self._kb = knowledge_store()
@@ -214,10 +220,10 @@ class ComplianceAgent(Agent):
             if not values or not p.get("amount"):
                 return chk
             basis = min(values) if p.get("basis") == "each year" else sum(values) / len(values)
-            chk.evidence = [f"FY {y}: {fmt_inr(fy[y])}" for y in years if y in fy]
+            chk.evidence = [f"FY {y}: {self._money(fy[y])}" for y in years if y in fy]
             ok = basis >= p["amount"]
             label = "lowest year" if p.get("basis") == "each year" else "average"
-            chk.position = f"{label.capitalize()} turnover {fmt_inr(basis)} against {fmt_inr(p['amount'])} required."
+            chk.position = f"{label.capitalize()} turnover {self._money(basis)} against {self._money(p['amount'])} required."
             chk.status = "Meets" if ok else "Does not meet"
             seg_text = p.get("segment") or ""
             seg = seg_text.lower()
@@ -241,7 +247,7 @@ class ComplianceAgent(Agent):
             if nw is not None:
                 need = p.get("amount") or 0
                 chk.status = "Meets" if nw > 0 and nw >= need else "Does not meet"
-                chk.position = f"Net worth {fmt_inr(nw)} as of {profile.get('net_worth_as_of', 'latest audit')}."
+                chk.position = f"Net worth {self._money(nw)} as of {profile.get('net_worth_as_of', 'latest audit')}."
         elif c.kind == "experience_years":
             inc = profile.get("incorporated_on")
             if inc and p.get("years"):
@@ -268,13 +274,13 @@ class ComplianceAgent(Agent):
             if best:
                 opt, threshold, qualifying = best
                 chk.status = "Meets"
-                chk.position = (f"{len(qualifying)} completed orders of at least {fmt_inr(threshold)}{scope} in the last {window} years "
+                chk.position = (f"{len(qualifying)} completed orders of at least {self._money(threshold)}{scope} in the last {window} years "
                                 f"({opt['count']} required).")
-                chk.evidence = [f"{cr['client']}: {fmt_inr(cr['value_inr'])}, {cr['completed_on'][:7]}" for cr in qualifying[:4]]
+                chk.evidence = [f"{cr['client']}: {self._money(cr['value_inr'])}, {cr['completed_on'][:7]}" for cr in qualifying[:4]]
             elif p.get("options"):
                 chk.status = "Does not meet"
                 chk.position = f"Not enough completed orders{scope} of the required value in the last {window} years."
-                chk.evidence = [f"{cr['client']}: {fmt_inr(cr['value_inr'])}" for cr in creds[:4]]
+                chk.evidence = [f"{cr['client']}: {self._money(cr['value_inr'])}" for cr in creds[:4]]
         elif c.kind == "supplied_quantity":
             cat, need = p.get("category"), p.get("quantity")
             window = int(p.get("years") or 3)
@@ -563,7 +569,7 @@ class ComplianceAgent(Agent):
         m = re.search(r"within\s+(\d+)\s+days[^.]*invoice|payment[^.]*within\s+(\d+)\s+days", t, re.I)
         if m:
             days = int(m.group(1) or m.group(2))
-            if days > MSME_PAYMENT_DAYS:
+            if days > MSME_PAYMENT_DAYS and self._indian_mse:
                 item.status = "Complies with note"
                 item.response = (f"Accepted; as a registered MSE we request payment within {MSME_PAYMENT_DAYS} days in line with "
                                  "Section 15 of the MSMED Act, 2006.")
@@ -577,10 +583,10 @@ class ComplianceAgent(Agent):
             if m:
                 cap = float(m.group(3))
                 item.status = "Complies with note"
-                item.response = f"Accepted; maximum exposure {cap:g}% of contract value (about {fmt_inr(value * cap / 100)})."
+                item.response = f"Accepted; maximum exposure {cap:g}% of contract value (about {self._money(value * cap / 100)})."
                 risks.append(RiskFlag(title="Liquidated damages", severity="high" if cap > LD_CAP_LIMIT_PCT else "low",
                                       clause=item.clause, page=item.page,
-                                      detail=f"{m.group(1)}% per {m.group(2)} up to {cap:g}% (≈ {fmt_inr(value * cap / 100)})."))
+                                      detail=f"{m.group(1)}% per {m.group(2)} up to {cap:g}% (≈ {self._money(value * cap / 100)})."))
             return
         # The rate must belong to the guarantee itself ("performance security of 3% of the order value"), not
         # to a payment clause that merely mentions it ("balance 10% after submission of the performance security").
@@ -589,11 +595,11 @@ class ComplianceAgent(Agent):
             m = pbg
             if m:
                 pct = float(m.group(1))
-                item.response = f"Accepted; bank guarantee of {pct:g}% (about {fmt_inr(value * pct / 100)}) will be furnished."
+                item.response = f"Accepted; bank guarantee of {pct:g}% (about {self._money(value * pct / 100)}) will be furnished."
                 risks.append(RiskFlag(title="Performance security", severity="low", clause=item.clause, page=item.page,
-                                      detail=f"{pct:g}% bank guarantee blocks about {fmt_inr(value * pct / 100)} of credit limits."))
+                                      detail=f"{pct:g}% bank guarantee blocks about {self._money(value * pct / 100)} of credit limits."))
             return
-        if re.search(r"\bemd\b|earnest money|bid security", t, re.I) and profile.get("msme", {}).get("valid") and \
+        if re.search(r"\bemd\b|earnest money|bid security", t, re.I) and self._indian_mse and \
                 re.search(r"forfeit|refund|exempt", t, re.I):
             item.response = "Accepted; EMD exemption claimed as a Udyam-registered small enterprise."
             return
@@ -746,17 +752,16 @@ class ComplianceAgent(Agent):
                 unique.append(c)
         return unique
 
-    @staticmethod
-    def _benefits(parsed: ParsedRfp, profile: dict) -> list[str]:
+    def _benefits(self, parsed: ParsedRfp, profile: dict) -> list[str]:
         out: list[str] = []
         doc = parsed.document
         m = profile.get("msme", {})
-        if not doc or not m.get("valid"):
+        if not doc or not self._indian_mse:
             return out
         emd = next((f for f in doc.facts if f.key == "emd"), None)
         msme = next((f for f in doc.facts if f.key == "msme"), None)
         if emd and emd.amount and msme:
-            out.append(f"EMD of {fmt_inr(emd.amount)} waived as a Udyam-registered {m.get('category', '').lower()} enterprise.")
+            out.append(f"EMD of {self._money(emd.amount)} waived as a Udyam-registered {m.get('category', '').lower()} enterprise.")
         fee = next((f for f in doc.facts if f.key == "tender_fee"), None)
         if fee and msme and msme.value.startswith("EMD"):
             out.append("Tender fee exemption available to MSEs.")

@@ -8,7 +8,7 @@ import { Badge, Button, Card, Dialog, Empty, Field, Segmented, Skeleton, Spinner
 import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
 import type { RfpDetail } from "../../lib/types";
-import { date, daysUntil, money } from "../../lib/format";
+import { date, daysUntil, getBaseCurrency, money } from "../../lib/format";
 import { ActivityTab } from "./ActivityTab";
 import { ComplianceTab } from "./ComplianceTab";
 import { PricingTab } from "./PricingTab";
@@ -83,7 +83,7 @@ export default function RequestDetail() {
           <>
             {docs.report && <Link to={`/app/requests/${id}/report`}><Button icon={<PenLine className="size-4" />}>Edit report</Button></Link>}
             <DocumentsMenu id={id} docs={docs} compliance={!!rfp.parsed?.document?.long_form} pack={ready} />
-            {ready && (rfp.status === "approved" || rfp.status === "review") && <OutcomeControl id={id} actor={actor} currency={loc?.currency ?? "INR"} />}
+            {ready && (rfp.status === "approved" || rfp.status === "review") && <OutcomeControl id={id} actor={actor} currency={loc?.currency ?? getBaseCurrency()} />}
             {rfp.status === "review" && !busy && <>
               <Button variant="danger" icon={<XCircle className="size-4" />} onClick={() => setDialog("reject")}>Decline</Button>
               <Button variant="success" icon={<CheckCircle2 className="size-4" />} onClick={() => setDialog("approve")}>Approve quotation</Button>

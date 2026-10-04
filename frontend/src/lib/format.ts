@@ -9,7 +9,12 @@ function nf(key: string, make: () => Intl.NumberFormat) {
   return f;
 }
 
-export function money(value: number | null | undefined, currency = "INR", opts: { decimals?: number; compact?: boolean } = {}) {
+// The catalogue (base) currency of the workspace; set by the app shell once the company profile loads.
+let baseCurrency = "INR";
+export const setBaseCurrency = (code: string) => { baseCurrency = code; };
+export const getBaseCurrency = () => baseCurrency;
+
+export function money(value: number | null | undefined, currency = baseCurrency, opts: { decimals?: number; compact?: boolean } = {}) {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
   const locale = currency === "INR" ? "en-IN" : "en-US";
   const decimals = opts.decimals ?? (Math.abs(value) >= 1000 ? 0 : 2);

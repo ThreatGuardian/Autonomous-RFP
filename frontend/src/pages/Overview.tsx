@@ -12,7 +12,7 @@ import { Button, Card, Empty, Segmented, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
 import type { Dashboard, RfpSummary } from "../lib/types";
-import { date, daysUntil, duration, money, pct } from "../lib/format";
+import { date, daysUntil, duration, getBaseCurrency, money, pct } from "../lib/format";
 
 export default function Overview() {
   const { user } = useAuth();
@@ -20,7 +20,7 @@ export default function Overview() {
   const dash = useQuery({ queryKey: ["dashboard"], queryFn: api.dashboard, refetchInterval: 8000 });
   const rfps = useQuery({ queryKey: ["rfps", "all"], queryFn: () => api.rfps(), refetchInterval: 5000 });
   const d = dash.data;
-  const ccy = d?.base_currency ?? "INR";
+  const ccy = d?.base_currency ?? getBaseCurrency();
   const all = rfps.data ?? [];
   const review = all.filter((r) => r.status === "review");
   const active = all.filter((r) => r.status === "queued" || r.status === "processing");

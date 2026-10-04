@@ -7,7 +7,7 @@ import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis
 import { Page, PageHeader } from "../components/layout/Shell";
 import { Button, Card, Field, Meter, Segmented, Sheet } from "../components/ui";
 import { api } from "../lib/api";
-import { date, money } from "../lib/format";
+import { date, getBaseCurrency, money } from "../lib/format";
 
 const ADAPTER_ICON = { feed: Radio, quotes: FileSpreadsheet, awards: Award, web: Globe2 } as const;
 const ADAPTER_HINT: Record<string, string> = {
@@ -59,7 +59,7 @@ export default function Market() {
                             {x.promotion && <> · <span className="text-rose-700">{x.promotion}</span></>}
                           </div>
                         </td>
-                        <td className="text-right tnum font-medium">{money(x.unit_price_base)}{x.currency !== "INR" && <div className="text-[11px] font-normal text-muted">{money(x.unit_price, x.currency)}</div>}</td>
+                        <td className="text-right tnum font-medium">{money(x.unit_price_base)}{x.currency !== getBaseCurrency() && <div className="text-[11px] font-normal text-muted">{money(x.unit_price, x.currency)}</div>}</td>
                         <td className={clsx("text-right tnum", x.vs_cost_pct < 0 ? "text-rose-700" : "text-muted")}>{x.vs_cost_pct > 0 ? "+" : ""}{x.vs_cost_pct.toFixed(1)}%</td>
                         <td className="text-right tnum">{x.warranty_months} mo</td>
                         <td className="max-w-[200px] text-[12px]"><div className="truncate">{x.source ?? "Market feed"}</div><div className="text-[11px] text-muted">{x.observed_on ? date(x.observed_on) : "today"}</div></td>
@@ -69,7 +69,7 @@ export default function Market() {
                 </table>
               </div>
               <div>
-                <div className="mb-2 flex items-center justify-between text-[12px] text-muted"><span>Unit price in INR</span><span>Cost {money(o.product.unit_cost)} · List {money(o.product.list_price)}</span></div>
+                <div className="mb-2 flex items-center justify-between text-[12px] text-muted"><span>Unit price in {getBaseCurrency()}</span><span>Cost {money(o.product.unit_cost)} · List {money(o.product.list_price)}</span></div>
                 <div className="h-[240px]">
                   <ResponsiveContainer>
                     <BarChart data={chart} layout="vertical" margin={{ left: 0, right: 12 }}>

@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import regions
 from app.db.models import DealHistory, PriceTier, PriceVersion, Product, Rfp, StageRun, TaxRule, ValueAdd
 from app.db.seed import load_json
 from app.db.session import get_db
@@ -69,13 +70,13 @@ def dashboard(db: Session = Depends(get_db)) -> dict[str, Any]:
         "average_stage_ms": {k: int(sum(v) / len(v)) for k, v in stage_ms.items()},
         "average_turnaround_s": round(sum(turnaround) / len(turnaround), 2) if turnaround else None,
         "intake_by_day": week,
-        "base_currency": load_json("company.json")["base_currency"],
+        "base_currency": regions.company_profile()["base_currency"],
     }
 
 
 @router.get("/company")
 def company() -> dict[str, Any]:
-    return load_json("company.json")
+    return regions.company_profile()
 
 
 # --------------------------------------------------------------------------- catalogue
@@ -211,7 +212,7 @@ class TaxPreview(BaseModel):
 
 @router.post("/finance/tax-preview")
 def tax_preview(body: TaxPreview) -> dict[str, Any]:
-    c = load_json("company.json")
+    c = regions.company_profile()
     info = countries().get(body.country.upper())
     ctx = TaxContext(c["country"], c["region"], body.country.upper(), body.region, bool(info and info.eu), body.tax_id,
                      body.incoterm)
@@ -254,3 +255,34 @@ def knowledge_search(q: str = Query(min_length=2), k: int = Query(default=5, ge=
         "sections": [{**h.as_dict(), "text": h.doc.meta["body"]} for h in sections],
         "evidence": [p.as_dict() for p in ks.evidence(q, k=3)],
     }
+
+
+# --------------------------------------------------------------------------- regions
+
+
+class OperatingRegion(BaseModel):
+    country: str = Field(min_length=2, max_length=2)
+    region: str | None = Field(default=None, max_length=48)
+
+
+@router.get("/regions")
+def region_list() -> list[dict[str, Any]]:
+    """Selectable regions with their currency, tax and procurement conventions."""
+    return regions.catalogue()
+
+
+@router.get("/workspace")
+def workspace() -> dict[str, Any]:
+    place = regions.operating_region()
+    company = regions.company_profile()
+    return {"operating_region": {"country": place.country, "region": place.region},
+            "base_currency": company["base_currency"], "company": company.get("short_name") or company["name"]}
+
+
+@router.put("/workspace")
+def set_workspace(body: OperatingRegion) -> dict[str, Any]:
+    try:
+        regions.set_operating_region(regions.Place(body.country, body.region))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    return workspace()

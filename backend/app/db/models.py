@@ -337,3 +337,16 @@ class BidOutcome(Base):
     winner: Mapped[str | None] = mapped_column(String(160), nullable=True)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+# --------------------------------------------------------------------------- workspace settings
+
+
+class WorkspaceSetting(Base):
+    """A workspace-level preference set in the app (e.g. the operating region)."""
+
+    __tablename__ = "workspace_settings"
+
+    key: Mapped[str] = mapped_column(String(48), primary_key=True)
+    value: Mapped[Any] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)

@@ -7,7 +7,7 @@ import { Badge, Button, Field, Segmented, Spinner } from "../../components/ui";
 import { api, type LineOverride, type RepriceBody } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import type { Product, RfpDetail } from "../../lib/types";
-import { CATEGORY_LABEL, money, titleCase } from "../../lib/format";
+import { CATEGORY_LABEL, getBaseCurrency, money, titleCase } from "../../lib/format";
 
 const REVIEWER = "added by reviewer";
 const INCOTERMS = ["", "EXW", "FCA", "FOB", "CIF", "CPT", "CIP", "DAP", "DPU", "DDP"];
@@ -83,7 +83,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 export function Workbench({ rfp, open, onClose }: { rfp: RfpDetail; open: boolean; onClose: () => void }) {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const base = rfp.pricing?.strategy?.base_currency ?? "INR";
+  const base = rfp.pricing?.strategy?.base_currency ?? getBaseCurrency();
   const original = useMemo(() => buildRows(rfp), [rfp]);
   const [rows, setRows] = useState<Row[]>(original);
   const [tab, setTab] = useState<"lines" | "add" | "client">("lines");
@@ -101,7 +101,7 @@ export function Workbench({ rfp, open, onClose }: { rfp: RfpDetail; open: boolea
     tax_id: parsed.client.tax_id ?? "", segment: parsed.client.segment,
   });
   const [incoterm, setIncoterm] = useState(parsed.terms.incoterm ?? "");
-  const [currency, setCurrency] = useState(loc?.currency ?? "INR");
+  const [currency, setCurrency] = useState(loc?.currency ?? base);
   const [buffer, setBuffer] = useState(loc?.fx_buffer_pct ?? 1.5);
 
   useEffect(() => {
@@ -192,12 +192,12 @@ export function Workbench({ rfp, open, onClose }: { rfp: RfpDetail; open: boolea
   const discard = () => {
     setRows(original); setAdds([]); setBulk(0); setNote("");
     setClient({ name: parsed.client.name ?? "", country: parsed.client.country ?? "", region: parsed.client.region ?? "", tax_id: parsed.client.tax_id ?? "", segment: parsed.client.segment });
-    setIncoterm(parsed.terms.incoterm ?? ""); setCurrency(loc?.currency ?? "INR"); setBuffer(loc?.fx_buffer_pct ?? 1.5);
+    setIncoterm(parsed.terms.incoterm ?? ""); setCurrency(loc?.currency ?? base); setBuffer(loc?.fx_buffer_pct ?? 1.5);
   };
 
   if (!open) return null;
   const selectedCountry = countries.data?.find((c) => c.code === client.country);
-  const currencies = Array.from(new Set(["INR", "USD", "EUR", "GBP", "AED", "SGD", ...(countries.data ?? []).map((c) => c.currency)])).sort();
+  const currencies = Array.from(new Set([base, ...(countries.data ?? []).map((c) => c.currency)])).sort();
   const hasOverrides = Object.keys(rfp.overrides ?? {}).some((k) => k !== "_version");
 
   return createPortal(
@@ -387,15 +387,20 @@ export function Workbench({ rfp, open, onClose }: { rfp: RfpDetail; open: boolea
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <div className="card p-5">
                 <div className="text-[13.5px] font-semibold">Client</div>
-                <p className="mb-4 mt-0.5 text-[12px] text-muted">Correct anything the request was ambiguous about. Location drives tax and competitor coverage.</p>
+                <p className="mb-4 mt-0.5 text-[12px] text-muted">The client region decides the quote currency, the tax treatment and competitor coverage.</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2"><Field label="Organisation"><input className="input" value={client.name} onChange={(e) => setClient({ ...client, name: e.target.value })} /></Field></div>
-                  <Field label="Country"><select className="input" value={client.country} onChange={(e) => setClient({ ...client, country: e.target.value, region: "" })}>
+                  <Field label="Region"><select className="input" value={client.country} onChange={(e) => {
+                    // A new region brings its own currency; the reviewer can still pick another below.
+                    const next = countries.data?.find((c) => c.code === e.target.value);
+                    setClient({ ...client, country: e.target.value, region: "" });
+                    if (next) setCurrency(next.currency);
+                  }}>
                     {countries.data?.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></Field>
                   <Field label="State / province"><select className="input" value={client.region} onChange={(e) => setClient({ ...client, region: e.target.value })} disabled={!selectedCountry?.regions.length}>
                     <option value="">{selectedCountry?.regions.length ? "Not specified" : "Not applicable"}</option>
                     {selectedCountry?.regions.map((r) => <option key={r}>{r}</option>)}</select></Field>
-                  <div className="col-span-2"><Field label="Tax registration" hint="A registration number enables reverse charge on cross-border services."><input className="input" value={client.tax_id} onChange={(e) => setClient({ ...client, tax_id: e.target.value })} placeholder="e.g. GSTIN, VAT or TRN" /></Field></div>
+                  <div className="col-span-2"><Field label="Tax registration" hint="A registration number enables reverse charge on cross-border services."><input className="input" value={client.tax_id} onChange={(e) => setClient({ ...client, tax_id: e.target.value })} placeholder="e.g. VAT number, GSTIN, ABN or TRN" /></Field></div>
                 </div>
                 <div className="mt-5">
                   <div className="mb-1.5 text-[12px] font-medium text-ink-soft">Buyer segment</div>
@@ -414,7 +419,7 @@ export function Workbench({ rfp, open, onClose }: { rfp: RfpDetail; open: boolea
                 <div className="mt-5">
                   <div className="flex items-center justify-between text-[12.5px]"><span className="font-medium text-ink-soft">Exchange-rate buffer</span><span className="tnum font-semibold">{buffer.toFixed(1)}%</span></div>
                   <input type="range" min={0} max={5} step={0.5} value={buffer} onChange={(e) => setBuffer(Number(e.target.value))} disabled={currency === base} className="mt-2 w-full accent-[#0b1220] disabled:opacity-40" />
-                  <p className="mt-1 text-[11.5px] text-muted">{currency === base ? "Not applied to rupee quotations." : "Protects margin against currency movement during the validity period."}</p>
+                  <p className="mt-1 text-[11.5px] text-muted">{currency === base ? `Not applied when quoting in ${base}, the catalogue currency.` : "Protects margin against currency movement during the validity period."}</p>
                 </div>
                 {loc && <div className="mt-5 rounded-xl bg-[#f6f7f9] px-4 py-3 text-[12px] text-muted">Currently <span className="font-medium text-ink">{loc.tax_summary}</span> for {loc.jurisdiction}.</div>}
               </div>

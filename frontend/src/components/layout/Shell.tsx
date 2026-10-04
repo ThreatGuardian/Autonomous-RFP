@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { api } from "../../lib/api";
 import { initials, useAuth } from "../../lib/auth";
+import { setBaseCurrency } from "../../lib/format";
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -48,6 +49,7 @@ export function Shell() {
   const location = useLocation();
   const { data } = useQuery({ queryKey: ["rfps", "review-count"], queryFn: () => api.rfps({ status: "review" }), refetchInterval: 10_000 });
   const company = useQuery({ queryKey: ["company"], queryFn: api.company, staleTime: Infinity });
+  if (company.data) setBaseCurrency(company.data.base_currency);
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-line bg-[#f3f4f6]/70 px-3 py-4">

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Page, PageHeader } from "../components/layout/Shell";
 import { Badge, Button, Card, Field } from "../components/ui";
-import { api } from "../lib/api";
-import { date, titleCase } from "../lib/format";
+import { RegionPicker, regionLabel, useRegions } from "../components/RegionPicker";
+import { api, type ClientRegion } from "../lib/api";
+import { date, getBaseCurrency, money, titleCase } from "../lib/format";
 
 const MAJOR = ["USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD", "JPY", "SAR", "CHF", "QAR", "ZAR"];
 const INCOTERMS = ["DDP", "DAP", "CIF", "FOB", "EXW", "FCA"];
@@ -20,9 +21,11 @@ export default function Finance() {
   const [incoterm, setIncoterm] = useState("DDP");
   const preview = useQuery({
     queryKey: ["tax-preview", country, region, taxId, incoterm],
-    queryFn: () => api.taxPreview({ country, region: region || undefined, tax_id: taxId || undefined, incoterm: country === "IN" ? undefined : incoterm }),
+    queryFn: () => api.taxPreview({ country, region: region || undefined, tax_id: taxId || undefined, incoterm: country === home ? undefined : incoterm }),
   });
   const selected = countries.data?.find((c) => c.code === country);
+  const workspace = useQuery({ queryKey: ["workspace"], queryFn: api.workspace });
+  const home = workspace.data?.operating_region.country;
 
   return (
     <>
@@ -32,20 +35,21 @@ export default function Finance() {
           actions={<Button size="sm" icon={<RefreshCw className="size-3.5" />} loading={refresh.isPending} onClick={() => refresh.mutate()}>Refresh</Button>} bodyClassName="p-0">
           {fx.data?.stale && <div className="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-[12px] text-amber-900">Live providers are unreachable; using the most recent available rates. Confirm before sending international quotations.</div>}
           <table className="table-base">
-            <thead><tr><th>Currency</th><th className="!text-right">1 unit in INR</th><th className="!text-right">Per ₹1,00,000</th></tr></thead>
+            <thead><tr><th>Currency</th><th className="!text-right">1 unit in {getBaseCurrency()}</th><th className="!text-right">Per {money(100000, getBaseCurrency(), { decimals: 0 })}</th></tr></thead>
             <tbody>
               {MAJOR.filter((c) => fx.data?.rates[c]).map((c) => {
                 const r = fx.data!.rates[c];
                 return (
-                  <tr key={c}><td className="font-medium">{c}</td><td className="text-right tnum">₹{(1 / r).toFixed(r > 1 ? 4 : 2)}</td><td className="text-right tnum text-muted">{(r * 100000).toLocaleString("en-US", { maximumFractionDigits: 2 })}</td></tr>
+                  <tr key={c}><td className="font-medium">{c}</td><td className="text-right tnum">{money(1 / r, getBaseCurrency(), { decimals: r > 1 ? 4 : 2 })}</td><td className="text-right tnum text-muted">{(r * 100000).toLocaleString("en-US", { maximumFractionDigits: 2 })}</td></tr>
                 );
               })}
             </tbody>
           </table>
-          <div className="border-t border-line px-5 py-3 text-[12px] text-muted">A 1.5% buffer is added to non-rupee quotations by default; it can be changed per quotation.</div>
+          <div className="border-t border-line px-5 py-3 text-[12px] text-muted">A 1.5% buffer is added to quotations in other currencies by default; it can be changed per quotation.</div>
         </Card>
 
         <div className="space-y-6">
+          <OperatingRegionCard />
           <Card title="Tax treatment preview" subtitle="How a quotation to a given jurisdiction will be taxed, by product tax category">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <Field label="Client country"><select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setRegion(""); }}>
@@ -53,7 +57,7 @@ export default function Finance() {
               <Field label="State / province"><select className="input" value={region} onChange={(e) => setRegion(e.target.value)} disabled={!selected?.regions.length}>
                 <option value="">{selected?.regions.length ? "Not specified" : "Not applicable"}</option>{selected?.regions.map((r) => <option key={r}>{r}</option>)}</select></Field>
               <Field label="Client tax ID"><input className="input" placeholder="Optional" value={taxId} onChange={(e) => setTaxId(e.target.value)} /></Field>
-              <Field label="Delivery terms"><select className="input" value={incoterm} onChange={(e) => setIncoterm(e.target.value)} disabled={country === "IN"}>
+              <Field label="Delivery terms"><select className="input" value={incoterm} onChange={(e) => setIncoterm(e.target.value)} disabled={country === home}>
                 {INCOTERMS.map((i) => <option key={i}>{i}</option>)}</select></Field>
             </div>
             {preview.data && (
@@ -80,8 +84,8 @@ export default function Finance() {
           </Card>
           <Card title="Rules in force">
             <ul className="grid grid-cols-1 gap-3 text-[12.5px] text-ink-soft md:grid-cols-2">
-              <li><span className="font-medium text-ink">Within India.</span> CGST + SGST when delivered inside Maharashtra; IGST for every other state.</li>
-              <li><span className="font-medium text-ink">Exports (EXW to DAP).</span> Zero-rated under Letter of Undertaking; the importer settles destination taxes.</li>
+              <li><span className="font-medium text-ink">Domestic supply.</span> The operating region's VAT, GST or sales tax, by state or province where rates differ. In India, CGST + SGST within the supplier's state and IGST between states.</li>
+              <li><span className="font-medium text-ink">Exports (EXW to DAP).</span> Zero-rated (under a Letter of Undertaking from India); the importer settles destination taxes.</li>
               <li><span className="font-medium text-ink">Exports (DDP).</span> Destination VAT, GST or sales tax is charged, with state and category brackets.</li>
               <li><span className="font-medium text-ink">Cross-border B2B services.</span> Licences and services are reverse-charged when the client provides a tax registration.</li>
             </ul>
@@ -89,5 +93,31 @@ export default function Finance() {
         </div>
       </Page>
     </>
+  );
+}
+
+/** Where the company is registered: decides domestic versus export tax treatment. */
+function OperatingRegionCard() {
+  const qc = useQueryClient();
+  const regions = useRegions();
+  const workspace = useQuery({ queryKey: ["workspace"], queryFn: api.workspace });
+  const [place, setPlace] = useState<ClientRegion | null>(null);
+  useEffect(() => { if (workspace.data) setPlace(workspace.data.operating_region); }, [workspace.data]);
+  const save = useMutation({
+    mutationFn: () => api.setOperatingRegion(place!),
+    onSuccess: (w) => { qc.setQueryData(["workspace"], w); qc.invalidateQueries({ queryKey: ["tax-preview"] }); },
+  });
+  const current = workspace.data?.operating_region;
+  const changed = Boolean(place && current && (place.country !== current.country || (place.region ?? null) !== (current.region ?? null)));
+  return (
+    <Card title="Operating region" subtitle="Where your company is registered. Sales inside this region are taxed as domestic supplies; others as exports."
+      actions={<Badge tone="neutral">Catalogue in {workspace.data?.base_currency ?? getBaseCurrency()}</Badge>}>
+      <RegionPicker value={place} onChange={setPlace} label="Country" />
+      <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+        <span className="text-[12px] text-muted">Currently {regionLabel(regions.data, current)}. Applies to requests processed from now on.</span>
+        <Button variant="primary" size="sm" disabled={!changed} loading={save.isPending} onClick={() => save.mutate()}>Save</Button>
+      </div>
+      {save.error && <div className="mt-3 text-[12px] text-rose-700">{(save.error as Error).message}</div>}
+    </Card>
   );
 }

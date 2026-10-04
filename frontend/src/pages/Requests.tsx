@@ -7,7 +7,7 @@ import { Page, PageHeader } from "../components/layout/Shell";
 import { Button, Empty, Skeleton, Tabs } from "../components/ui";
 import { api } from "../lib/api";
 import type { RfpSummary } from "../lib/types";
-import { date, daysUntil, money, pct, prob, relative } from "../lib/format";
+import { date, daysUntil, getBaseCurrency, money, pct, prob, relative } from "../lib/format";
 
 const FILTERS = [
   { value: "all", label: "All", match: () => true },
@@ -66,7 +66,7 @@ export default function Requests() {
                         <td className="max-w-[220px]"><div className="truncate">{r.client_name ?? "—"}</div><div className="mt-0.5"><CountryTag code={r.client_country} /></div></td>
                         <td><StatusBadge status={r.status} /></td>
                         <td className="whitespace-nowrap">{date(r.due_date)}{days !== null && r.status === "review" && <div className={days <= 7 ? "text-[11.5px] text-rose-700" : "text-[11.5px] text-muted"}>{days < 0 ? "Closed" : `${days} days left`}</div>}</td>
-                        <td className="text-right tnum font-medium">{money(r.total_client, r.currency ?? "INR")}</td>
+                        <td className="text-right tnum font-medium">{money(r.total_client, r.currency ?? getBaseCurrency())}</td>
                         <td className="text-right tnum">{pct(r.margin_pct)}</td>
                         <td className="text-right tnum">{prob(r.win_probability)}</td>
                         <td>{r.strategy_summary ? <StrategyBadge strategy={r.strategy_summary} /> : <span className="text-muted">—</span>}</td>

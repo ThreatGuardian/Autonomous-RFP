@@ -37,11 +37,11 @@ from app.agents.pricing_agent import InternalPricingAgent
 from app.agents.strategy_agent import CompetitiveStrategyAgent
 from app.config import get_settings
 from app.db.models import ApprovalEvent, Rfp, StageRun
-from app.db.seed import load_json
 from app.db.session import session_scope
 from app.services.pdf_renderer import document_dir, render_memo, render_quotation
 from app.services.compliance_renderer import render_compliance
 from app.services.report_renderer import render_report
+from app.regions import company_profile
 
 log = logging.getLogger("tenderdesk.pipeline")
 
@@ -237,7 +237,7 @@ class Orchestrator:
             log.exception("Pipeline failed for RFP %s", rfp_id)
 
     def run(self, rfp_id: int, from_stage: str = "intake") -> None:
-        company = load_json("company.json")
+        company = company_profile()
         with session_scope() as s:
             rfp = s.get(Rfp, rfp_id)
             assert rfp is not None
@@ -295,7 +295,7 @@ class Orchestrator:
 
     def finalize(self, rfp_id: int, actor: str, note: str | None) -> dict[str, str]:
         """Re-render documents without the draft watermark and with the approval record."""
-        company = load_json("company.json")
+        company = company_profile()
         with session_scope() as s:
             rfp = s.get(Rfp, rfp_id)
             assert rfp is not None

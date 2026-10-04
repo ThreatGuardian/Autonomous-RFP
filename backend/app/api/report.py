@@ -13,12 +13,12 @@ from pydantic import BaseModel, Field
 
 from app.agents.orchestrator import _load_messages, document_dir
 from app.db.models import Rfp
-from app.db.seed import load_json
 from app.db.session import session_scope
 from app.rag.stores import knowledge_store
 from app.report.assistant import HISTORY_LIMIT, ReportAssistant, ensure_ids
 from app.report.builder import build_document, build_sections, figures
 from app.report.export import render_docx, render_pdf
+from app.regions import company_profile
 
 router = APIRouter(prefix="/api/rfps", tags=["report"])
 CHAT_LIMIT = 80
@@ -46,7 +46,7 @@ def _context(rfp: Rfp):
 
 def _fresh(rfp: Rfp) -> dict[str, Any]:
     m = _context(rfp)
-    return build_document(load_json("company.json"), m["parsed"], m["strategy"], m["localisation"], m["proposal"],
+    return build_document(company_profile(), m["parsed"], m["strategy"], m["localisation"], m["proposal"],
                           m.get("compliance"))
 
 
@@ -106,7 +106,7 @@ def assistant(rfp_id: int, body: ChatBody) -> dict[str, Any]:
         rfp = _get(db, rfp_id)
         doc = copy.deepcopy(_load(rfp))
         m = _context(rfp)
-        company = load_json("company.json")
+        company = company_profile()
         kb = knowledge_store()
         helper = ReportAssistant(
             figures=figures(m["parsed"], m["strategy"], m["localisation"], m.get("compliance")),
@@ -165,7 +165,7 @@ def reset(rfp_id: int) -> dict[str, Any]:
 
 def export_report(rfp: Rfp, fmt: str) -> Path:
     doc = _load(rfp)
-    company = load_json("company.json")
+    company = company_profile()
     folder = document_dir(rfp.reference)
     stem = f"{(rfp.proposal or {}).get('quote_number', rfp.reference)}-bid-report{'-edited' if doc.get('edited') else ''}"
     if fmt == "docx":
